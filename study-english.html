@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Use of English — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"]{--bg:#0F172A;--surface:#1E293B;--surface2:#253147;--primary:#14B8A6;--primary-glow:rgba(20,184,166,0.15);--text:#F1F5F9;--text-muted:#94A3B8;--border:rgba(255,255,255,0.07);--card-shadow:0 4px 32px rgba(0,0,0,0.4);}
+    :root[data-theme="light"]{--bg:#F0FDF9;--surface:#FFFFFF;--surface2:#CCFBF1;--primary:#0D9488;--primary-glow:rgba(13,148,136,0.1);--text:#134E4A;--text-muted:#6B7280;--border:rgba(0,0,0,0.07);--card-shadow:0 4px 32px rgba(13,148,136,0.08);}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;transition:background 0.3s,color 0.3s;}
+    .blob{position:fixed;border-radius:50%;filter:blur(90px);opacity:0.08;pointer-events:none;z-index:0;}
+    .blob-1{width:450px;height:450px;background:#14B8A6;top:-100px;right:-80px;}
+    .blob-2{width:300px;height:300px;background:#06B6D4;bottom:80px;left:-60px;}
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:rgba(15,23,42,0.82);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);}
+    [data-theme="light"] nav{background:rgba(240,253,249,0.88);}
+    .nav-logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--primary);text-decoration:none;}
+    .nav-logo span{color:var(--text);}
+    .theme-toggle{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+    .content{max-width:560px;margin:0 auto;padding:28px 20px;position:relative;z-index:1;}
+    .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--text-muted);font-size:0.85rem;text-decoration:none;margin-bottom:16px;}
+    .back-link:hover{color:var(--primary);}
+    .subject-hero{display:flex;align-items:center;gap:16px;margin-bottom:28px;animation:fadeUp 0.5s ease both;}
+    .hero-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#14B8A6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 8px 24px rgba(20,184,166,0.3);flex-shrink:0;}
+    .hero-text h1{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;}
+    .hero-text p{font-size:0.82rem;color:var(--text-muted);margin-top:3px;}
+    .tabs{display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:24px;border:1px solid var(--border);animation:fadeUp 0.5s 0.1s ease both;}
+    .tab-btn{flex:1;padding:10px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;border-radius:10px;cursor:pointer;transition:all 0.2s;}
+    .tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px var(--primary-glow);}
+    .tab-content{display:none;}
+    .tab-content.active{display:block;animation:fadeUp 0.3s ease both;}
+
+    /* NOTES */
+    .notes-loading{text-align:center;padding:40px 20px;color:var(--text-muted);}
+    .spinner{width:30px;height:30px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;}
+    .notes-empty{text-align:center;padding:40px 20px;}
+    .notes-empty .empty-icon{font-size:2.5rem;margin-bottom:12px;}
+    .notes-empty p{color:var(--text-muted);font-size:0.88rem;line-height:1.6;}
+
+    .topic-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:var(--card-shadow);}
+    .topic-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;user-select:none;transition:background 0.2s;}
+    .topic-header:hover{background:var(--surface2);}
+    .topic-header-left{display:flex;align-items:center;gap:12px;}
+    .topic-emoji{font-size:1.2rem;}
+    .topic-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:800;}
+    .topic-chevron{font-size:0.75rem;color:var(--text-muted);transition:transform 0.25s;flex-shrink:0;}
+    .topic-card.open .topic-chevron{transform:rotate(180deg);}
+    .topic-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border);}
+    .topic-card.open .topic-body{display:block;animation:fadeUp 0.25s ease both;}
+    .topic-body ul{padding-left:18px;margin-top:12px;}
+    .topic-body li{font-size:0.85rem;color:var(--text-muted);line-height:1.75;margin-bottom:3px;}
+    .example-box{background:var(--surface2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:12px;font-size:0.82rem;line-height:1.6;color:var(--text-muted);}
+    .example-box strong{color:var(--primary);}
+
+    /* QUIZ */
+    .quiz-intro{text-align:center;padding:24px 0 20px;}
+    .quiz-intro .big-icon{font-size:3rem;margin-bottom:12px;}
+    .quiz-intro h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:6px;}
+    .quiz-intro p{font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;}
+    .btn{padding:13px 24px;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+    .btn-primary{background:var(--primary);color:#fff;}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
+    .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);}
+    .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+    .quiz-engine{display:none;}
+    .quiz-engine.active{display:block;animation:fadeUp 0.3s ease both;}
+    .qpb-wrap{margin-bottom:16px;}
+    .qpb-bg{background:var(--surface2);border-radius:100px;height:5px;overflow:hidden;}
+    .qpb-fill{height:100%;background:linear-gradient(90deg,#14B8A6,#06B6D4);border-radius:100px;transition:width 0.3s;}
+    .qpb-label{font-size:0.7rem;color:var(--text-muted);margin-top:4px;text-align:right;}
+    .q-counter{font-size:0.75rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+    .q-text{font-size:0.98rem;font-weight:600;line-height:1.65;margin-bottom:20px;}
+    .options{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+    .option{background:var(--surface);border:2px solid var(--border);border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;}
+    .option:hover{border-color:var(--primary);background:var(--primary-glow);}
+    .option.selected{border-color:var(--primary);background:var(--primary-glow);}
+    .option-letter{width:30px;height:30px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:800;flex-shrink:0;transition:all 0.2s;}
+    .option.selected .option-letter{background:var(--primary);color:#fff;}
+    .option-text{font-size:0.88rem;line-height:1.4;}
+    .quiz-nav{display:flex;gap:10px;margin-bottom:16px;}
+    .nav-btn{flex:1;padding:12px;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .nav-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .nav-btn:disabled{opacity:0.35;cursor:not-allowed;}
+    .nav-btn.submit-btn{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .loading-state{text-align:center;padding:32px;color:var(--text-muted);}
+    .batch-result{display:none;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;margin-top:8px;}
+    .batch-result.active{display:block;animation:fadeUp 0.3s ease both;}
+    .batch-score{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;text-align:center;margin-bottom:4px;}
+    .batch-label{font-size:0.85rem;color:var(--text-muted);text-align:center;margin-bottom:18px;}
+    .batch-review{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+    .br-card{background:var(--surface2);border-radius:12px;padding:13px 15px;border-left:3px solid #94A3B8;}
+    .br-card.correct{border-left-color:#22C55E;}
+    .br-card.wrong{border-left-color:#EF4444;}
+    .br-card.skipped{border-left-color:#F59E0B;}
+    .br-q{font-size:0.82rem;font-weight:600;margin-bottom:6px;line-height:1.4;}
+    .br-ans{font-size:0.78rem;color:var(--text-muted);margin-bottom:2px;}
+    .br-ans .c{color:#22C55E;font-weight:700;}
+    .br-ans .w{color:#EF4444;font-weight:700;}
+    .br-exp{font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);}
+    .batch-btns{display:flex;flex-direction:column;gap:8px;}
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(15,23,42,0.92);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;padding:10px 0 14px;}
+    [data-theme="light"] .bottom-nav{background:rgba(240,253,249,0.92);}
+    .bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--text-muted);font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:0 14px;}
+    .bnav-item.active{color:var(--primary);}
+    .bnav-icon{font-size:1.2rem;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+<div class="blob blob-1"></div><div class="blob blob-2"></div>
+<nav>
+  <a href="study.html" class="nav-logo">Ace<span>Unilorin</span> PQ</a>
+  <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+</nav>
+<div class="content">
+  <a href="study.html" class="back-link">← Back to Study Hub</a>
+  <div class="subject-hero">
+    <div class="hero-icon">📖</div>
+    <div class="hero-text"><h1>Use of English</h1><p>Notes + Practice Questions</p></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('notes',this)">📒 Notes</button>
+    <button class="tab-btn" onclick="switchTab('quiz',this)">🧠 Quiz</button>
+  </div>
+
+  <!-- NOTES TAB -->
+  <div class="tab-content active" id="tab-notes">
+    <div id="notesContainer">
+      <div class="notes-loading"><div class="spinner"></div>Loading notes...</div>
+    </div>
+  </div>
+
+  <!-- QUIZ TAB -->
+  <div class="tab-content" id="tab-quiz">
+    <div id="quizIntro">
+      <div class="quiz-intro">
+        <div class="big-icon">🧠</div>
+        <h3>English Quiz</h3>
+        <p>5 questions at a time. Review your answers and explanations after each set.</p>
+        <button class="btn btn-primary" onclick="startQuiz()">Start Quiz →</button>
+      </div>
+    </div>
+    <div class="quiz-engine" id="quizEngine">
+      <div class="qpb-wrap"><div class="qpb-bg"><div class="qpb-fill" id="qpbFill" style="width:0%"></div></div><div class="qpb-label" id="qpbLabel">Question 1 of 5</div></div>
+      <div class="q-counter" id="qCounter">Question 1 of 5</div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="quiz-nav">
+        <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+        <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+        <button class="nav-btn submit-btn" id="submitBtn" onclick="submitBatch()" style="display:none;">Submit ✓</button>
+      </div>
+      <div id="loadingMore" class="loading-state" style="display:none;"><div class="spinner"></div><div>Loading questions...</div></div>
+    </div>
+    <div class="batch-result" id="batchResult">
+      <div class="batch-score" id="batchScore">0/5</div>
+      <div class="batch-label" id="batchLabel"></div>
+      <div class="batch-review" id="batchReview"></div>
+      <div class="batch-btns">
+        <button class="btn btn-primary" id="nextBatchBtn" onclick="nextBatch()">Next 5 Questions →</button>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:4px;">🔁 Restart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="dashboard.html" class="bnav-item"><span class="bnav-icon">🏠</span>Home</a>
+  <a href="pastquestions.html" class="bnav-item"><span class="bnav-icon">📝</span>Past Q</a>
+  <a href="mock.html" class="bnav-item"><span class="bnav-icon">⏱️</span>Mock</a>
+  <a href="study.html" class="bnav-item active"><span class="bnav-icon">📚</span>Study</a>
+  <a href="leaderboard.html" class="bnav-item"><span class="bnav-icon">🏆</span>Ranks</a>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig={apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"};
+  firebase.initializeApp(firebaseConfig);
+  const auth=firebase.auth(), db=firebase.firestore();
+  const SUBJECT='english', BATCH=5;
+  let questions=[],currentIndex=0,userAnswers={},lastDoc=null,hasMore=true,uid=null;
+
+  function toggleTheme(){const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.querySelector('.theme-toggle').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
+  const saved=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',saved);document.querySelector('.theme-toggle').textContent=saved==='dark'?'☀️':'🌙';
+
+  auth.onAuthStateChanged(u=>{if(!u){window.location.href='auth.html';return;}uid=u.uid;loadNotes();});
+
+  function switchTab(tab,btn){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+tab).classList.add('active');
+  }
+
+  // ── NOTES ──
+  async function loadNotes(){
+    const container=document.getElementById('notesContainer');
+    try{
+      const snap=await db.collection('studynotes').doc(SUBJECT)
+        .collection('topics').orderBy('order').get();
+      if(snap.empty){
+        container.innerHTML=`<div class="notes-empty"><div class="empty-icon">📭</div><p>No notes added yet for this subject.<br>Check back soon!</p></div>`;
+        return;
+      }
+      container.innerHTML='';
+      snap.forEach(doc=>{
+        const t=doc.data();
+        const points=(t.content||[]).map(p=>`<li>${p}</li>`).join('');
+        const example=t.example?`<div class="example-box"><strong>💡 Note:</strong> ${t.example}</div>`:'';
+        container.innerHTML+=`
+          <div class="topic-card" onclick="this.classList.toggle('open')">
+            <div class="topic-header">
+              <div class="topic-header-left">
+                <span class="topic-emoji">${t.emoji||'📌'}</span>
+                <span class="topic-title">${t.title}</span>
+              </div>
+              <span class="topic-chevron">▼</span>
+            </div>
+            <div class="topic-body">
+              <ul>${points}</ul>
+              ${example}
+            </div>
+          </div>`;
+      });
+    }catch(e){
+      container.innerHTML=`<div class="notes-empty"><div class="empty-icon">⚠️</div><p>Failed to load notes. Check your connection.</p></div>`;
+      console.error(e);
+    }
+  }
+
+  // ── QUIZ ──
+  async function startQuiz(){document.getElementById('quizIntro').style.display='none';document.getElementById('quizEngine').classList.add('active');await loadBatch();}
+
+  async function loadBatch(){
+    document.getElementById('loadingMore').style.display='block';
+    try{
+      let q=db.collection('studyquestions').doc(SUBJECT).collection('questions').orderBy('number').limit(BATCH);
+      if(lastDoc) q=q.startAfter(lastDoc);
+      const snap=await q.get();
+      document.getElementById('loadingMore').style.display='none';
+      if(snap.empty||snap.docs.length<BATCH) hasMore=false;
+      if(snap.empty){showDone();return false;}
+      lastDoc=snap.docs[snap.docs.length-1];
+      questions=snap.docs.map(d=>({...d.data(),id:d.id}));
+      currentIndex=0;userAnswers={};renderQuestion();return true;
+    }catch(e){document.getElementById('loadingMore').style.display='none';alert('Failed to load. Check connection.');console.error(e);return false;}
+  }
+
+  function renderQuestion(){
+    const q=questions[currentIndex],total=questions.length;
+    document.getElementById('qCounter').textContent=`Question ${currentIndex+1} of ${total}`;
+    document.getElementById('qpbLabel').textContent=`Question ${currentIndex+1} of ${total}`;
+    document.getElementById('qpbFill').style.width=`${((currentIndex+1)/total)*100}%`;
+    document.getElementById('qText').textContent=q.question||q.text||'';
+    const opts=document.getElementById('optionsContainer');opts.innerHTML='';
+    ['A','B','C','D','E'].forEach((l,i)=>{
+      const opt=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE][i];
+      if(!opt)return;
+      const div=document.createElement('div');
+      div.className='option'+(userAnswers[currentIndex]===l?' selected':'');
+      div.onclick=()=>selectAnswer(l);
+      div.innerHTML=`<div class="option-letter">${l}</div><div class="option-text">${opt}</div>`;
+      opts.appendChild(div);
+    });
+    document.getElementById('prevBtn').disabled=currentIndex===0;
+    document.getElementById('nextBtn').style.display=currentIndex<total-1?'flex':'none';
+    document.getElementById('submitBtn').style.display=currentIndex===total-1?'flex':'none';
+  }
+
+  function selectAnswer(l){userAnswers[currentIndex]=l;renderQuestion();}
+  function navigate(d){currentIndex=Math.max(0,Math.min(questions.length-1,currentIndex+d));renderQuestion();}
+
+  function submitBatch(){
+    let correct=0;const review=[];
+    questions.forEach((q,i)=>{
+      const ua=userAnswers[i]||null,ca=q.answer||q.correctAnswer;
+      let status='skipped';
+      if(ua){if(ua===ca){correct++;status='correct';}else status='wrong';}
+      review.push({...q,userAnswer:ua,status});
+    });
+    if(uid){
+      const key=`studyProgress_${uid}_${SUBJECT}`;
+      const raw=localStorage.getItem(key);
+      let done=correct,total=questions.length;
+      if(raw){const d=JSON.parse(raw);done=d.done+correct;total=d.total+questions.length;}
+      localStorage.setItem(key,JSON.stringify({done,total}));
+      const sk=`studyStreak_${uid}`,today=new Date().toDateString(),yesterday=new Date(Date.now()-86400000).toDateString();
+      const sr=localStorage.getItem(sk);let count=1;
+      if(sr){const d=JSON.parse(sr);if(d.lastDate===today)count=d.count;else if(d.lastDate===yesterday)count=d.count+1;}
+      localStorage.setItem(sk,JSON.stringify({count,lastDate:today}));
+    }
+    document.getElementById('quizEngine').classList.remove('active');
+    const br=document.getElementById('batchResult');br.classList.add('active');
+    document.getElementById('batchScore').textContent=`${correct}/${questions.length}`;
+    const pct=Math.round((correct/questions.length)*100);
+    document.getElementById('batchLabel').textContent=pct===100?'Perfect! 🎉':pct>=80?'Excellent! 🔥':pct>=60?'Good effort 👍':pct>=40?'Keep practising 💪':'Review the notes and try again 📖';
+    const letters=['A','B','C','D','E'];
+    document.getElementById('batchReview').innerHTML=review.map((q,i)=>{
+      const opts=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE];
+      const ca=q.answer||q.correctAnswer;
+      const correctOpt=opts[letters.indexOf(ca)]||'';
+      const userOpt=q.userAnswer?opts[letters.indexOf(q.userAnswer)]||'':'';
+      return`<div class="br-card ${q.status}">
+        <div class="br-q">${q.status==='correct'?'✅':q.status==='wrong'?'❌':'⏭️'} Q${i+1}: ${q.question||q.text}</div>
+        <div class="br-ans">Correct: <span class="c">${ca} — ${correctOpt}</span></div>
+        ${q.userAnswer&&q.status==='wrong'?`<div class="br-ans">Your answer: <span class="w">${q.userAnswer} — ${userOpt}</span></div>`:''}
+        ${q.status==='skipped'?'<div class="br-ans" style="color:#F59E0B">Not answered</div>':''}
+        ${q.explanation?`<div class="br-exp">💡 ${q.explanation}</div>`:''}
+      </div>`;
+    }).join('');
+    if(!hasMore) document.getElementById('nextBatchBtn').textContent='🔁 Restart Quiz';
+  }
+
+  async function nextBatch(){
+    document.getElementById('batchResult').classList.remove('active');
+    if(!hasMore){lastDoc=null;hasMore=true;}
+    document.getElementById('quizEngine').classList.add('active');
+    await loadBatch();
+  }
+
+  function restartQuiz(){lastDoc=null;hasMore=true;document.getElementById('batchResult').classList.remove('active');document.getElementById('quizEngine').classList.add('active');loadBatch();}
+
+  function showDone(){
+    document.getElementById('quizEngine').classList.remove('active');
+    const intro=document.getElementById('quizIntro');intro.style.display='block';
+    intro.innerHTML=`<div class="quiz-intro"><div class="big-icon">🎉</div><h3>All questions done!</h3><p>You've completed all available English questions.</p><button class="btn btn-primary" onclick="restartQuiz()">🔁 Start Over</button></div>`;
+  }
+</script>
+</body>
+</html>
