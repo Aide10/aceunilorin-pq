@@ -7,278 +7,122 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
   <style>
     :root[data-theme="dark"] {
-      --bg: #0F172A;
-      --surface: #1E293B;
-      --surface2: #253147;
-      --primary: #3B82F6;
-      --primary-glow: rgba(59,130,246,0.18);
-      --text: #F1F5F9;
-      --text-muted: #94A3B8;
-      --border: rgba(255,255,255,0.07);
-      --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
-      --header-bg: #0B1120;
+      --bg: #0F172A; --surface: #1E293B; --surface2: #253147;
+      --primary: #3B82F6; --primary-glow: rgba(59,130,246,0.18);
+      --text: #F1F5F9; --text-muted: #94A3B8;
+      --border: rgba(255,255,255,0.07); --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
     }
     :root[data-theme="light"] {
-      --bg: #F0F4FF;
-      --surface: #FFFFFF;
-      --surface2: #E8EFFF;
-      --primary: #2563EB;
-      --primary-glow: rgba(37,99,235,0.12);
-      --text: #1E293B;
-      --text-muted: #64748B;
-      --border: rgba(0,0,0,0.07);
-      --card-shadow: 0 4px 24px rgba(37,99,235,0.08);
-      --header-bg: #0F172A;
+      --bg: #F0F4FF; --surface: #FFFFFF; --surface2: #E8EFFF;
+      --primary: #2563EB; --primary-glow: rgba(37,99,235,0.12);
+      --text: #1E293B; --text-muted: #64748B;
+      --border: rgba(0,0,0,0.07); --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      transition: background 0.3s, color 0.3s;
+      font-family: 'DM Sans', sans-serif; background: var(--bg);
+      color: var(--text); min-height: 100vh;
+      transition: background 0.3s, color 0.3s; padding-bottom: 48px;
     }
-
-    /* TOP HEADER BAR */
     .top-bar {
-      background: #0B1535;
-      padding: 16px 20px;
+      background: #0B1535; padding: 14px 20px;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .top-bar-left { display: flex; align-items: center; gap: 14px; }
-    .hamburger { font-size: 1.3rem; color: #fff; cursor: pointer; background: none; border: none; }
-    .top-bar-date {
-      font-size: 0.9rem; color: #fff;
-      font-weight: 500;
-    }
-    .top-bar-icons { display: flex; gap: 10px; }
+    .top-bar-date { font-size: 0.88rem; color: #fff; font-weight: 500; }
     .top-icon {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       background: rgba(255,255,255,0.12);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; color: #fff; cursor: pointer;
-      border: none; transition: background 0.2s;
+      font-size: 0.95rem; color: #fff; cursor: pointer; border: none;
     }
-    .top-icon:hover { background: rgba(255,255,255,0.2); }
-
-    /* MAIN CONTENT */
-    .content {
-      max-width: 500px; margin: 0 auto;
-      padding: 32px 20px 64px;
-      display: flex; flex-direction: column; gap: 20px;
-    }
-
-    .page-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.1rem; font-weight: 800;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-align: center;
-      margin-bottom: 4px;
-    }
-
-    /* RESULT CARDS */
-    .result-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
-      box-shadow: var(--card-shadow);
-      animation: fadeUp 0.5s ease both;
-    }
-    .result-card:nth-child(2) { animation-delay: 0.1s; }
-    .result-card:nth-child(3) { animation-delay: 0.2s; }
-
-    .card-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-    }
-
-    .card-icon {
-      font-size: 2.8rem;
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    /* Score display */
-    .score-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 4.5rem;
-      font-weight: 800;
-      color: var(--primary);
-      line-height: 1;
-      display: block;
-      margin-top: 8px;
-    }
-    .score-percent {
-      font-size: 1.5rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-    .score-detail {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 10px;
-    }
-
-    /* Score color tiers */
-    .score-excellent { color: #22C55E; }
-    .score-good { color: #3B82F6; }
-    .score-average { color: #F59E0B; }
-    .score-poor { color: #EF4444; }
-
-    /* Status display */
-    .status-value {
-      font-family: 'Syne', sans-serif;
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-top: 8px;
-    }
-    .status-badge {
-      display: inline-block;
-      background: rgba(245,158,11,0.15);
-      color: #F59E0B;
-      border: 1px solid rgba(245,158,11,0.3);
-      font-size: 0.78rem; font-weight: 700;
-      padding: 4px 14px; border-radius: 100px;
-      text-transform: uppercase; letter-spacing: 1px;
-      margin-top: 10px;
-    }
-
-    /* BREAKDOWN CARD */
-    .breakdown-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: var(--card-shadow);
-      animation: fadeUp 0.5s 0.3s ease both;
-    }
-    .breakdown-title {
-      font-size: 0.72rem; font-weight: 700;
-      letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-muted);
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .breakdown-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 24px;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-    .breakdown-row:last-child { border-bottom: none; }
-    .breakdown-key { color: var(--text-muted); font-weight: 500; }
-    .breakdown-val { font-weight: 700; color: var(--text); }
-    .breakdown-val.correct { color: #22C55E; }
-    .breakdown-val.wrong { color: #EF4444; }
-    .breakdown-val.skipped { color: #F59E0B; }
-
-    /* ACTION BUTTONS */
-    .action-btns {
-      display: flex; flex-direction: column; gap: 12px;
-      animation: fadeUp 0.5s 0.4s ease both;
-    }
-    .btn {
-      padding: 15px; border-radius: 14px;
-      font-family: 'DM Sans', sans-serif; font-weight: 700;
-      font-size: 0.95rem; cursor: pointer; border: none;
-      transition: all 0.2s; text-decoration: none;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--primary-glow); }
-    .btn-outline {
-      background: transparent;
-      border: 1.5px solid var(--border);
-      color: var(--text-muted);
-    }
-    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-
-    /* PROGRESS RING */
-    .progress-ring-wrap {
-      display: flex; justify-content: center;
-      margin: 8px 0 4px;
-    }
-    .progress-ring { transform: rotate(-90deg); }
-    .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 8; }
-    .ring-fill {
-      fill: none; stroke-width: 8;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
-    }
-    .ring-text {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.4rem; font-weight: 800;
-      fill: var(--text);
-      text-anchor: middle; dominant-baseline: central;
-      transform: rotate(90deg);
-      transform-origin: center;
-    }
-    .ring-sublabel {
-      font-size: 0.5rem; font-weight: 600;
-      fill: var(--text-muted);
-      text-anchor: middle; dominant-baseline: central;
-      transform: rotate(90deg);
-      transform-origin: center;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .content { max-width: 500px; margin: 0 auto; padding: 28px 20px; display: flex; flex-direction: column; gap: 20px; }
+    .page-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; text-align:center; }
+    .result-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:28px 24px; text-align:center; box-shadow:var(--card-shadow); animation:fadeUp 0.5s ease both; }
+    .result-card:nth-child(2) { animation-delay:0.1s; }
+    .result-card:nth-child(3) { animation-delay:0.2s; }
+    .card-label { font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:18px; }
+    .card-icon { font-size:2.6rem; margin-bottom:14px; display:block; }
+    .progress-ring-wrap { display:flex; justify-content:center; margin:6px 0; }
+    .progress-ring { transform:rotate(-90deg); }
+    .ring-bg { fill:none; stroke:var(--surface2); stroke-width:8; }
+    .ring-fill { fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
+    .ring-text { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; fill:var(--text); text-anchor:middle; dominant-baseline:central; transform:rotate(90deg); transform-origin:center; }
+    .ring-sublabel { font-size:0.5rem; font-weight:600; fill:var(--text-muted); text-anchor:middle; dominant-baseline:central; transform:rotate(90deg); transform-origin:center; }
+    .score-detail { font-size:0.85rem; color:var(--text-muted); margin-top:8px; }
+    .timeup-badge { display:inline-block; background:rgba(239,68,68,0.15); color:#EF4444; font-size:0.72rem; font-weight:700; padding:4px 12px; border-radius:100px; margin-top:8px; text-transform:uppercase; }
+    .status-value { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800; color:var(--text); margin-top:6px; }
+    .status-badge { display:inline-block; background:rgba(245,158,11,0.15); color:#F59E0B; border:1px solid rgba(245,158,11,0.3); font-size:0.75rem; font-weight:700; padding:4px 14px; border-radius:100px; margin-top:8px; text-transform:uppercase; letter-spacing:1px; }
+    .breakdown-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; overflow:hidden; box-shadow:var(--card-shadow); animation:fadeUp 0.5s 0.3s ease both; }
+    .breakdown-title { font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); padding:18px 22px 14px; border-bottom:1px solid var(--border); }
+    .breakdown-row { display:flex; justify-content:space-between; align-items:center; padding:13px 22px; border-bottom:1px solid var(--border); font-size:0.88rem; }
+    .breakdown-row:last-child { border-bottom:none; }
+    .breakdown-key { color:var(--text-muted); font-weight:500; }
+    .breakdown-val { font-weight:700; }
+    .correct-val { color:#22C55E; }
+    .wrong-val { color:#EF4444; }
+    .skipped-val { color:#F59E0B; }
+    .action-btns { display:flex; flex-direction:column; gap:10px; animation:fadeUp 0.5s 0.4s ease both; }
+    .btn { padding:14px; border-radius:13px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .btn-primary { background:var(--primary); color:#fff; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px var(--primary-glow); }
+    .btn-outline { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); }
+    .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+    .review-section { animation:fadeUp 0.5s 0.5s ease both; }
+    .review-header { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; margin-bottom:16px; }
+    .review-filter { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+    .filter-btn { padding:6px 14px; border-radius:100px; border:1.5px solid var(--border); background:var(--surface); color:var(--text-muted); font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif; }
+    .filter-btn.active { border-color:var(--primary); color:var(--primary); background:var(--primary-glow); }
+    .filter-btn.f-correct.active { border-color:#22C55E; color:#22C55E; background:rgba(34,197,94,0.1); }
+    .filter-btn.f-wrong.active { border-color:#EF4444; color:#EF4444; background:rgba(239,68,68,0.1); }
+    .filter-btn.f-skipped.active { border-color:#F59E0B; color:#F59E0B; background:rgba(245,158,11,0.1); }
+    .review-cards { display:flex; flex-direction:column; gap:14px; }
+    .review-card { background:var(--surface); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:var(--card-shadow); }
+    .review-card.correct { border-color:rgba(34,197,94,0.3); }
+    .review-card.wrong { border-color:rgba(239,68,68,0.3); }
+    .review-card.skipped { border-color:rgba(245,158,11,0.3); }
+    .review-card-header { padding:12px 18px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+    .review-q-num { font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:800; color:var(--text-muted); }
+    .review-card-body { padding:16px 18px; }
+    .review-q-text { font-size:0.9rem; font-weight:600; line-height:1.5; margin-bottom:14px; }
+    .review-options { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; }
+    .review-option { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; font-size:0.82rem; background:var(--surface2); }
+    .review-option.correct-ans { background:rgba(34,197,94,0.12); color:#22C55E; font-weight:600; }
+    .review-option.user-wrong { background:rgba(239,68,68,0.12); color:#EF4444; font-weight:600; }
+    .review-option-letter { width:24px; height:24px; border-radius:6px; background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; flex-shrink:0; }
+    .review-option.correct-ans .review-option-letter { background:#22C55E; color:#fff; }
+    .review-option.user-wrong .review-option-letter { background:#EF4444; color:#fff; }
+    .explanation-box { background:var(--primary-glow); border:1px solid rgba(59,130,246,0.2); border-radius:10px; padding:12px 14px; font-size:0.82rem; line-height:1.6; color:var(--text); }
+    .explanation-box strong { color:var(--primary); font-weight:700; }
+    .no-explanation { font-size:0.78rem; color:var(--text-muted); font-style:italic; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body>
 
-  <!-- TOP BAR -->
   <div class="top-bar">
-    <div class="top-bar-left">
-      <button class="hamburger">☰</button>
-      <span class="top-bar-date" id="topDate"></span>
-    </div>
-    <div class="top-bar-icons">
-      <button class="top-icon" onclick="toggleTheme()">☀️</button>
-      <button class="top-icon">🔔</button>
-      <button class="top-icon">⚙️</button>
-    </div>
+    <span class="top-bar-date" id="topDate"></span>
+    <button class="top-icon" onclick="toggleTheme()">☀️</button>
   </div>
 
-  <!-- CONTENT -->
   <div class="content">
-
     <div class="page-title">Mock Result</div>
 
     <!-- SCORE CARD -->
     <div class="result-card">
       <div class="card-label">Mock Screening Score</div>
-
-      <!-- Progress Ring -->
       <div class="progress-ring-wrap">
         <svg class="progress-ring" width="130" height="130" viewBox="0 0 130 130">
           <circle class="ring-bg" cx="65" cy="65" r="54"/>
-          <circle class="ring-fill" id="ringFill" cx="65" cy="65" r="54"
-            stroke="#3B82F6"
-            stroke-dasharray="339.3"
-            stroke-dashoffset="339.3"/>
+          <circle class="ring-fill" id="ringFill" cx="65" cy="65" r="54" stroke="#3B82F6" stroke-dasharray="339.3" stroke-dashoffset="339.3"/>
           <text class="ring-text" x="65" y="60" id="ringText">0%</text>
           <text class="ring-sublabel" x="65" y="76" id="ringGrade"></text>
         </svg>
       </div>
-
       <span class="score-detail" id="scoreDetail">— / 100 marks</span>
+      <div id="timeUpBadge"></div>
     </div>
 
-    <!-- ADMISSION STATUS CARD -->
+    <!-- ADMISSION STATUS -->
     <div class="result-card">
       <div class="card-label">Admission Status</div>
       <span class="card-icon">🎓</span>
@@ -286,46 +130,39 @@
       <div class="status-badge">Awaiting Result</div>
     </div>
 
-    <!-- BREAKDOWN CARD -->
+    <!-- BREAKDOWN -->
     <div class="breakdown-card">
       <div class="breakdown-title">Score Breakdown</div>
-      <div class="breakdown-row">
-        <span class="breakdown-key">Total Questions</span>
-        <span class="breakdown-val" id="bTotal">50</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-key">Correct Answers</span>
-        <span class="breakdown-val correct" id="bCorrect">—</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-key">Wrong Answers</span>
-        <span class="breakdown-val wrong" id="bWrong">—</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-key">Unanswered</span>
-        <span class="breakdown-val skipped" id="bSkipped">—</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-key">Marks Obtained</span>
-        <span class="breakdown-val" id="bMarks">— / 100</span>
-      </div>
-      <div class="breakdown-row">
-        <span class="breakdown-key">Time Taken</span>
-        <span class="breakdown-val" id="bTime">—</span>
-      </div>
+      <div class="breakdown-row"><span class="breakdown-key">Total Questions</span><span class="breakdown-val" id="bTotal">50</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">Correct Answers</span><span class="breakdown-val correct-val" id="bCorrect">—</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">Wrong Answers</span><span class="breakdown-val wrong-val" id="bWrong">—</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">Unanswered</span><span class="breakdown-val skipped-val" id="bSkipped">—</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">Marks Obtained</span><span class="breakdown-val" id="bMarks">— / 100</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">Time Taken</span><span class="breakdown-val" id="bTime">—</span></div>
     </div>
 
-    <!-- ACTION BUTTONS -->
+    <!-- ACTIONS -->
     <div class="action-btns">
       <a href="mock.html" class="btn btn-primary">🔁 Try Another Mock</a>
       <a href="pastquestions.html" class="btn btn-outline">📝 Practice Past Questions</a>
       <a href="dashboard.html" class="btn btn-outline">🏠 Back to Dashboard</a>
     </div>
 
+    <!-- REVIEW -->
+    <div class="review-section">
+      <div class="review-header">📋 Question Review</div>
+      <div class="review-filter">
+        <button class="filter-btn active" onclick="filterReview('all', this)">All</button>
+        <button class="filter-btn f-correct" onclick="filterReview('correct', this)">✅ Correct</button>
+        <button class="filter-btn f-wrong" onclick="filterReview('wrong', this)">❌ Wrong</button>
+        <button class="filter-btn f-skipped" onclick="filterReview('skipped', this)">⏭️ Skipped</button>
+      </div>
+      <div class="review-cards" id="reviewCards"></div>
+    </div>
+
   </div>
 
   <script>
-    // Theme
     function toggleTheme() {
       const html = document.documentElement;
       const isDark = html.getAttribute('data-theme') === 'dark';
@@ -337,57 +174,103 @@
     document.documentElement.setAttribute('data-theme', saved);
     document.querySelector('.top-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
 
-    // Date
-    const now = new Date();
-    document.getElementById('topDate').textContent = now.toLocaleDateString('en-GB', {
-      weekday:'short', day:'numeric', month:'short', year:'numeric'
-    });
+    document.getElementById('topDate').textContent = new Date().toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
 
-    // Load result from localStorage (set by mock.html after exam)
-    const result = JSON.parse(localStorage.getItem('mockResult')) || {
-      correct: 36, wrong: 10, skipped: 4, timeTaken: '18:42'
-    };
+    const result = JSON.parse(localStorage.getItem('mockResult')) || { correct:36, wrong:10, skipped:4, timeTaken:'18:42', timeUp:false, reviewData:[] };
 
     const correct = result.correct;
     const wrong = result.wrong;
     const skipped = result.skipped;
-    const total = 50;
     const marks = correct * 2;
     const percentage = Math.round((marks / 100) * 100);
 
-    // Ring animation
-    const circumference = 339.3;
-    const offset = circumference - (percentage / 100) * circumference;
     const ring = document.getElementById('ringFill');
     const ringText = document.getElementById('ringText');
     const ringGrade = document.getElementById('ringGrade');
 
-    // Color by score
     let color, grade;
-    if (percentage === 100) { color = '#A855F7'; grade = 'Perfect'; }
-    else if (percentage >= 90) { color = '#22C55E'; grade = 'Excellent'; }
-    else if (percentage >= 80) { color = '#3B82F6'; grade = 'Very Good'; }
-    else if (percentage >= 70) { color = '#06B6D4'; grade = 'Good'; }
-    else if (percentage >= 60) { color = '#F59E0B'; grade = 'Okay'; }
-    else if (percentage >= 50) { color = '#F97316'; grade = 'Fair'; }
-    else { color = '#EF4444'; grade = 'Poor'; }
+    if (percentage === 100) { color='#A855F7'; grade='Perfect'; }
+    else if (percentage >= 90) { color='#22C55E'; grade='Excellent'; }
+    else if (percentage >= 80) { color='#3B82F6'; grade='Very Good'; }
+    else if (percentage >= 70) { color='#06B6D4'; grade='Good'; }
+    else if (percentage >= 60) { color='#F59E0B'; grade='Okay'; }
+    else if (percentage >= 50) { color='#F97316'; grade='Fair'; }
+    else { color='#EF4444'; grade='Poor'; }
 
     ring.style.stroke = color;
     ringGrade.textContent = grade;
     ringGrade.style.fill = color;
+    setTimeout(() => { ring.style.strokeDashoffset = 339.3 - (percentage / 100) * 339.3; ringText.textContent = percentage + '%'; }, 300);
 
-    setTimeout(() => {
-      ring.style.strokeDashoffset = offset;
-      ringText.textContent = percentage + '%';
-    }, 300);
-
-    // Breakdown
     document.getElementById('scoreDetail').textContent = `${marks} / 100 marks`;
+    if (result.timeUp) document.getElementById('timeUpBadge').innerHTML = '<div class="timeup-badge">⏰ Time Up — Auto Submitted</div>';
     document.getElementById('bCorrect').textContent = correct;
     document.getElementById('bWrong').textContent = wrong;
     document.getElementById('bSkipped').textContent = skipped;
     document.getElementById('bMarks').textContent = `${marks} / 100`;
     document.getElementById('bTime').textContent = result.timeTaken || '—';
+
+    const reviewData = result.reviewData || [];
+
+    function renderReview(filter) {
+      const container = document.getElementById('reviewCards');
+      container.innerHTML = '';
+      const filtered = filter === 'all' ? reviewData : reviewData.filter(q => q.status === filter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:24px;font-size:0.88rem;">No questions in this category.</div>`;
+        return;
+      }
+
+      filtered.forEach(q => {
+        const globalIndex = reviewData.indexOf(q);
+        const statusIcon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭️';
+        const letters = ['A','B','C','D','E'];
+        const opts = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
+
+        let optionsHTML = '';
+        opts.forEach((opt, oi) => {
+          if (!opt) return;
+          const letter = letters[oi];
+          const isCorrect = letter === q.correctAnswer;
+          const isUserWrong = letter === q.userAnswer && q.userAnswer !== q.correctAnswer;
+          let cls = 'review-option';
+          if (isCorrect) cls += ' correct-ans';
+          else if (isUserWrong) cls += ' user-wrong';
+          let suffix = isCorrect ? ' ✓ Correct' : isUserWrong ? ' ✗ Your Answer' : '';
+          optionsHTML += `<div class="${cls}"><div class="review-option-letter">${letter}</div><span>${opt}${suffix}</span></div>`;
+        });
+
+        const explanationHTML = q.explanation
+          ? `<div class="explanation-box"><strong>💡 Explanation:</strong> ${q.explanation}</div>`
+          : `<div class="no-explanation">No explanation available for this question.</div>`;
+
+        const skippedNote = q.status === 'skipped'
+          ? `<div style="font-size:0.78rem;color:#F59E0B;margin-bottom:10px;">⏭️ You did not answer this question.</div>` : '';
+
+        container.innerHTML += `
+          <div class="review-card ${q.status}">
+            <div class="review-card-header">
+              <span>${statusIcon}</span>
+              <span class="review-q-num">Question ${globalIndex + 1}</span>
+            </div>
+            <div class="review-card-body">
+              <div class="review-q-text">${q.question || 'Question not available'}</div>
+              ${skippedNote}
+              <div class="review-options">${optionsHTML}</div>
+              ${explanationHTML}
+            </div>
+          </div>`;
+      });
+    }
+
+    function filterReview(filter, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderReview(filter);
+    }
+
+    renderReview('all');
   </script>
 </body>
 </html>
