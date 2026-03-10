@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AceUnilorin PQ — Study Smart. Pass Well.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #253147;
+      --primary: #3B82F6;
+      --primary-glow: rgba(59,130,246,0.18);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --border: rgba(255,255,255,0.07);
+      --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+    :root[data-theme="light"] {
+      --bg: #F0F4FF;
+      --surface: #FFFFFF;
+      --surface2: #E8EFFF;
+      --primary: #2563EB;
+      --primary-glow: rgba(37,99,235,0.12);
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: rgba(0,0,0,0.07);
+      --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
+    }
+
+    /* BG blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob-1 { width: 480px; height: 480px; background: #3B82F6; top: -120px; right: -100px; }
+    .blob-2 { width: 360px; height: 360px; background: #6366F1; bottom: 0; left: -80px; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(15,23,42,0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+    [data-theme="light"] nav { background: rgba(240,244,255,0.8); }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--text); }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .theme-toggle {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .theme-toggle:hover { transform: scale(1.1); background: var(--primary-glow); }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+    }
+    .btn-outline:hover { background: var(--primary-glow); }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 16px var(--primary-glow);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--primary-glow); }
+
+    /* HERO */
+    .hero {
+      position: relative; z-index: 1;
+      padding: 72px 24px 56px;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary-glow);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: var(--primary);
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-dot { width: 7px; height: 7px; background: var(--primary); border-radius: 50%; animation: pulse 1.5s infinite; }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.4rem, 8vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .hero h1 .accent { color: var(--primary); }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-btns {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .hero-btns .btn { padding: 14px 28px; font-size: 1rem; border-radius: 12px; }
+
+    /* STATS */
+    .stats {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+      padding: 0 24px 56px;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 130px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-4px); }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+    /* FEATURES */
+    .section {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .section-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 32px; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.2s, border-color 0.2s;
+      cursor: default;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .feature-icon {
+      width: 48px; height: 48px;
+      background: var(--primary-glow);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* CTA */
+    .cta-section {
+      position: relative; z-index: 1;
+      margin: 0 24px 64px;
+      background: var(--primary);
+      border-radius: 24px;
+      padding: 48px 32px;
+      text-align: center;
+      overflow: hidden;
+      max-width: 852px;
+      margin-left: auto; margin-right: auto;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .cta-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .cta-section p { color: rgba(255,255,255,0.8); margin-bottom: 28px; position: relative; font-size: 0.95rem; }
+    .btn-white {
+      background: #fff;
+      color: var(--primary);
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 1rem;
+      position: relative;
+    }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+
+    /* FOOTER */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+    footer span { color: var(--primary); font-weight: 600; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Ace<span>Unilorin</span> PQ</div>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+      <a href="auth.html" class="btn btn-outline">Login</a>
+      <a href="auth.html?mode=register" class="btn btn-primary">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge"><span class="badge-dot"></span> Unilorin Exam Prep</div>
+    <h1>Study Smart.<br/><span class="accent">Ace Unilorin.</span></h1>
+    <p>Practice real past questions, take timed mock exams, and master English, Mathematics & Current Affairs — all in one place.</p>
+    <div class="hero-btns">
+      <a href="auth.html?mode=register" class="btn btn-primary">🚀 Start for Free</a>
+      <a href="pastquestions.html" class="btn btn-outline">📚 Browse Past Questions</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num">10+</div>
+      <div class="stat-label">Years of PQs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Study Subjects</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Mock Modes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">Free</div>
+      <div class="stat-label">Always</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <div class="section-title">Everything you need to pass</div>
+    <div class="section-sub">Built specifically for Unilorin POST-UTME and entrance exam candidates.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Past Questions by Year</h3>
+        <p>Browse and practice real Unilorin past questions organised neatly by year.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⏱️</div>
+        <h3>Timed Mock Exams</h3>
+        <p>Simulate real exam conditions with our PQ-only or full mixed mock modes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📖</div>
+        <h3>Study Notes</h3>
+        <p>Structured notes for English, Mathematics and Current Affairs to build your foundation.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Subject Quizzes</h3>
+        <p>Test yourself on each subject with targeted quizzes after studying the notes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Track Your Progress</h3>
+        <p>See your scores, improvement over time and know exactly where to focus.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Personal Account</h3>
+        <p>Your progress is saved to your account — pick up right where you left off.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Ready to Ace Unilorin?</h2>
+    <p>Join students already preparing smarter with AceUnilorin PQ.</p>
+    <a href="auth.html?mode=register" class="btn btn-white">Create Free Account →</a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 <span>AceUnilorin PQ</span> — Study Smart. Pass Well.
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    // Load saved theme
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+  </script>
+</body>
+</html>
