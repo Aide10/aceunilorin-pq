@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Past Questions — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #253147;
+      --primary: #3B82F6;
+      --primary-glow: rgba(59,130,246,0.18);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --border: rgba(255,255,255,0.07);
+      --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
+      --locked-bg: #1a2235;
+      --locked-text: #4B5563;
+    }
+    :root[data-theme="light"] {
+      --bg: #F0F4FF;
+      --surface: #FFFFFF;
+      --surface2: #E8EFFF;
+      --primary: #2563EB;
+      --primary-glow: rgba(37,99,235,0.12);
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: rgba(0,0,0,0.07);
+      --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
+      --locked-bg: #F1F5F9;
+      --locked-text: #9CA3AF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(80px); opacity: 0.12;
+      pointer-events: none; z-index: 0;
+    }
+    .blob-1 { width: 400px; height: 400px; background: #3B82F6; top: -100px; right: -80px; }
+    .blob-2 { width: 300px; height: 300px; background: #6366F1; bottom: 0; left: -60px; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      background: rgba(15,23,42,0.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    [data-theme="light"] nav { background: rgba(240,244,255,0.85); }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem; font-weight: 800;
+      color: var(--primary); letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text); }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+
+    .theme-toggle {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); width: 38px; height: 38px;
+      border-radius: 50%; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    .theme-toggle:hover { transform: scale(1.1); }
+
+    .btn {
+      padding: 9px 20px; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-weight: 600;
+      font-size: 0.88rem; cursor: pointer; border: none;
+      transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--primary-glow); }
+    .btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: var(--primary-glow); }
+
+    /* PAGE HEADER */
+    .page-header {
+      position: relative; z-index: 1;
+      padding: 48px 24px 32px;
+      max-width: 900px; margin: 0 auto;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); font-size: 0.88rem;
+      text-decoration: none; margin-bottom: 20px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 800; letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
+    .page-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* FILTER BAR */
+    .filter-bar {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 0 24px 28px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .filter-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .filter-btn {
+      padding: 7px 16px; border-radius: 100px;
+      border: 1.5px solid var(--border);
+      background: var(--surface); color: var(--text-muted);
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--primary); color: var(--primary);
+      background: var(--primary-glow);
+    }
+
+    /* LEGEND */
+    .legend {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 0 24px 24px;
+      display: flex; gap: 20px; flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .legend-dot.free { background: var(--primary); }
+    .legend-dot.locked { background: #F59E0B; }
+
+    /* YEARS GRID */
+    .years-section {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
+      padding: 0 24px 64px;
+    }
+
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    .years-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px;
+      margin-bottom: 40px;
+    }
+
+    .year-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: block;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .year-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--primary); opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .year-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .year-card:hover::before { opacity: 1; }
+
+    .year-card.locked {
+      background: var(--locked-bg);
+      cursor: pointer;
+      border-color: rgba(245,158,11,0.2);
+    }
+    .year-card.locked:hover { border-color: #F59E0B; transform: translateY(-4px); }
+    .year-card.locked::before { background: #F59E0B; }
+    .year-card.locked:hover::before { opacity: 1; }
+
+    .year-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem; font-weight: 800;
+      color: var(--primary); line-height: 1;
+      margin-bottom: 6px;
+    }
+    .year-card.locked .year-num { color: var(--locked-text); }
+
+    .year-label {
+      font-size: 0.75rem; color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .lock-icon {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 0.85rem;
+      background: rgba(245,158,11,0.15);
+      border-radius: 6px; padding: 3px 6px;
+    }
+
+    .premium-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #F59E0B, #EF4444);
+      color: #fff; font-size: 0.65rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 100px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-top: 6px;
+    }
+
+    /* UPGRADE MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 400px; width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-icon { font-size: 3rem; margin-bottom: 16px; }
+    .modal h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .modal p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
+
+    .modal-year-tag {
+      display: inline-block;
+      background: var(--primary-glow);
+      color: var(--primary);
+      font-weight: 700; font-size: 1.1rem;
+      padding: 6px 20px; border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .modal-btns { display: flex; gap: 10px; flex-direction: column; }
+    .btn-upgrade {
+      background: linear-gradient(135deg, #F59E0B, #EF4444);
+      color: #fff; font-weight: 700;
+      padding: 14px; border-radius: 12px;
+      font-size: 0.95rem; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-upgrade:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.3); }
+    .btn-cancel {
+      background: transparent; border: 1.5px solid var(--border);
+      color: var(--text-muted); padding: 12px;
+      border-radius: 12px; font-size: 0.88rem;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .btn-cancel:hover { border-color: var(--text-muted); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .years-grid { animation: fadeUp 0.5s ease both; }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Ace<span>Unilorin</span> PQ</a>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+      <a href="dashboard.html" class="btn btn-outline">Dashboard</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+    <h1>📝 Past Questions</h1>
+    <p>Select a year to start practising real Unilorin past questions.</p>
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <button class="filter-btn active" onclick="filterYears('all', this)">All Years</button>
+    <button class="filter-btn" onclick="filterYears('free', this)">Free Only</button>
+    <button class="filter-btn" onclick="filterYears('premium', this)">Premium</button>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot free"></div> Free access</div>
+    <div class="legend-item"><div class="legend-dot locked"></div> Premium (one-time unlock)</div>
+  </div>
+
+  <!-- YEARS -->
+  <div class="years-section">
+
+    <!-- FREE YEARS -->
+    <div class="section-label" id="free-label">Free Years</div>
+    <div class="years-grid" id="free-grid">
+      <!-- 2006–2015 + 2017–2019 (free, no 2016) -->
+    </div>
+
+    <!-- PREMIUM YEARS -->
+    <div class="section-label" id="premium-label">Premium Years</div>
+    <div class="years-grid" id="premium-grid">
+      <!-- 2021–2025 (no 2020) -->
+    </div>
+
+  </div>
+
+  <!-- UPGRADE MODAL -->
+  <div class="modal-overlay" id="upgradeModal">
+    <div class="modal">
+      <div class="modal-icon">🔒</div>
+      <h2>Premium Content</h2>
+      <div class="modal-year-tag" id="modalYear">2021</div>
+      <p>This year's past questions are available for premium subscribers. Unlock <strong>all premium years (2021–2025)</strong> with a one-time payment.</p>
+      <div class="modal-btns">
+        <button class="btn-upgrade" onclick="goToUpgrade()">🚀 Unlock All Premium Years</button>
+        <button class="btn-cancel" onclick="closeModal()">Maybe Later</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+
+    // Years config
+    const freeYears = [
+      {year:2006}, {year:2007}, {year:2008}, {year:2009}, {year:2010},
+      {year:2011}, {year:2012}, {year:2013}, {year:2014}, {year:2015},
+      {year:2016, unavailable: true, reason: 'No PUTME', detail: 'Suspended by FG order'},
+      {year:2017}, {year:2018}, {year:2019},
+      {year:2020, unavailable: true, reason: 'No PUTME', detail: 'Cancelled due to COVID-19'},
+    ];
+    const premiumYears = [2021,2022,2023,2024,2025];
+
+    // Build free year cards
+    const freeGrid = document.getElementById('free-grid');
+    freeYears.forEach(({year, unavailable, detail}) => {
+      if (unavailable) {
+        const card = document.createElement('div');
+        card.className = 'year-card unavailable-year';
+        card.dataset.type = 'free';
+        card.style.cursor = 'default';
+        card.style.opacity = '0.5';
+        card.style.borderStyle = 'dashed';
+        card.innerHTML = `
+          <div class="year-num" style="color:var(--text-muted)">${year}</div>
+          <div class="year-label" style="color:var(--text-muted);font-weight:600;">No PUTME</div>
+          <div class="year-label" style="font-size:0.7rem;margin-top:4px;color:var(--text-muted)">${detail}</div>
+        `;
+        freeGrid.appendChild(card);
+      } else {
+        const card = document.createElement('a');
+        card.href = `quiz.html?year=${year}`;
+        card.className = 'year-card free-year';
+        card.dataset.type = 'free';
+        card.innerHTML = `
+          <div class="year-num">${year}</div>
+          <div class="year-label">Past Questions</div>
+        `;
+        freeGrid.appendChild(card);
+      }
+    });
+
+    // Build premium year cards
+    const premiumGrid = document.getElementById('premium-grid');
+    premiumYears.forEach(year => {
+      const card = document.createElement('div');
+      card.className = 'year-card locked premium-year';
+      card.dataset.type = 'premium';
+      card.onclick = () => showUpgradeModal(year);
+      card.innerHTML = `
+        <span class="lock-icon">🔒</span>
+        <div class="year-num">${year}</div>
+        <div class="year-label">Past Questions</div>
+        <div class="premium-badge">Premium</div>
+      `;
+      premiumGrid.appendChild(card);
+    });
+
+    // Filter
+    function filterYears(type, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const freeCards = document.querySelectorAll('.free-year');
+      const premCards = document.querySelectorAll('.premium-year');
+      const freeLabel = document.getElementById('free-label');
+      const premLabel = document.getElementById('premium-label');
+
+      if (type === 'all') {
+        freeCards.forEach(c => c.style.display = '');
+        premCards.forEach(c => c.style.display = '');
+        freeLabel.style.display = ''; premLabel.style.display = '';
+      } else if (type === 'free') {
+        freeCards.forEach(c => c.style.display = '');
+        premCards.forEach(c => c.style.display = 'none');
+        freeLabel.style.display = ''; premLabel.style.display = 'none';
+      } else {
+        freeCards.forEach(c => c.style.display = 'none');
+        premCards.forEach(c => c.style.display = '');
+        freeLabel.style.display = 'none'; premLabel.style.display = '';
+      }
+    }
+
+    // Modal
+    function showUpgradeModal(year) {
+      document.getElementById('modalYear').textContent = year;
+      document.getElementById('upgradeModal').classList.add('open');
+    }
+    function closeModal() {
+      document.getElementById('upgradeModal').classList.remove('open');
+    }
+    function goToUpgrade() {
+      window.location.href = 'upgrade.html';
+    }
+
+    // Close modal on overlay click
+    document.getElementById('upgradeModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+</body>
+</html>
