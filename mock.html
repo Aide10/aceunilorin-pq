@@ -388,17 +388,16 @@
 
   async function startMock() {
     const btn = document.querySelector('#lobbyScreen .btn-primary');
-    btn.textContent = 'Loading questions...';
     btn.disabled = true;
 
-    try {
-      let allQuestions = [];
+    // Show loading overlay
+    showLoadingOverlay('Preparing your mock exam...');
 
-      // Fetch past questions
+    try {
       const freeYears = [2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
       const premiumYears = [2021,2022,2023,2024,2025];
 
-      // Check if user is premium
+      // Check premium
       const user = auth.currentUser;
       let isPremium = false;
       if (user) {
@@ -406,32 +405,55 @@
         isPremium = doc.exists && doc.data().isPremium;
       }
 
-      const yearsToUse = isPremium ? [...freeYears, ...premiumYears] : freeYears;
+      let yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
 
-      // Fetch questions from Firestore
+      // Shuffle years so question variety is random
+      yearsToUse = yearsToUse.sort(() => Math.random() - 0.5);
+
+      let allQuestions = [];
+      const TARGET = 50;
+      const BATCH = 5;
+
+      // Fetch 5 questions per year, cycling through years until we have 50
       for (const year of yearsToUse) {
-        const snap = await db.collection('pastquestions').doc(String(year)).collection('questions').get();
-        snap.forEach(d => allQuestions.push({ ...d.data(), id: d.id, year }));
-      }
-
-      // If full mock, also fetch study questions
-      if (mockType === 'full') {
-        const subjects = ['english', 'math', 'currentaffairs'];
-        for (const subject of subjects) {
-          const snap = await db.collection('studyquestions').doc(subject).collection('questions').get();
-          snap.forEach(d => allQuestions.push({ ...d.data(), id: d.id, subject }));
+        if (allQuestions.length >= TARGET) break;
+        updateLoadingOverlay(`Loading questions... ${allQuestions.length}/${TARGET}`);
+        try {
+          const snap = await db.collection('pastquestions').doc(String(year))
+            .collection('questions').limit(BATCH).get();
+          snap.forEach(d => allQuestions.push({ ...d.data(), id: d.id, year }));
+        } catch (e) {
+          console.warn(`Skipped year ${year}:`, e.message);
+          // Network hiccup on one year — skip and continue
         }
       }
 
+      // If full mock, also fetch study questions in batches of 5
+      if (mockType === 'full' && allQuestions.length < TARGET) {
+        const subjects = ['english', 'math', 'currentaffairs'];
+        for (const subject of subjects) {
+          if (allQuestions.length >= TARGET) break;
+          updateLoadingOverlay(`Loading study questions... ${allQuestions.length}/${TARGET}`);
+          try {
+            const snap = await db.collection('studyquestions').doc(subject)
+              .collection('questions').limit(BATCH).get();
+            snap.forEach(d => allQuestions.push({ ...d.data(), id: d.id, subject }));
+          } catch (e) {
+            console.warn(`Skipped subject ${subject}:`, e.message);
+          }
+        }
+      }
+
+      hideLoadingOverlay();
+
       if (allQuestions.length === 0) {
-        alert('No questions found. Please check back later.');
-        btn.textContent = '🚀 Start Mock Exam';
+        alert('No questions could be loaded. Please check your connection and try again.');
         btn.disabled = false;
         return;
       }
 
-      // Shuffle and pick 50
-      allQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, 50);
+      // Shuffle and cap at 50
+      allQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, TARGET);
       questions = allQuestions;
       userAnswers = {};
       currentIndex = 0;
@@ -444,11 +466,44 @@
       startTimer();
 
     } catch (err) {
+      hideLoadingOverlay();
       console.error(err);
-      alert('Failed to load questions: ' + err.message);
-      btn.textContent = '🚀 Start Mock Exam';
+      alert('Failed to start mock: ' + err.message);
       btn.disabled = false;
     }
+  }
+
+  // Loading overlay helpers
+  function showLoadingOverlay(msg) {
+    let el = document.getElementById('loadingOverlay');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'loadingOverlay';
+      el.style.cssText = `position:fixed;inset:0;z-index:300;background:rgba(15,23,42,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;`;
+      el.innerHTML = `
+        <div style="width:44px;height:44px;border:4px solid #253147;border-top-color:#3B82F6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+        <div id="loadingOverlayText" style="color:#94A3B8;font-size:0.92rem;font-family:'DM Sans',sans-serif;"></div>
+        <div style="width:200px;background:#253147;border-radius:100px;height:6px;overflow:hidden;">
+          <div id="loadingOverlayBar" style="height:100%;background:#3B82F6;border-radius:100px;width:0%;transition:width 0.4s;"></div>
+        </div>`;
+      document.body.appendChild(el);
+    }
+    el.style.display = 'flex';
+    document.getElementById('loadingOverlayText').textContent = msg;
+  }
+
+  function updateLoadingOverlay(msg) {
+    const textEl = document.getElementById('loadingOverlayText');
+    const barEl = document.getElementById('loadingOverlayBar');
+    if (textEl) textEl.textContent = msg;
+    // Parse progress from msg for bar
+    const match = msg.match(/(\d+)\/(\d+)/);
+    if (match && barEl) barEl.style.width = `${Math.round((+match[1] / +match[2]) * 100)}%`;
+  }
+
+  function hideLoadingOverlay() {
+    const el = document.getElementById('loadingOverlay');
+    if (el) el.style.display = 'none';
   }
 
   // ── TIMER ──
@@ -565,6 +620,7 @@
   function submitMock(timeUp = false) {
     clearInterval(timerInterval);
     closeSubmitModal();
+    document.querySelector('#lobbyScreen .btn-primary').disabled = false;
 
     let correct = 0, wrong = 0, skipped = 0;
     const reviewData = [];
