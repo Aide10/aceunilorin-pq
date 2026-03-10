@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Hub — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0F172A; --surface: #1E293B; --surface2: #253147;
+      --primary: #3B82F6; --primary-glow: rgba(59,130,246,0.18);
+      --text: #F1F5F9; --text-muted: #94A3B8;
+      --border: rgba(255,255,255,0.07); --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+    :root[data-theme="light"] {
+      --bg: #F0F4FF; --surface: #FFFFFF; --surface2: #E8EFFF;
+      --primary: #2563EB; --primary-glow: rgba(37,99,235,0.12);
+      --text: #1E293B; --text-muted: #64748B;
+      --border: rgba(0,0,0,0.07); --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif; background: var(--bg);
+      color: var(--text); min-height: 100vh;
+      transition: background 0.3s, color 0.3s; padding-bottom: 60px;
+    }
+
+    /* BLOBS */
+    .blob { position:fixed; border-radius:50%; filter:blur(90px); opacity:0.08; pointer-events:none; z-index:0; transition: opacity 0.3s; }
+    .blob-1 { width:500px; height:500px; background:#3B82F6; top:-150px; right:-100px; }
+    .blob-2 { width:350px; height:350px; background:#10B981; bottom:80px; left:-80px; }
+    .blob-3 { width:250px; height:250px; background:#F59E0B; top:50%; left:50%; transform:translate(-50%,-50%); }
+    [data-theme="light"] .blob { opacity: 0.06; }
+
+    /* NAV */
+    nav {
+      position:sticky; top:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px;
+      background:rgba(15,23,42,0.82); backdrop-filter:blur(18px);
+      border-bottom:1px solid var(--border);
+    }
+    [data-theme="light"] nav { background:rgba(240,244,255,0.88); }
+    .nav-logo { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; color:var(--primary); text-decoration:none; }
+    .nav-logo span { color:var(--text); }
+    .theme-toggle { background:var(--surface2); border:1px solid var(--border); color:var(--text); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:transform 0.2s; }
+    .theme-toggle:hover { transform:rotate(20deg); }
+
+    /* CONTENT */
+    .content { max-width:540px; margin:0 auto; padding:32px 20px; position:relative; z-index:1; }
+
+    /* HEADER */
+    .page-header { margin-bottom:32px; animation:fadeUp 0.5s ease both; }
+    .back-link { display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); font-size:0.85rem; text-decoration:none; margin-bottom:16px; transition:color 0.2s; }
+    .back-link:hover { color:var(--primary); }
+    .header-eyebrow { font-size:0.72rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:10px; }
+    .page-header h1 { font-family:'Syne',sans-serif; font-size:2.1rem; font-weight:800; letter-spacing:-1px; line-height:1.1; margin-bottom:10px; }
+    .page-header p { color:var(--text-muted); font-size:0.92rem; line-height:1.6; max-width:340px; }
+
+    /* STREAK BANNER */
+    .streak-banner {
+      display:flex; align-items:center; gap:14px;
+      background:linear-gradient(135deg, rgba(245,158,11,0.12), rgba(251,191,36,0.06));
+      border:1px solid rgba(245,158,11,0.25);
+      border-radius:16px; padding:16px 18px; margin-bottom:28px;
+      animation:fadeUp 0.5s 0.1s ease both;
+    }
+    .streak-icon { font-size:1.8rem; flex-shrink:0; }
+    .streak-text strong { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:800; display:block; margin-bottom:2px; }
+    .streak-text span { font-size:0.78rem; color:var(--text-muted); }
+
+    /* SUBJECT CARDS */
+    .subjects-label { font-size:0.72rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
+
+    .subject-grid { display:flex; flex-direction:column; gap:14px; margin-bottom:32px; }
+
+    .subject-card {
+      position:relative; border-radius:20px; overflow:hidden;
+      text-decoration:none; color:var(--text);
+      display:flex; align-items:center; gap:18px;
+      padding:22px 20px; border:1.5px solid var(--border);
+      background:var(--surface);
+      box-shadow:var(--card-shadow);
+      transition:all 0.25s; cursor:pointer;
+    }
+    .subject-card::before {
+      content:''; position:absolute; inset:0;
+      opacity:0; transition:opacity 0.25s;
+    }
+    .subject-card:hover { transform:translateY(-3px); border-color:transparent; }
+    .subject-card:hover::before { opacity:1; }
+    .subject-card:active { transform:translateY(-1px); }
+
+    /* English — teal */
+    .card-english { animation:fadeUp 0.5s 0.15s ease both; }
+    .card-english::before { background:linear-gradient(135deg, rgba(20,184,166,0.08), rgba(6,182,212,0.04)); }
+    .card-english:hover { box-shadow:0 12px 40px rgba(20,184,166,0.2); border-color:rgba(20,184,166,0.3); }
+    .card-english .subject-icon-wrap { background:linear-gradient(135deg,#14B8A6,#06B6D4); }
+
+    /* Math — amber */
+    .card-math { animation:fadeUp 0.5s 0.25s ease both; }
+    .card-math::before { background:linear-gradient(135deg, rgba(245,158,11,0.08), rgba(251,191,36,0.04)); }
+    .card-math:hover { box-shadow:0 12px 40px rgba(245,158,11,0.2); border-color:rgba(245,158,11,0.3); }
+    .card-math .subject-icon-wrap { background:linear-gradient(135deg,#F59E0B,#FBBF24); }
+
+    /* Current Affairs — rose */
+    .card-ca { animation:fadeUp 0.5s 0.35s ease both; }
+    .card-ca::before { background:linear-gradient(135deg, rgba(244,63,94,0.08), rgba(251,113,133,0.04)); }
+    .card-ca:hover { box-shadow:0 12px 40px rgba(244,63,94,0.2); border-color:rgba(244,63,94,0.3); }
+    .card-ca .subject-icon-wrap { background:linear-gradient(135deg,#F43F5E,#FB7185); }
+
+    .subject-icon-wrap {
+      width:52px; height:52px; border-radius:14px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; box-shadow:0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .subject-info { flex:1; }
+    .subject-info h3 { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; margin-bottom:4px; }
+    .subject-info p { font-size:0.78rem; color:var(--text-muted); line-height:1.4; }
+
+    .subject-meta { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+    .topic-count { font-size:0.72rem; color:var(--text-muted); white-space:nowrap; }
+    .subject-arrow { font-size:1rem; color:var(--text-muted); transition:transform 0.2s; }
+    .subject-card:hover .subject-arrow { transform:translateX(4px); color:var(--text); }
+
+    /* PROGRESS MINI-BARS */
+    .subject-progress { width:60px; }
+    .prog-bar-bg { height:4px; background:var(--surface2); border-radius:100px; overflow:hidden; }
+    .prog-bar-fill { height:100%; border-radius:100px; }
+    .prog-label { font-size:0.65rem; color:var(--text-muted); margin-top:3px; text-align:right; }
+    .card-english .prog-bar-fill { background:linear-gradient(90deg,#14B8A6,#06B6D4); }
+    .card-math .prog-bar-fill { background:linear-gradient(90deg,#F59E0B,#FBBF24); }
+    .card-ca .prog-bar-fill { background:linear-gradient(90deg,#F43F5E,#FB7185); }
+
+    /* QUICK TIPS SECTION */
+    .tips-section { animation:fadeUp 0.5s 0.45s ease both; }
+    .tips-label { font-size:0.72rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
+    .tips-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:18px; padding:20px; box-shadow:var(--card-shadow);
+    }
+    .tip-item { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+    .tip-item:last-child { border-bottom:none; padding-bottom:0; }
+    .tip-item:first-child { padding-top:0; }
+    .tip-emoji { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+    .tip-text { font-size:0.83rem; color:var(--text-muted); line-height:1.5; }
+    .tip-text strong { color:var(--text); font-weight:600; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position:fixed; bottom:0; left:0; right:0; z-index:100;
+      background:rgba(15,23,42,0.92); backdrop-filter:blur(18px);
+      border-top:1px solid var(--border);
+      display:flex; justify-content:space-around; align-items:center;
+      padding:10px 0 14px;
+    }
+    [data-theme="light"] .bottom-nav { background:rgba(240,244,255,0.92); }
+    .bnav-item { display:flex; flex-direction:column; align-items:center; gap:3px; text-decoration:none; color:var(--text-muted); font-size:0.62rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; transition:color 0.2s; padding:0 14px; }
+    .bnav-item.active { color:var(--primary); }
+    .bnav-item:hover { color:var(--primary); }
+    .bnav-icon { font-size:1.2rem; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);} }
+  </style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<nav>
+  <a href="dashboard.html" class="nav-logo">Ace<span>Unilorin</span> PQ</a>
+  <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+</nav>
+
+<div class="content">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+    <div class="header-eyebrow">Study Hub</div>
+    <h1>Learn &<br/>Practice</h1>
+    <p>Sharpen your skills with focused notes and quizzes for each subject.</p>
+  </div>
+
+  <!-- STREAK BANNER -->
+  <div class="streak-banner">
+    <div class="streak-icon">🔥</div>
+    <div class="streak-text">
+      <strong id="streakText">Keep your streak going!</strong>
+      <span id="streakSub">Study at least one subject today.</span>
+    </div>
+  </div>
+
+  <!-- SUBJECTS -->
+  <div class="subjects-label">Choose a Subject</div>
+  <div class="subject-grid">
+
+    <!-- English -->
+    <a href="study-english.html" class="subject-card card-english">
+      <div class="subject-icon-wrap">📖</div>
+      <div class="subject-info">
+        <h3>Use of English</h3>
+        <p>Comprehension, grammar, vocabulary, sentence structure & essay writing</p>
+      </div>
+      <div class="subject-meta">
+        <div class="subject-progress">
+          <div class="prog-bar-bg"><div class="prog-bar-fill" id="engProg" style="width:0%"></div></div>
+          <div class="prog-label" id="engProgLabel">—</div>
+        </div>
+        <span class="subject-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Math -->
+    <a href="study-math.html" class="subject-card card-math">
+      <div class="subject-icon-wrap">🔢</div>
+      <div class="subject-info">
+        <h3>Mathematics</h3>
+        <p>Algebra, calculus, statistics, trigonometry & number theory</p>
+      </div>
+      <div class="subject-meta">
+        <div class="subject-progress">
+          <div class="prog-bar-bg"><div class="prog-bar-fill" id="mathProg" style="width:0%"></div></div>
+          <div class="prog-label" id="mathProgLabel">—</div>
+        </div>
+        <span class="subject-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Current Affairs -->
+    <a href="study-ca.html" class="subject-card card-ca">
+      <div class="subject-icon-wrap">🌍</div>
+      <div class="subject-info">
+        <h3>Current Affairs</h3>
+        <p>Nigerian politics, history, geography, science & world events</p>
+      </div>
+      <div class="subject-meta">
+        <div class="subject-progress">
+          <div class="prog-bar-bg"><div class="prog-bar-fill" id="caProg" style="width:0%"></div></div>
+          <div class="prog-label" id="caProgLabel">—</div>
+        </div>
+        <span class="subject-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- QUICK TIPS -->
+  <div class="tips-section">
+    <div class="tips-label">Study Tips</div>
+    <div class="tips-card">
+      <div class="tip-item">
+        <span class="tip-emoji">⏱️</span>
+        <span class="tip-text"><strong>Short sessions win.</strong> Study for 20–30 minutes, then take a 5-minute break. Repeat.</span>
+      </div>
+      <div class="tip-item">
+        <span class="tip-emoji">✍️</span>
+        <span class="tip-text"><strong>Test yourself.</strong> After reading notes, close them and try to recall key points before doing quizzes.</span>
+      </div>
+      <div class="tip-item">
+        <span class="tip-emoji">📅</span>
+        <span class="tip-text"><strong>Rotate subjects.</strong> Don't study one subject all day — switching keeps your brain fresh.</span>
+      </div>
+      <div class="tip-item">
+        <span class="tip-emoji">🎯</span>
+        <span class="tip-text"><strong>Review mistakes.</strong> Wrong answers teach you more than correct ones. Re-read explanations carefully.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="dashboard.html" class="bnav-item"><span class="bnav-icon">🏠</span>Home</a>
+  <a href="pastquestions.html" class="bnav-item"><span class="bnav-icon">📝</span>Past Q</a>
+  <a href="mock.html" class="bnav-item"><span class="bnav-icon">⏱️</span>Mock</a>
+  <a href="study.html" class="bnav-item active"><span class="bnav-icon">📚</span>Study</a>
+  <a href="leaderboard.html" class="bnav-item"><span class="bnav-icon">🏆</span>Ranks</a>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+    authDomain: "aceunilorin-pq.firebaseapp.com",
+    projectId: "aceunilorin-pq",
+    storageBucket: "aceunilorin-pq.firebasestorage.app",
+    messagingSenderId: "152163357125",
+    appId: "1:152163357125:web:23dc8652f9789197623bac",
+    measurementId: "G-PQ1H0EWQ2L"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Theme
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  }
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+
+  // Auth check
+  auth.onAuthStateChanged(user => {
+    if (!user) { window.location.href = 'auth.html'; return; }
+    loadProgress(user.uid);
+    loadStreak(user.uid);
+  });
+
+  // Load per-subject progress from localStorage (lightweight, no extra Firestore reads)
+  function loadProgress(uid) {
+    const subjects = [
+      { key: 'english', progId: 'engProg', labelId: 'engProgLabel' },
+      { key: 'math',    progId: 'mathProg', labelId: 'mathProgLabel' },
+      { key: 'ca',      progId: 'caProg',   labelId: 'caProgLabel' },
+    ];
+    subjects.forEach(s => {
+      const raw = localStorage.getItem(`studyProgress_${uid}_${s.key}`);
+      if (raw) {
+        const { done, total } = JSON.parse(raw);
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        document.getElementById(s.progId).style.width = pct + '%';
+        document.getElementById(s.labelId).textContent = `${done}/${total}`;
+      } else {
+        document.getElementById(s.labelId).textContent = 'Start';
+      }
+    });
+  }
+
+  // Streak — stored in localStorage
+  function loadStreak(uid) {
+    const key = `studyStreak_${uid}`;
+    const raw = localStorage.getItem(key);
+    const today = new Date().toDateString();
+    let streak = 0;
+
+    if (raw) {
+      const data = JSON.parse(raw);
+      const last = data.lastDate;
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      if (last === today) {
+        streak = data.count;
+      } else if (last === yesterday) {
+        streak = data.count; // still alive
+      } else {
+        streak = 0; // broken
+        localStorage.setItem(key, JSON.stringify({ count: 0, lastDate: '' }));
+      }
+    }
+
+    const streakText = document.getElementById('streakText');
+    const streakSub = document.getElementById('streakSub');
+    if (streak > 0) {
+      streakText.textContent = `🔥 ${streak}-day streak! Keep it up!`;
+      streakSub.textContent = `You studied yesterday. Don't break the chain.`;
+    } else {
+      streakText.textContent = 'Start your study streak today!';
+      streakSub.textContent = 'Study at least one subject to begin.';
+    }
+  }
+</script>
+</body>
+</html>
