@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"]{--bg:#0A0F1E;--surface:#131C2E;--surface2:#1A2640;--surface3:#21304F;--primary:#3B82F6;--primary-glow:rgba(59,130,246,0.2);--text:#F1F5F9;--text-muted:#64748B;--border:rgba(255,255,255,0.06);--danger:#EF4444;--success:#22C55E;--warning:#F59E0B;}
+    :root[data-theme="light"]{--bg:#F1F5FB;--surface:#FFFFFF;--surface2:#E8EFF9;--surface3:#D8E4F4;--primary:#2563EB;--primary-glow:rgba(37,99,235,0.12);--text:#0F172A;--text-muted:#64748B;--border:rgba(0,0,0,0.07);--danger:#DC2626;--success:#16A34A;--warning:#D97706;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s;}
+
+    /* AUTH */
+    #authGate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+    .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 32px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.4);}
+    .auth-logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--primary);margin-bottom:4px;}
+    .auth-logo span{color:var(--text);}
+    .auth-sub{font-size:0.82rem;color:var(--text-muted);margin-bottom:28px;}
+    .auth-label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-align:left;margin-bottom:6px;}
+    .auth-input{width:100%;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.92rem;margin-bottom:14px;outline:none;transition:border-color 0.2s;}
+    .auth-input:focus{border-color:var(--primary);}
+    .auth-btn{width:100%;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.2s;}
+    .auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
+    .auth-error{color:var(--danger);font-size:0.82rem;margin-top:10px;min-height:18px;}
+
+    /* LAYOUT */
+    #adminPanel{display:none;}
+    .top-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--primary);}
+    .logo span{color:var(--text);}
+    .top-right{display:flex;align-items:center;gap:8px;}
+    .admin-badge{background:rgba(59,130,246,0.15);color:var(--primary);font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:100px;border:1px solid rgba(59,130,246,0.25);}
+    .icon-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+    .icon-btn:hover{background:var(--surface3);}
+
+    .layout{display:flex;min-height:calc(100vh - 53px);}
+    .sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);padding:18px 0;flex-shrink:0;}
+    .sidebar-label{font-size:0.63rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:0 16px;margin-bottom:8px;margin-top:12px;}
+    .sidebar-label:first-child{margin-top:0;}
+    .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:all 0.15s;font-size:0.86rem;font-weight:500;color:var(--text-muted);border-left:3px solid transparent;}
+    .sidebar-item:hover{background:var(--surface2);color:var(--text);}
+    .sidebar-item.active{background:var(--primary-glow);color:var(--primary);border-left-color:var(--primary);font-weight:600;}
+    .s-icon{font-size:1rem;width:20px;text-align:center;}
+    .main{flex:1;padding:28px 24px;overflow-y:auto;max-width:800px;}
+
+    /* SECTIONS */
+    .page-section{display:none;}
+    .page-section.active{display:block;animation:fadeUp 0.3s ease both;}
+    .section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;}
+    .section-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;}
+    .section-sub{font-size:0.82rem;color:var(--text-muted);margin-top:3px;}
+
+    /* SUBJECT TABS */
+    .subject-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+    .sub-tab{padding:7px 16px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+    .sub-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+    /* PDF UPLOAD ZONE */
+    .upload-zone{border:2px dashed var(--border);border-radius:18px;padding:36px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface);margin-bottom:20px;}
+    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--primary);background:var(--primary-glow);}
+    .upload-icon{font-size:2.5rem;margin-bottom:12px;}
+    .upload-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-bottom:6px;}
+    .upload-sub{font-size:0.82rem;color:var(--text-muted);}
+    .upload-sub strong{color:var(--primary);}
+    #pdfInput{display:none;}
+    .selected-file{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+    .file-icon{font-size:1.4rem;}
+    .file-name{font-size:0.88rem;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .file-size{font-size:0.75rem;color:var(--text-muted);}
+    .remove-file{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;padding:4px;}
+    .remove-file:hover{color:var(--danger);}
+
+    /* EXTRACT BTN */
+    .extract-btn{width:100%;padding:14px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;}
+    .extract-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 30px rgba(59,130,246,0.3);}
+    .extract-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+    /* PROGRESS */
+    .ai-progress{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;}
+    .ai-progress.active{display:block;animation:fadeUp 0.3s ease both;}
+    .progress-steps{display:flex;flex-direction:column;gap:10px;}
+    .step{display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--text-muted);}
+    .step.done{color:var(--success);}
+    .step.active{color:var(--text);font-weight:600;}
+    .step-icon{width:28px;height:28px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;}
+    .step.done .step-icon{background:rgba(34,197,94,0.15);color:var(--success);}
+    .step.active .step-icon{background:var(--primary-glow);animation:pulse 1s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+    .step-spinner{width:14px;height:14px;border:2px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;}
+
+    /* PREVIEW */
+    .preview-section{display:none;animation:fadeUp 0.3s ease both;}
+    .preview-section.active{display:block;}
+    .preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+    .preview-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;}
+    .preview-count{font-size:0.78rem;color:var(--text-muted);}
+    .preview-tabs{display:flex;gap:8px;margin-bottom:16px;}
+    .prev-tab{padding:7px 16px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+    .prev-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+    /* PREVIEW CARDS */
+    .preview-list{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto;margin-bottom:16px;padding-right:4px;}
+    .preview-list::-webkit-scrollbar{width:4px;}
+    .preview-list::-webkit-scrollbar-track{background:var(--surface2);}
+    .preview-list::-webkit-scrollbar-thumb{background:var(--primary);border-radius:100px;}
+
+    .preview-card{background:var(--surface);border:1.5px solid var(--border);border-radius:13px;padding:14px 16px;}
+    .preview-card-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .preview-emoji{font-size:1.2rem;}
+    .preview-card-title{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:800;}
+    .preview-points{padding-left:16px;}
+    .preview-points li{font-size:0.8rem;color:var(--text-muted);line-height:1.65;margin-bottom:2px;}
+    .preview-example{font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--primary);}
+    .preview-q-num{font-family:'Syne',sans-serif;font-size:0.75rem;font-weight:800;color:var(--primary);margin-bottom:4px;}
+    .preview-q-text{font-size:0.85rem;font-weight:600;margin-bottom:8px;line-height:1.5;}
+    .preview-opts{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
+    .preview-opt{font-size:0.78rem;color:var(--text-muted);padding:3px 0;}
+    .preview-opt.correct{color:var(--success);font-weight:700;}
+    .preview-exp{font-size:0.75rem;color:var(--text-muted);font-style:italic;padding-top:6px;border-top:1px solid var(--border);margin-top:4px;}
+
+    /* SAVE ALL BTN */
+    .save-all-wrap{display:flex;gap:10px;}
+    .save-all-btn{flex:1;padding:14px;background:var(--success);color:#fff;border:none;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .save-all-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,197,94,0.3);}
+    .save-all-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+    .discard-btn{padding:14px 20px;background:transparent;border:1.5px solid var(--border);color:var(--text-muted);border-radius:13px;font-weight:600;font-size:0.88rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+    .discard-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+    /* EXISTING LIST */
+    .existing-list{display:flex;flex-direction:column;gap:8px;}
+    .existing-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    .existing-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+    .existing-emoji{font-size:1.2rem;}
+    .existing-info{flex:1;min-width:0;}
+    .existing-title{font-family:'Syne',sans-serif;font-size:0.86rem;font-weight:800;margin-bottom:1px;}
+    .existing-meta{font-size:0.72rem;color:var(--text-muted);}
+    .del-btn{padding:6px 12px;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+    .del-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:0.85rem;font-weight:600;z-index:500;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.3);}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .toast.success{border-color:var(--success);color:var(--success);}
+    .toast.error{border-color:var(--danger);color:var(--danger);}
+    .toast.info{border-color:var(--primary);color:var(--primary);}
+
+    /* MODAL */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);animation:popIn 0.25s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);}}
+    .modal-icon{font-size:2.2rem;margin-bottom:12px;}
+    .modal h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-bottom:8px;}
+    .modal p{color:var(--text-muted);font-size:0.82rem;margin-bottom:18px;line-height:1.5;}
+    .modal-btns{display:flex;gap:8px;}
+    .modal-btn{flex:1;padding:11px;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+    .modal-btn.danger{background:var(--danger);color:#fff;border:none;}
+    .modal-btn.cancel-btn{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);}
+
+    .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);}
+    .empty-state .ei{font-size:2.2rem;margin-bottom:10px;}
+    .empty-state p{font-size:0.85rem;line-height:1.6;}
+    .spinner{width:28px;height:28px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;}
+    .loading-wrap{text-align:center;padding:32px;color:var(--text-muted);font-size:0.85rem;}
+
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+    @media(max-width:600px){
+      .sidebar{display:none;}
+      .main{padding:20px 16px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">Ace<span>Unilorin</span> PQ</div>
+    <div class="auth-sub">Admin Panel — Authorised Access Only</div>
+    <label class="auth-label">Email</label>
+    <input class="auth-input" type="email" id="adminEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    <label class="auth-label">Password</label>
+    <input class="auth-input" type="password" id="adminPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    <button class="auth-btn" onclick="adminLogin()">Sign In →</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <div class="top-bar">
+    <div class="logo">Ace<span>Unilorin</span> <span style="color:var(--text-muted);font-weight:500;font-size:0.9rem;">Admin</span></div>
+    <div class="top-right">
+      <span class="admin-badge">ADMIN</span>
+      <button class="icon-btn" onclick="toggleTheme()">☀️</button>
+      <button class="icon-btn" onclick="adminLogout()" title="Logout">🚪</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sidebar-label">Upload</div>
+      <div class="sidebar-item active" onclick="showSection('upload',this)"><span class="s-icon">📄</span>PDF Upload</div>
+      <div class="sidebar-label">Manage</div>
+      <div class="sidebar-item" onclick="showSection('manage-notes',this)"><span class="s-icon">📒</span>Notes</div>
+      <div class="sidebar-item" onclick="showSection('manage-questions',this)"><span class="s-icon">❓</span>Questions</div>
+      <div class="sidebar-label">Site</div>
+      <div class="sidebar-item" onclick="window.open('https://aide10.github.io/aceunilorin-pq','_blank')"><span class="s-icon">🌐</span>View Live</div>
+    </div>
+
+    <div class="main">
+
+      <!-- ══ PDF UPLOAD SECTION ══ -->
+      <div class="page-section active" id="section-upload">
+        <div class="section-header">
+          <div>
+            <div class="section-title">📄 PDF Upload</div>
+            <div class="section-sub">Upload a PDF — AI extracts notes and questions automatically</div>
+          </div>
+        </div>
+
+        <!-- Subject selector -->
+        <div class="subject-tabs">
+          <button class="sub-tab active" onclick="selectSubject('english',this)">📖 English</button>
+          <button class="sub-tab" onclick="selectSubject('math',this)">🔢 Mathematics</button>
+          <button class="sub-tab" onclick="selectSubject('currentaffairs',this)">🌍 Current Affairs</button>
+        </div>
+
+        <!-- Upload zone -->
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('pdfInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleDrop(event)">
+          <div class="upload-icon">📄</div>
+          <div class="upload-title">Drop your PDF here</div>
+          <div class="upload-sub">or click to browse · <strong>PDF only</strong> · max 20MB</div>
+        </div>
+        <input type="file" id="pdfInput" accept=".pdf" onchange="handleFileSelect(event)"/>
+
+        <div class="selected-file" id="selectedFile" style="display:none;">
+          <span class="file-icon">📄</span>
+          <span class="file-name" id="fileName">—</span>
+          <span class="file-size" id="fileSize">—</span>
+          <button class="remove-file" onclick="clearFile()">✕</button>
+        </div>
+
+        <button class="extract-btn" id="extractBtn" onclick="runExtraction()" disabled>
+          <span>🤖</span> Extract with AI
+        </button>
+
+        <!-- AI Progress -->
+        <div class="ai-progress" id="aiProgress">
+          <div class="progress-steps">
+            <div class="step" id="step1"><div class="step-icon">📄</div> Reading PDF...</div>
+            <div class="step" id="step2"><div class="step-icon">🧠</div> AI analysing content...</div>
+            <div class="step" id="step3"><div class="step-icon">📒</div> Extracting notes...</div>
+            <div class="step" id="step4"><div class="step-icon">❓</div> Extracting questions...</div>
+            <div class="step" id="step5"><div class="step-icon">✅</div> Done!</div>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-section" id="previewSection">
+          <div class="preview-header">
+            <div class="preview-title">📋 Preview Extracted Content</div>
+            <div class="preview-count" id="previewCount">—</div>
+          </div>
+
+          <div class="preview-tabs">
+            <button class="prev-tab active" onclick="switchPreviewTab('notes',this)">📒 Notes</button>
+            <button class="prev-tab" onclick="switchPreviewTab('questions',this)">❓ Questions</button>
+          </div>
+
+          <div id="prevNotes" class="preview-list"></div>
+          <div id="prevQuestions" class="preview-list" style="display:none;"></div>
+
+          <div class="save-all-wrap">
+            <button class="discard-btn" onclick="discardExtraction()">✕ Discard</button>
+            <button class="save-all-btn" id="saveAllBtn" onclick="saveAllToFirestore()">
+              💾 Save All to Firestore
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MANAGE NOTES ══ -->
+      <div class="page-section" id="section-manage-notes">
+        <div class="section-header">
+          <div>
+            <div class="section-title">📒 Manage Notes</div>
+            <div class="section-sub">View and delete existing notes</div>
+          </div>
+        </div>
+        <div class="subject-tabs">
+          <button class="sub-tab active" onclick="selectManageSubject('notes','english',this)">📖 English</button>
+          <button class="sub-tab" onclick="selectManageSubject('notes','math',this)">🔢 Mathematics</button>
+          <button class="sub-tab" onclick="selectManageSubject('notes','currentaffairs',this)">🌍 Current Affairs</button>
+        </div>
+        <div id="manageNotesList"><div class="loading-wrap"><div class="spinner"></div>Loading...</div></div>
+      </div>
+
+      <!-- ══ MANAGE QUESTIONS ══ -->
+      <div class="page-section" id="section-manage-questions">
+        <div class="section-header">
+          <div>
+            <div class="section-title">❓ Manage Questions</div>
+            <div class="section-sub">View and delete existing quiz questions</div>
+          </div>
+        </div>
+        <div class="subject-tabs">
+          <button class="sub-tab active" onclick="selectManageSubject('questions','english',this)">📖 English</button>
+          <button class="sub-tab" onclick="selectManageSubject('questions','math',this)">🔢 Mathematics</button>
+          <button class="sub-tab" onclick="selectManageSubject('questions','currentaffairs',this)">🌍 Current Affairs</button>
+        </div>
+        <div id="manageQuestionsList"><div class="loading-wrap"><div class="spinner"></div>Loading...</div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <h3>Delete this?</h3>
+    <p id="deleteModalDesc">This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="modal-btn cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(), db=firebase.firestore();
+
+// Theme
+function toggleTheme(){
+  const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',d?'light':'dark');
+  document.querySelector('.icon-btn[onclick="toggleTheme()"]').textContent=d?'🌙':'☀️';
+  localStorage.setItem('theme',d?'light':'dark');
+}
+const saved=localStorage.getItem('theme')||'dark';
+document.documentElement.setAttribute('data-theme',saved);
+document.querySelector('.icon-btn[onclick="toggleTheme()"]').textContent=saved==='dark'?'☀️':'🌙';
+
+// Auth
+async function adminLogin(){
+  const email=document.getElementById('adminEmail').value.trim();
+  const pass=document.getElementById('adminPassword').value;
+  const err=document.getElementById('authError');
+  err.textContent='Signing in...';
+  try{
+    await auth.signInWithEmailAndPassword(email,pass);
+    err.textContent='';
+  }catch(e){ err.textContent=e.message.replace('Firebase:','').trim(); }
+}
+
+auth.onAuthStateChanged(u=>{
+  if(u){
+    document.getElementById('authGate').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    loadManageNotes('english');
+    loadManageQuestions('english');
+  } else {
+    document.getElementById('authGate').style.display='flex';
+    document.getElementById('adminPanel').style.display='none';
+  }
+});
+
+async function adminLogout(){ await auth.signOut(); }
+
+// Sections
+function showSection(name,el){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ══════════════════════════════
+// PDF UPLOAD & AI EXTRACTION
+// ══════════════════════════════
+let currentSubject='english';
+let selectedPdfFile=null;
+let extractedData={notes:[],questions:[]};
+
+function selectSubject(subject,btn){
+  currentSubject=subject;
+  document.querySelectorAll('#section-upload .sub-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type==='application/pdf') setFile(file);
+  else showToast('Please drop a PDF file','error');
+}
+
+function handleFileSelect(e){
+  const file=e.target.files[0];
+  if(file) setFile(file);
+}
+
+function setFile(file){
+  if(file.size>20*1024*1024){showToast('File too large. Max 20MB','error');return;}
+  selectedPdfFile=file;
+  document.getElementById('fileName').textContent=file.name;
+  document.getElementById('fileSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
+  document.getElementById('selectedFile').style.display='flex';
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('extractBtn').disabled=false;
+}
+
+function clearFile(){
+  selectedPdfFile=null;
+  document.getElementById('pdfInput').value='';
+  document.getElementById('selectedFile').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('extractBtn').disabled=true;
+  document.getElementById('aiProgress').classList.remove('active');
+  document.getElementById('previewSection').classList.remove('active');
+}
+
+function setStep(n,status){
+  for(let i=1;i<=5;i++){
+    const s=document.getElementById('step'+i);
+    s.className='step';
+    if(i<n) s.classList.add('done'), s.querySelector('.step-icon').textContent='✅';
+    else if(i===n){
+      s.classList.add('active');
+      if(status==='loading') s.querySelector('.step-icon').innerHTML='<div class="step-spinner"></div>';
+      else if(status==='done') s.querySelector('.step-icon').textContent='✅', s.classList.remove('active'), s.classList.add('done');
+    }
+  }
+}
+
+async function runExtraction(){
+  if(!selectedPdfFile) return;
+  const btn=document.getElementById('extractBtn');
+  btn.disabled=true;
+  document.getElementById('aiProgress').classList.add('active');
+  document.getElementById('previewSection').classList.remove('active');
+
+  try{
+    // Step 1: Read PDF as base64
+    setStep(1,'loading');
+    const base64=await fileToBase64(selectedPdfFile);
+    setStep(1,'done');
+
+    // Step 2 & 3 & 4: Send to Claude API
+    setStep(2,'loading');
+
+    const subjectLabel = currentSubject==='english'?'Use of English':currentSubject==='math'?'Mathematics':'Current Affairs';
+
+    const prompt=`You are extracting educational content from a PDF for a Nigerian university post-UTME study app (subject: ${subjectLabel}).
+
+Extract ALL of the following from the document:
+
+1. STUDY NOTES: Identify distinct topics/chapters. For each topic extract:
+   - A short title
+   - A relevant emoji
+   - An order number (1, 2, 3...)
+   - 4-8 concise bullet points summarising key facts
+   - An optional example, tip or mnemonic (if present)
+
+2. QUIZ QUESTIONS: Extract ALL multiple choice questions. For each question:
+   - Question number
+   - Full question text
+   - Options A, B, C, D (and E if present)
+   - The correct answer letter
+   - A brief explanation of why it is correct (infer if not stated)
+
+Respond ONLY with a valid JSON object. No markdown, no explanation, no backticks. Exact format:
+{
+  "notes": [
+    {
+      "emoji": "📌",
+      "title": "Topic Title",
+      "order": 1,
+      "content": ["point 1", "point 2", "point 3"],
+      "example": "optional tip or example"
+    }
+  ],
+  "questions": [
+    {
+      "number": 1,
+      "question": "Full question text?",
+      "optionA": "Option A text",
+      "optionB": "Option B text",
+      "optionC": "Option C text",
+      "optionD": "Option D text",
+      "optionE": null,
+      "answer": "A",
+      "explanation": "Brief explanation"
+    }
+  ]
+}`;
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:8000,
+        messages:[{
+          role:"user",
+          content:[
+            {type:"document",source:{type:"base64",media_type:"application/pdf",data:base64}},
+            {type:"text",text:prompt}
+          ]
+        }]
+      })
+    });
+
+    setStep(2,'done');
+    setStep(3,'loading');
+
+    if(!response.ok){
+      const err=await response.json();
+      throw new Error(err.error?.message||'API error '+response.status);
+    }
+
+    const data=await response.json();
+    const raw=data.content.map(c=>c.text||'').join('').trim();
+    const clean=raw.replace(/```json|```/g,'').trim();
+
+    setStep(3,'done');
+    setStep(4,'loading');
+
+    let parsed;
+    try{ parsed=JSON.parse(clean); }
+    catch(e){ throw new Error('AI returned invalid JSON. Try again.'); }
+
+    extractedData={
+      notes: parsed.notes||[],
+      questions: parsed.questions||[]
+    };
+
+    setStep(4,'done');
+    setStep(5,'done');
+
+    // Show preview
+    renderPreview();
+    document.getElementById('previewSection').classList.add('active');
+
+    showToast(`Found ${extractedData.notes.length} topics & ${extractedData.questions.length} questions 🎉`,'success');
+
+  }catch(e){
+    showToast('Error: '+e.message,'error');
+    console.error(e);
+  }
+
+  btn.disabled=false;
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=()=>rej(new Error('Failed to read file'));
+    r.readAsDataURL(file);
+  });
+}
+
+// ── PREVIEW ──
+let previewTab='notes';
+
+function switchPreviewTab(tab,btn){
+  previewTab=tab;
+  document.querySelectorAll('.prev-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('prevNotes').style.display=tab==='notes'?'flex':'none';
+  document.getElementById('prevQuestions').style.display=tab==='questions'?'flex':'none';
+}
+
+function renderPreview(){
+  document.getElementById('previewCount').textContent=
+    `${extractedData.notes.length} topics · ${extractedData.questions.length} questions`;
+
+  // Notes preview
+  const notesEl=document.getElementById('prevNotes');
+  if(extractedData.notes.length===0){
+    notesEl.innerHTML='<div class="empty-state"><div class="ei">📭</div><p>No notes found in this PDF.</p></div>';
+  } else {
+    notesEl.innerHTML=extractedData.notes.map(n=>`
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <span class="preview-emoji">${n.emoji||'📌'}</span>
+          <span class="preview-card-title">${n.title}</span>
+        </div>
+        <ul class="preview-points">${(n.content||[]).map(p=>`<li>${p}</li>`).join('')}</ul>
+        ${n.example?`<div class="preview-example">💡 ${n.example}</div>`:''}
+      </div>`).join('');
+  }
+
+  // Questions preview
+  const qEl=document.getElementById('prevQuestions');
+  const letters=['A','B','C','D','E'];
+  if(extractedData.questions.length===0){
+    qEl.innerHTML='<div class="empty-state"><div class="ei">❓</div><p>No questions found in this PDF.</p></div>';
+  } else {
+    qEl.innerHTML=extractedData.questions.map((q,i)=>{
+      const opts=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE];
+      const optsHTML=opts.map((o,i)=>o?`<div class="preview-opt${letters[i]===q.answer?' correct':''}">${letters[i]}. ${o}${letters[i]===q.answer?' ✓':''}</div>`:'').join('');
+      return`<div class="preview-card">
+        <div class="preview-q-num">Q${q.number||i+1}</div>
+        <div class="preview-q-text">${q.question}</div>
+        <div class="preview-opts">${optsHTML}</div>
+        ${q.explanation?`<div class="preview-exp">💡 ${q.explanation}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+}
+
+function discardExtraction(){
+  extractedData={notes:[],questions:[]};
+  document.getElementById('previewSection').classList.remove('active');
+  document.getElementById('aiProgress').classList.remove('active');
+  clearFile();
+}
+
+// ── SAVE ALL ──
+async function saveAllToFirestore(){
+  const btn=document.getElementById('saveAllBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span>⏳</span> Saving...';
+  let saved=0, failed=0;
+
+  try{
+    // Save notes
+    const notesCol=db.collection('studynotes').doc(currentSubject).collection('topics');
+    for(const note of extractedData.notes){
+      try{
+        await notesCol.add({
+          ...note,
+          createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        saved++;
+      }catch(e){ failed++; console.error('Note save error:',e); }
+    }
+
+    // Save questions
+    const qCol=db.collection('studyquestions').doc(currentSubject).collection('questions');
+    for(const q of extractedData.questions){
+      try{
+        await qCol.add({
+          ...q,
+          createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        });
+        saved++;
+      }catch(e){ failed++; console.error('Question save error:',e); }
+    }
+
+    showToast(`✅ Saved ${saved} items${failed>0?' ('+failed+' failed)':''}!`,'success');
+    discardExtraction();
+    // Refresh manage lists
+    loadManageNotes(currentSubject);
+    loadManageQuestions(currentSubject);
+
+  }catch(e){
+    showToast('Save failed: '+e.message,'error');
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='💾 Save All to Firestore';
+}
+
+// ══════════════════════════════
+// MANAGE NOTES
+// ══════════════════════════════
+let manageNotesSubject='english', manageQSubject='english';
+
+function selectManageSubject(type,subject,btn){
+  const section=type==='notes'?'section-manage-notes':'section-manage-questions';
+  document.querySelectorAll('#'+section+' .sub-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(type==='notes'){manageNotesSubject=subject;loadManageNotes(subject);}
+  else{manageQSubject=subject;loadManageQuestions(subject);}
+}
+
+async function loadManageNotes(subject){
+  manageNotesSubject=subject;
+  const el=document.getElementById('manageNotesList');
+  el.innerHTML='<div class="loading-wrap"><div class="spinner"></div>Loading...</div>';
+  try{
+    const snap=await db.collection('studynotes').doc(subject).collection('topics').orderBy('order').get();
+    if(snap.empty){el.innerHTML='<div class="empty-state"><div class="ei">📭</div><p>No notes yet for this subject.<br>Upload a PDF to add notes.</p></div>';return;}
+    el.innerHTML='<div class="existing-list">'+snap.docs.map(doc=>{
+      const t=doc.data();
+      return`<div class="existing-item">
+        <div class="existing-left">
+          <span class="existing-emoji">${t.emoji||'📌'}</span>
+          <div class="existing-info">
+            <div class="existing-title">${t.title}</div>
+            <div class="existing-meta">${(t.content||[]).length} points · Order ${t.order||'—'}</div>
+          </div>
+        </div>
+        <button class="del-btn" onclick="promptDelete('note','${doc.id}','${t.title.replace(/'/g,"\\'")}')">Delete</button>
+      </div>`;
+    }).join('')+'</div>';
+  }catch(e){el.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+}
+
+async function loadManageQuestions(subject){
+  manageQSubject=subject;
+  const el=document.getElementById('manageQuestionsList');
+  el.innerHTML='<div class="loading-wrap"><div class="spinner"></div>Loading...</div>';
+  try{
+    const snap=await db.collection('studyquestions').doc(subject).collection('questions').orderBy('number').get();
+    if(snap.empty){el.innerHTML='<div class="empty-state"><div class="ei">❓</div><p>No questions yet.<br>Upload a PDF to add questions.</p></div>';return;}
+    el.innerHTML='<div class="existing-list">'+snap.docs.map(doc=>{
+      const q=doc.data();
+      const qtext=(q.question||q.text||'').substring(0,70);
+      return`<div class="existing-item">
+        <div class="existing-left">
+          <span class="existing-emoji" style="font-size:0.8rem;background:var(--surface2);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;flex-shrink:0;">${q.number||'?'}</span>
+          <div class="existing-info">
+            <div class="existing-title" style="font-size:0.82rem;">${qtext}${qtext.length>=70?'…':''}</div>
+            <div class="existing-meta">Answer: <strong style="color:var(--success);">${q.answer||q.correctAnswer||'?'}</strong></div>
+          </div>
+        </div>
+        <button class="del-btn" onclick="promptDelete('question','${doc.id}','Q${q.number}')">Delete</button>
+      </div>`;
+    }).join('')+'</div>';
+  }catch(e){el.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+}
+
+// ── DELETE ──
+let deleteTarget={type:null,id:null};
+function promptDelete(type,id,label){
+  deleteTarget={type,id};
+  document.getElementById('deleteModalDesc').textContent=`Delete "${label}"? This cannot be undone.`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeModal(){document.getElementById('deleteModal').classList.remove('open');}
+async function confirmDelete(){
+  closeModal();
+  const{type,id}=deleteTarget;
+  try{
+    if(type==='note'){
+      await db.collection('studynotes').doc(manageNotesSubject).collection('topics').doc(id).delete();
+      showToast('Topic deleted','success');
+      loadManageNotes(manageNotesSubject);
+    } else {
+      await db.collection('studyquestions').doc(manageQSubject).collection('questions').doc(id).delete();
+      showToast('Question deleted','success');
+      loadManageQuestions(manageQSubject);
+    }
+  }catch(e){showToast('Delete failed: '+e.message,'error');}
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>
