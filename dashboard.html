@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"] {
+      --bg: #0F172A;
+      --surface: #1E293B;
+      --surface2: #253147;
+      --primary: #3B82F6;
+      --primary-glow: rgba(59,130,246,0.18);
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --border: rgba(255,255,255,0.07);
+      --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+    :root[data-theme="light"] {
+      --bg: #F0F4FF;
+      --surface: #FFFFFF;
+      --surface2: #E8EFFF;
+      --primary: #2563EB;
+      --primary-glow: rgba(37,99,235,0.12);
+      --text: #1E293B;
+      --text-muted: #64748B;
+      --border: rgba(0,0,0,0.07);
+      --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+      padding-bottom: 80px;
+    }
+
+    .blob {
+      position: fixed; border-radius: 50%;
+      filter: blur(80px); opacity: 0.1;
+      pointer-events: none; z-index: 0;
+    }
+    .blob-1 { width: 400px; height: 400px; background: #3B82F6; top: -100px; right: -80px; }
+    .blob-2 { width: 300px; height: 300px; background: #6366F1; bottom: 60px; left: -60px; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      background: rgba(15,23,42,0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    [data-theme="light"] nav { background: rgba(240,244,255,0.85); }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 800;
+      color: var(--primary); letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text); }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+
+    .theme-toggle {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); width: 36px; height: 36px;
+      border-radius: 50%; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    .theme-toggle:hover { transform: scale(1.1); }
+
+    .logout-btn {
+      background: transparent; border: 1.5px solid var(--border);
+      color: var(--text-muted); padding: 7px 14px;
+      border-radius: 10px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    .logout-btn:hover { border-color: #EF4444; color: #EF4444; }
+
+    /* CONTENT */
+    .content {
+      max-width: 600px; margin: 0 auto;
+      padding: 28px 20px; position: relative; z-index: 1;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+
+    /* WELCOME */
+    .welcome-card {
+      background: linear-gradient(135deg, #1E3A8A, #1E40AF, #2563EB);
+      border-radius: 22px; padding: 28px 24px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(37,99,235,0.3);
+      animation: fadeUp 0.5s ease both;
+    }
+    .welcome-card::before {
+      content: ''; position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .welcome-card::after {
+      content: ''; position: absolute;
+      bottom: -60px; right: 40px;
+      width: 140px; height: 140px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+    .welcome-greeting {
+      font-size: 0.82rem; color: rgba(255,255,255,0.7);
+      font-weight: 500; margin-bottom: 4px;
+    }
+    .welcome-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem; font-weight: 800;
+      color: #fff; margin-bottom: 12px;
+    }
+    .welcome-sub {
+      font-size: 0.85rem; color: rgba(255,255,255,0.75);
+      line-height: 1.5;
+    }
+    .premium-tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.15);
+      color: #fff; font-size: 0.72rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 100px;
+      margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 16px 12px;
+      text-align: center; box-shadow: var(--card-shadow);
+      transition: transform 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      color: var(--primary);
+    }
+    .stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 800;
+      margin-bottom: 14px; letter-spacing: -0.3px;
+    }
+
+    /* QUICK ACCESS CARDS */
+    .quick-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .quick-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 22px 18px;
+      text-decoration: none; color: var(--text);
+      transition: all 0.2s; box-shadow: var(--card-shadow);
+      position: relative; overflow: hidden;
+    }
+    .quick-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-accent, var(--primary));
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .quick-card:hover { transform: translateY(-4px); border-color: var(--card-accent, var(--primary)); }
+    .quick-card:hover::before { opacity: 1; }
+
+    .quick-card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 12px;
+      background: var(--icon-bg, var(--primary-glow));
+    }
+    .quick-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .quick-card p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.4; }
+
+    .quick-card.pq { --card-accent: #3B82F6; --icon-bg: rgba(59,130,246,0.15); }
+    .quick-card.mock { --card-accent: #8B5CF6; --icon-bg: rgba(139,92,246,0.15); }
+    .quick-card.study { --card-accent: #22C55E; --icon-bg: rgba(34,197,94,0.15); }
+    .quick-card.leaderboard { --card-accent: #F59E0B; --icon-bg: rgba(245,158,11,0.15); }
+
+    /* LAST SCORE */
+    .last-score-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 20px;
+      box-shadow: var(--card-shadow);
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .last-score-inner {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .last-score-left { display: flex; align-items: center; gap: 14px; }
+    .score-ring-sm {
+      width: 56px; height: 56px; flex-shrink: 0;
+    }
+    .score-info h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 700; margin-bottom: 2px;
+    }
+    .score-info p { font-size: 0.78rem; color: var(--text-muted); }
+    .view-link {
+      font-size: 0.8rem; color: var(--primary);
+      text-decoration: none; font-weight: 600;
+    }
+    .view-link:hover { text-decoration: underline; }
+    .no-score {
+      text-align: center; padding: 12px 0;
+      color: var(--text-muted); font-size: 0.88rem;
+    }
+
+    /* UPGRADE BANNER */
+    .upgrade-banner {
+      background: linear-gradient(135deg, #F59E0B20, #EF444420);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 18px; padding: 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      animation: fadeUp 0.5s 0.4s ease both;
+    }
+    .upgrade-banner.hidden { display: none; }
+    .upgrade-left { display: flex; align-items: center; gap: 12px; }
+    .upgrade-icon { font-size: 1.8rem; }
+    .upgrade-text h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.92rem; font-weight: 800; margin-bottom: 2px;
+    }
+    .upgrade-text p { font-size: 0.76rem; color: var(--text-muted); }
+    .btn-upgrade {
+      background: linear-gradient(135deg, #F59E0B, #EF4444);
+      color: #fff; border: none; padding: 10px 18px;
+      border-radius: 10px; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      white-space: nowrap; transition: transform 0.2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-upgrade:hover { transform: scale(1.05); }
+
+    /* LEADERBOARD PREVIEW */
+    .leaderboard-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px; overflow: hidden;
+      box-shadow: var(--card-shadow);
+      animation: fadeUp 0.5s 0.5s ease both;
+    }
+    .lb-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .lb-header h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 800;
+    }
+    .lb-header a {
+      font-size: 0.78rem; color: var(--primary);
+      text-decoration: none; font-weight: 600;
+    }
+    .lb-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .lb-row:last-child { border-bottom: none; }
+    .lb-row:hover { background: var(--surface2); }
+    .lb-rank {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 800;
+      width: 24px; text-align: center;
+      color: var(--text-muted);
+    }
+    .lb-rank.gold { color: #F59E0B; }
+    .lb-rank.silver { color: #94A3B8; }
+    .lb-rank.bronze { color: #CD7C2F; }
+    .lb-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--primary-glow);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700;
+      color: var(--primary); flex-shrink: 0;
+    }
+    .lb-info { flex: 1; }
+    .lb-username { font-size: 0.88rem; font-weight: 600; }
+    .lb-meta { font-size: 0.72rem; color: var(--text-muted); }
+    .lb-score {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem; font-weight: 800;
+      color: var(--primary);
+    }
+    .lb-empty {
+      padding: 24px; text-align: center;
+      color: var(--text-muted); font-size: 0.88rem;
+    }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px 0 14px;
+      backdrop-filter: blur(16px);
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      text-decoration: none; color: var(--text-muted);
+      font-size: 0.65rem; font-weight: 600;
+      transition: color 0.2s; cursor: pointer;
+      background: none; border: none; font-family: 'DM Sans', sans-serif;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item:hover { color: var(--primary); }
+    .nav-icon { font-size: 1.3rem; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Ace<span>Unilorin</span> PQ</a>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- WELCOME -->
+    <div class="welcome-card">
+      <div class="welcome-greeting" id="greeting">Good morning,</div>
+      <div class="welcome-name" id="userName">Loading...</div>
+      <div class="welcome-sub">Ready to study today? Keep pushing — your admission is closer than you think. 💪</div>
+      <div class="premium-tag" id="userBadge">🆓 Free Plan</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="statMocks">0</div>
+        <div class="stat-label">Mocks Taken</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statBest">—</div>
+        <div class="stat-label">Best Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statRank">—</div>
+        <div class="stat-label">Your Rank</div>
+      </div>
+    </div>
+
+    <!-- QUICK ACCESS -->
+    <div>
+      <div class="section-title">Quick Access</div>
+      <div class="quick-grid">
+        <a href="pastquestions.html" class="quick-card pq">
+          <div class="quick-card-icon">📝</div>
+          <h3>Past Questions</h3>
+          <p>Practice by year</p>
+        </a>
+        <a href="mock.html" class="quick-card mock">
+          <div class="quick-card-icon">⏱️</div>
+          <h3>Mock Exam</h3>
+          <p>50 questions, 25 mins</p>
+        </a>
+        <a href="study.html" class="quick-card study">
+          <div class="quick-card-icon">📖</div>
+          <h3>Study Notes</h3>
+          <p>English, Math, C/Affairs</p>
+        </a>
+        <a href="leaderboard.html" class="quick-card leaderboard">
+          <div class="quick-card-icon">🏆</div>
+          <h3>Leaderboard</h3>
+          <p>See top scorers</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- LAST SCORE -->
+    <div class="last-score-card">
+      <div class="section-title">Last Mock Score</div>
+      <div id="lastScoreContent">
+        <div class="no-score">You haven't taken a mock yet. <a href="mock.html" style="color:var(--primary);font-weight:600;">Start now →</a></div>
+      </div>
+    </div>
+
+    <!-- UPGRADE BANNER -->
+    <div class="upgrade-banner" id="upgradeBanner">
+      <div class="upgrade-left">
+        <div class="upgrade-icon">🔓</div>
+        <div class="upgrade-text">
+          <h4>Unlock 2021–2025 PQs</h4>
+          <p>One-time payment. Access forever.</p>
+        </div>
+      </div>
+      <a href="upgrade.html" class="btn-upgrade">Upgrade</a>
+    </div>
+
+    <!-- LEADERBOARD PREVIEW -->
+    <div class="leaderboard-card">
+      <div class="lb-header">
+        <h3>🏆 Top Scorers</h3>
+        <a href="leaderboard.html">View All →</a>
+      </div>
+      <div id="leaderboardList">
+        <div class="lb-empty">No scores yet. Be the first! 🚀</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">
+      <span class="nav-icon">🏠</span>Home
+    </a>
+    <a href="pastquestions.html" class="nav-item">
+      <span class="nav-icon">📝</span>PQs
+    </a>
+    <a href="mock.html" class="nav-item">
+      <span class="nav-icon">⏱️</span>Mock
+    </a>
+    <a href="study.html" class="nav-item">
+      <span class="nav-icon">📖</span>Study
+    </a>
+    <a href="leaderboard.html" class="nav-item">
+      <span class="nav-icon">🏆</span>Ranks
+    </a>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+      authDomain: "aceunilorin-pq.firebaseapp.com",
+      projectId: "aceunilorin-pq",
+      storageBucket: "aceunilorin-pq.firebasestorage.app",
+      messagingSenderId: "152163357125",
+      appId: "1:152163357125:web:23dc8652f9789197623bac",
+      measurementId: "G-PQ1H0EWQ2L"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Theme
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+
+    // Greeting
+    function getGreeting() {
+      const h = new Date().getHours();
+      if (h < 12) return 'Good morning,';
+      if (h < 17) return 'Good afternoon,';
+      return 'Good evening,';
+    }
+    document.getElementById('greeting').textContent = getGreeting();
+
+    // Auth check
+    auth.onAuthStateChanged(async user => {
+      if (!user) { window.location.href = 'auth.html'; return; }
+
+      // Load user data
+      try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        const data = doc.data();
+        const firstName = data.fullName ? data.fullName.split(' ')[0] : user.displayName || 'Student';
+
+        document.getElementById('userName').textContent = firstName + '!';
+
+        // Premium badge
+        if (data.isPremium) {
+          document.getElementById('userBadge').textContent = '⭐ Premium';
+          document.getElementById('userBadge').style.background = 'rgba(245,158,11,0.25)';
+          document.getElementById('upgradeBanner').classList.add('hidden');
+        }
+
+        // Stats
+        const statsDoc = await db.collection('userStats').doc(user.uid).get();
+        if (statsDoc.exists) {
+          const stats = statsDoc.data();
+          document.getElementById('statMocks').textContent = stats.mocksTaken || 0;
+          document.getElementById('statBest').textContent = stats.bestScore ? stats.bestScore + '%' : '—';
+        }
+
+        // Last score
+        const lastResult = JSON.parse(localStorage.getItem('mockResult'));
+        if (lastResult) {
+          const pct = Math.round((lastResult.correct * 2));
+          let color = '#EF4444';
+          if (pct === 100) color = '#A855F7';
+          else if (pct >= 90) color = '#22C55E';
+          else if (pct >= 80) color = '#3B82F6';
+          else if (pct >= 70) color = '#06B6D4';
+          else if (pct >= 60) color = '#F59E0B';
+          else if (pct >= 50) color = '#F97316';
+
+          document.getElementById('lastScoreContent').innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <svg class="score-ring-sm" viewBox="0 0 56 56">
+                  <circle cx="28" cy="28" r="22" fill="none" stroke="var(--surface2)" stroke-width="5"/>
+                  <circle cx="28" cy="28" r="22" fill="none" stroke="${color}" stroke-width="5"
+                    stroke-linecap="round"
+                    stroke-dasharray="${2 * Math.PI * 22}"
+                    stroke-dashoffset="${2 * Math.PI * 22 * (1 - pct / 100)}"
+                    transform="rotate(-90 28 28)"/>
+                  <text x="28" y="33" text-anchor="middle" font-size="11" font-weight="800"
+                    fill="${color}" font-family="Syne,sans-serif">${pct}%</text>
+                </svg>
+                <div>
+                  <div style="font-family:Syne,sans-serif;font-size:0.9rem;font-weight:700;">Mock Exam</div>
+                  <div style="font-size:0.76rem;color:var(--text-muted);">${lastResult.correct} correct · ${lastResult.wrong} wrong</div>
+                </div>
+              </div>
+              <a href="results.html" class="view-link">View →</a>
+            </div>
+          `;
+        }
+
+        // Leaderboard preview
+        loadLeaderboard();
+
+        // User rank
+        loadUserRank(user.uid);
+
+      } catch (err) {
+        document.getElementById('userName').textContent = 'Student!';
+      }
+    });
+
+    // Load leaderboard top 5
+    async function loadLeaderboard() {
+      try {
+        const snap = await db.collection('leaderboard')
+          .orderBy('bestScore', 'desc')
+          .limit(5).get();
+
+        if (snap.empty) return;
+
+        const medals = ['gold', 'silver', 'bronze', '', ''];
+        let html = '';
+        snap.docs.forEach((doc, i) => {
+          const d = doc.data();
+          const initial = d.username ? d.username[0].toUpperCase() : '?';
+          html += `
+            <div class="lb-row">
+              <div class="lb-rank ${medals[i]}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}</div>
+              <div class="lb-avatar">${initial}</div>
+              <div class="lb-info">
+                <div class="lb-username">@${d.username || 'unknown'}</div>
+                <div class="lb-meta">${d.mocksTaken || 0} mock${d.mocksTaken !== 1 ? 's' : ''}</div>
+              </div>
+              <div class="lb-score">${d.bestScore || 0}%</div>
+            </div>
+          `;
+        });
+        document.getElementById('leaderboardList').innerHTML = html;
+      } catch (e) {}
+    }
+
+    // Load user rank
+    async function loadUserRank(uid) {
+      try {
+        const snap = await db.collection('leaderboard')
+          .orderBy('bestScore', 'desc').get();
+        const idx = snap.docs.findIndex(d => d.id === uid);
+        if (idx !== -1) {
+          document.getElementById('statRank').textContent = '#' + (idx + 1);
+        }
+      } catch (e) {}
+    }
+
+    // Logout
+    async function handleLogout() {
+      await auth.signOut();
+      window.location.href = 'auth.html';
+    }
+  </script>
+</body>
+</html>
