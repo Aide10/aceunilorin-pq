@@ -365,22 +365,22 @@
   <div class="toast" id="toast"></div>
 
   <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
     // =====================
     // PASTE YOUR FIREBASE CONFIG HERE
     // =====================
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
+      apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
       authDomain: "aceunilorin-pq.firebaseapp.com",
       projectId: "aceunilorin-pq",
       storageBucket: "aceunilorin-pq.firebasestorage.app",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID",
-      measurementId: "YOUR_MEASUREMENT_ID"
+      messagingSenderId: "152163357125",
+      appId: "1:152163357125:web:23dc8652f9789197623bac",
+      measurementId: "G-PQ1H0EWQ2L"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -571,12 +571,13 @@
         setTimeout(() => window.location.href = 'dashboard.html', 1200);
       } catch (err) {
         setLoading('registerBtn', 'registerSpinner', 'registerBtnText', false);
+        console.error('Registration error:', err.code, err.message);
         if (err.code === 'auth/email-already-in-use') {
           showToast('This email is already registered. Try logging in.');
         } else if (err.code === 'auth/weak-password') {
           showToast('Password is too weak. Use at least 6 characters.');
         } else {
-          showToast('Registration failed. Check your connection.');
+          showToast('Error: ' + (err.message || err.code || 'Unknown error'));
         }
       }
     }
