@@ -197,6 +197,9 @@
       .main{padding:16px 14px;padding-bottom:90px;}
     }
   </style>
+  <!-- File extraction libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -268,7 +271,8 @@
         <div class="input-tabs" id="studyInputTabs">
           <button class="input-tab active" onclick="setStudyInput('pdf',this)">📄 PDF</button>
           <button class="input-tab" onclick="setStudyInput('image',this)">🖼️ Image</button>
-          <button class="input-tab" onclick="setStudyInput('text',this)">📋 Paste Text</button>
+          <button class="input-tab" onclick="setStudyInput('file',this)">📁 File</button>
+          <button class="input-tab" onclick="setStudyInput('text',this)">📋 Paste</button>
         </div>
 
         <!-- PDF input -->
@@ -308,6 +312,25 @@
             <span style="font-size:1.2rem;">🖼️</span>
             <span class="file-name" id="studyImgName">—</span>
             <span class="file-size" id="studyImgSize">—</span>
+            <button class="remove-file" onclick="clearStudyInput()">✕</button>
+          </div>
+        </div>
+
+        <!-- File input (docx, epub, txt, pptx) -->
+        <div id="study-file-input" style="display:none;">
+          <div class="upload-zone" id="studyFileZone" onclick="document.getElementById('studyDocFile').click()"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event,'studyDocFile','studyFileZone')">
+            <div class="upload-icon">📁</div>
+            <div class="upload-title">Drop file here or tap to browse</div>
+            <div class="upload-sub"><strong>DOCX, DOC, EPUB, TXT, PPTX</strong> · max 20MB</div>
+          </div>
+          <input type="file" id="studyDocFile" accept=".docx,.doc,.epub,.txt,.pptx,.ppt" style="display:none" onchange="onFileSelected(event,'study','doc')"/>
+          <div class="selected-file" id="studyDocSelected">
+            <span style="font-size:1.2rem;">📁</span>
+            <span class="file-name" id="studyDocName">—</span>
+            <span class="file-size" id="studyDocSize">—</span>
             <button class="remove-file" onclick="clearStudyInput()">✕</button>
           </div>
         </div>
@@ -364,7 +387,8 @@
         <div class="input-tabs">
           <button class="input-tab active" onclick="setPQInput('pdf',this)">📄 PDF</button>
           <button class="input-tab" onclick="setPQInput('image',this)">🖼️ Image</button>
-          <button class="input-tab" onclick="setPQInput('text',this)">📋 Paste Text</button>
+          <button class="input-tab" onclick="setPQInput('file',this)">📁 File</button>
+          <button class="input-tab" onclick="setPQInput('text',this)">📋 Paste</button>
         </div>
 
         <!-- PDF -->
@@ -402,6 +426,25 @@
             <span style="font-size:1.2rem;">🖼️</span>
             <span class="file-name" id="pqImgName">—</span>
             <span class="file-size" id="pqImgSize">—</span>
+            <button class="remove-file" onclick="clearPQInput()">✕</button>
+          </div>
+        </div>
+
+        <!-- File (docx, epub, txt, pptx) -->
+        <div id="pq-file-input" style="display:none;">
+          <div class="upload-zone" id="pqFileZone" onclick="document.getElementById('pqDocFile').click()"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event,'pqDocFile','pqFileZone')">
+            <div class="upload-icon">📁</div>
+            <div class="upload-title">Drop file here or tap to browse</div>
+            <div class="upload-sub"><strong>DOCX, DOC, EPUB, TXT, PPTX</strong> · max 20MB</div>
+          </div>
+          <input type="file" id="pqDocFile" accept=".docx,.doc,.epub,.txt,.pptx,.ppt" style="display:none" onchange="onFileSelected(event,'pq','doc')"/>
+          <div class="selected-file" id="pqDocSelected">
+            <span style="font-size:1.2rem;">📁</span>
+            <span class="file-name" id="pqDocName">—</span>
+            <span class="file-size" id="pqDocSize">—</span>
             <button class="remove-file" onclick="clearPQInput()">✕</button>
           </div>
         </div>
@@ -617,6 +660,7 @@ function setStudyInput(method,btn){
   btn.classList.add('active');
   document.getElementById('study-pdf-input').style.display=method==='pdf'?'block':'none';
   document.getElementById('study-image-input').style.display=method==='image'?'block':'none';
+  document.getElementById('study-file-input').style.display=method==='file'?'block':'none';
   document.getElementById('study-text-input').style.display=method==='text'?'block':'none';
   if(method==='text') document.getElementById('studyExtractBtn').disabled=false;
   else {studyFile=null; document.getElementById('studyExtractBtn').disabled=true;}
@@ -633,6 +677,7 @@ function setPQInput(method,btn){
   btn.classList.add('active');
   document.getElementById('pq-pdf-input').style.display=method==='pdf'?'block':'none';
   document.getElementById('pq-image-input').style.display=method==='image'?'block':'none';
+  document.getElementById('pq-file-input').style.display=method==='file'?'block':'none';
   document.getElementById('pq-text-input').style.display=method==='text'?'block':'none';
   if(method==='text') checkPQExtractReady();
   else {pqFile=null; document.getElementById('pqExtractBtn').disabled=true;}
@@ -641,7 +686,7 @@ function setPQInput(method,btn){
 }
 
 function checkPQExtractReady(){
-  const ready=selectedYear&&(pqInputMethod==='text'||pqFile);
+  const ready=selectedYear&&(pqInputMethod==='text'||pqFile!=null);
   document.getElementById('pqExtractBtn').disabled=!ready;
 }
 
@@ -656,14 +701,25 @@ function handleDrop(e,inputId,zoneId){
 function onFileSelected(e,section,type){
   const file=e.target.files[0];
   if(!file) return;
-  simulateFileSelect(file, section==='study'?(type==='pdf'?'studyPdfFile':'studyImgFile'):(type==='pdf'?'pqPdfFile':'pqImgFile'));
+  let inputId;
+  if(section==='study'){
+    if(type==='pdf') inputId='studyPdfFile';
+    else if(type==='image') inputId='studyImgFile';
+    else inputId='studyDocFile';
+  } else {
+    if(type==='pdf') inputId='pqPdfFile';
+    else if(type==='image') inputId='pqImgFile';
+    else inputId='pqDocFile';
+  }
+  simulateFileSelect(file, inputId);
 }
 
 function simulateFileSelect(file,inputId){
   const isStudy=inputId.startsWith('study');
   const isPdf=inputId.includes('Pdf')||file.type==='application/pdf';
-  const maxSize=isPdf?20:10;
-  if(file.size>maxSize*1024*1024){showToast(`File too large. Max ${maxSize}MB`,'error');return;}
+  const isImg=inputId.includes('Img')||file.type.startsWith('image/');
+  const isDoc=inputId.includes('Doc');
+  if(file.size>20*1024*1024){showToast('File too large. Max 20MB','error');return;}
 
   if(isStudy){
     studyFile=file;
@@ -672,7 +728,7 @@ function simulateFileSelect(file,inputId){
       document.getElementById('studyPdfSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
       document.getElementById('studyPdfSelected').classList.add('show');
       document.getElementById('studyPdfZone').style.display='none';
-    } else {
+    } else if(isImg){
       document.getElementById('studyImgName').textContent=file.name;
       document.getElementById('studyImgSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
       document.getElementById('studyImgSelected').classList.add('show');
@@ -680,6 +736,11 @@ function simulateFileSelect(file,inputId){
       const reader=new FileReader();
       reader.onload=e=>{document.getElementById('studyImgTag').src=e.target.result;document.getElementById('studyImgPreview').classList.add('show');}
       reader.readAsDataURL(file);
+    } else {
+      document.getElementById('studyDocName').textContent=file.name;
+      document.getElementById('studyDocSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
+      document.getElementById('studyDocSelected').classList.add('show');
+      document.getElementById('studyFileZone').style.display='none';
     }
     document.getElementById('studyExtractBtn').disabled=false;
   } else {
@@ -689,7 +750,7 @@ function simulateFileSelect(file,inputId){
       document.getElementById('pqPdfSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
       document.getElementById('pqPdfSelected').classList.add('show');
       document.getElementById('pqPdfZone').style.display='none';
-    } else {
+    } else if(isImg){
       document.getElementById('pqImgName').textContent=file.name;
       document.getElementById('pqImgSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
       document.getElementById('pqImgSelected').classList.add('show');
@@ -697,6 +758,11 @@ function simulateFileSelect(file,inputId){
       const reader=new FileReader();
       reader.onload=e=>{document.getElementById('pqImgTag').src=e.target.result;document.getElementById('pqImgPreview').classList.add('show');}
       reader.readAsDataURL(file);
+    } else {
+      document.getElementById('pqDocName').textContent=file.name;
+      document.getElementById('pqDocSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
+      document.getElementById('pqDocSelected').classList.add('show');
+      document.getElementById('pqFileZone').style.display='none';
     }
     checkPQExtractReady();
   }
@@ -704,9 +770,9 @@ function simulateFileSelect(file,inputId){
 
 function clearStudyInput(){
   studyFile=null;
-  ['studyPdfSelected','studyImgSelected','studyImgPreview'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.style.display='';}});
-  ['studyPdfZone','studyImgZone'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
-  ['studyPdfFile','studyImgFile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['studyPdfSelected','studyImgSelected','studyImgPreview','studyDocSelected'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.style.display='';}});
+  ['studyPdfZone','studyImgZone','studyFileZone'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+  ['studyPdfFile','studyImgFile','studyDocFile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('studyExtractBtn').disabled=true;
   document.getElementById('studyProgress').classList.remove('active');
   document.getElementById('studyPreview').classList.remove('active');
@@ -714,15 +780,86 @@ function clearStudyInput(){
 
 function clearPQInput(){
   pqFile=null;
-  ['pqPdfSelected','pqImgSelected','pqImgPreview'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.style.display='';}});
-  ['pqPdfZone','pqImgZone'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
-  ['pqPdfFile','pqImgFile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['pqPdfSelected','pqImgSelected','pqImgPreview','pqDocSelected'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.style.display='';}});
+  ['pqPdfZone','pqImgZone','pqFileZone'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+  ['pqPdfFile','pqImgFile','pqDocFile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   checkPQExtractReady();
   document.getElementById('pqProgress').classList.remove('active');
   document.getElementById('pqPreview').classList.remove('active');
 }
 
 // ── FILE TO BASE64 ──
+// ── EXTRACT TEXT FROM DOC/EPUB/TXT/PPTX ──
+async function extractTextFromFile(file){
+  const name=file.name.toLowerCase();
+  const ext=name.split('.').pop();
+
+  // TXT — just read directly
+  if(ext==='txt'){
+    return new Promise((res,rej)=>{
+      const r=new FileReader();
+      r.onload=e=>res(e.target.result);
+      r.onerror=()=>rej(new Error('Failed to read TXT'));
+      r.readAsText(file);
+    });
+  }
+
+  // DOCX/DOC — use mammoth
+  if(ext==='docx'||ext==='doc'){
+    const arrayBuffer=await file.arrayBuffer();
+    const result=await mammoth.extractRawText({arrayBuffer});
+    return result.value||'';
+  }
+
+  // PPTX/PPT — unzip and extract text from slides
+  if(ext==='pptx'||ext==='ppt'){
+    const zip=await JSZip.loadAsync(file);
+    let text='';
+    const slideFiles=Object.keys(zip.files).filter(f=>f.match(/ppt\/slides\/slide[0-9]+\.xml$/));
+    slideFiles.sort();
+    for(const sf of slideFiles){
+      const xml=await zip.files[sf].async('string');
+      // Extract text from <a:t> tags
+      const matches=xml.match(/<a:t[^>]*>([^<]+)<\/a:t>/g)||[];
+      const slideText=matches.map(m=>m.replace(/<[^>]+>/g,'')).join(' ');
+      text+=slideText+'
+
+';
+    }
+    return text.trim()||'(No readable text found in PPTX)';
+  }
+
+  // EPUB — unzip and extract from HTML/XHTML content files
+  if(ext==='epub'){
+    const zip=await JSZip.loadAsync(file);
+    let text='';
+    const contentFiles=Object.keys(zip.files).filter(f=>
+      (f.endsWith('.html')||f.endsWith('.xhtml')||f.endsWith('.htm'))
+      &&!f.includes('toc')&&!f.includes('nav')
+    );
+    contentFiles.sort();
+    for(const cf of contentFiles.slice(0,30)){ // limit to 30 chapters
+      const html=await zip.files[cf].async('string');
+      // Strip HTML tags
+      const plain=html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'')
+                      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
+                      .replace(/<[^>]+>/g,' ')
+                      .replace(/&nbsp;/g,' ')
+                      .replace(/&amp;/g,'&')
+                      .replace(/&lt;/g,'<')
+                      .replace(/&gt;/g,'>')
+                      .replace(/\s+/g,' ')
+                      .trim();
+      text+=plain+'
+
+';
+    }
+    return text.substring(0,50000)||'(No readable text found in EPUB)'; // cap at 50k chars
+  }
+
+  throw new Error('Unsupported file type: '+ext);
+}
+
 function fileToBase64(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
@@ -751,7 +888,10 @@ function setStep(prefix,n,status,total){
 async function callClaude(messages, maxTokens=8000){
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{
+      'Content-Type':'application/json',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages})
   });
   if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
@@ -780,8 +920,15 @@ async function runStudyExtraction(){
   try{
     setStep('sp',1,'loading',5);
     let base64='', text='';
-    if(studyInputMethod==='text') text=document.getElementById('studyTextArea').value;
-    else base64=await fileToBase64(studyFile);
+    if(studyInputMethod==='text'){
+      text=document.getElementById('studyTextArea').value;
+    } else if(studyInputMethod==='file'){
+      showToast('Extracting text from file...','info');
+      text=await extractTextFromFile(studyFile);
+      if(!text.trim()) throw new Error('Could not extract text from this file.');
+    } else {
+      base64=await fileToBase64(studyFile);
+    }
     setStep('sp',1,'done',5);
     setStep('sp',2,'loading',5);
 
@@ -903,8 +1050,15 @@ async function runPQExtraction(){
   try{
     setStep('pp',1,'loading',4);
     let base64='', text='';
-    if(pqInputMethod==='text') text=document.getElementById('pqTextArea').value;
-    else base64=await fileToBase64(pqFile);
+    if(pqInputMethod==='text'){
+      text=document.getElementById('pqTextArea').value;
+    } else if(pqInputMethod==='file'){
+      showToast('Extracting text from file...','info');
+      text=await extractTextFromFile(pqFile);
+      if(!text.trim()) throw new Error('Could not extract text from this file.');
+    } else {
+      base64=await fileToBase64(pqFile);
+    }
     setStep('pp',1,'done',4);
     setStep('pp',2,'loading',4);
 
