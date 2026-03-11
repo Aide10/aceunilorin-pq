@@ -560,12 +560,22 @@ async function adminLogin(){
   const email=document.getElementById('adminEmail').value.trim();
   const pass=document.getElementById('adminPassword').value;
   const err=document.getElementById('authError');
+  err.style.color='var(--text-muted)';
   err.textContent='Signing in...';
+  if(!email||!pass){err.style.color='var(--danger)';err.textContent='Please enter email and password.';return;}
   try{
     const cred=await auth.signInWithEmailAndPassword(email,pass);
-    if(cred.user.uid!==ADMIN_UID){await auth.signOut();err.textContent='Access denied.';return;}
+    if(cred.user.uid!==ADMIN_UID){
+      await auth.signOut();
+      err.style.color='var(--danger)';
+      err.textContent='Access denied. UID: '+cred.user.uid;
+      return;
+    }
     err.textContent='';
-  }catch(e){err.textContent=e.message.replace('Firebase:','').trim();}
+  }catch(e){
+    err.style.color='var(--danger)';
+    err.textContent=e.code+': '+e.message;
+  }
 }
 auth.onAuthStateChanged(u=>{
   if(u&&u.uid===ADMIN_UID){
