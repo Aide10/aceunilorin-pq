@@ -209,7 +209,7 @@
     <input class="auth-input" type="email" id="adminEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')adminLogin()"/>
     <label class="auth-label">Password</label>
     <input class="auth-input" type="password" id="adminPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/>
-    <button class="auth-btn" onclick="adminLogin()">Sign In →</button>
+    <button class="auth-btn" onclick="this.textContent='Working...';adminLogin().finally(()=>this.textContent='Sign In →')">Sign In →</button>
     <div class="auth-error" id="authError"></div>
   </div>
 </div>
@@ -546,6 +546,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
+// Debug banner
+window.onerror=function(msg,src,line,col,err){
+  document.body.innerHTML='<div style="padding:24px;color:red;font-family:monospace;font-size:14px;background:#000;min-height:100vh;"><h2>JS Error</h2><p>'+msg+'</p><p>Line: '+line+'</p><p>'+src+'</p></div>';
+  return true;
+};
+
 const firebaseConfig={apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"};
 firebase.initializeApp(firebaseConfig);
 const auth=firebase.auth(), db=firebase.firestore();
