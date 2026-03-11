@@ -1,514 +1,384 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel — AceUnilorin PQ</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root[data-theme="dark"]{--bg:#0A0F1E;--surface:#131C2E;--surface2:#1A2640;--surface3:#21304F;--primary:#3B82F6;--primary-glow:rgba(59,130,246,0.2);--text:#F1F5F9;--text-muted:#64748B;--border:rgba(255,255,255,0.06);--danger:#EF4444;--success:#22C55E;--warning:#F59E0B;}
-    :root[data-theme="light"]{--bg:#F1F5FB;--surface:#FFFFFF;--surface2:#E8EFF9;--surface3:#D8E4F4;--primary:#2563EB;--primary-glow:rgba(37,99,235,0.12);--text:#0F172A;--text-muted:#64748B;--border:rgba(0,0,0,0.07);--danger:#DC2626;--success:#16A34A;--warning:#D97706;}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background 0.3s,color 0.3s;}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — AceUnilorin PQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0A0F1E;--surface:#131C2E;--surface2:#1A2640;--surface3:#21304F;--primary:#3B82F6;--pg:rgba(59,130,246,0.15);--text:#F1F5F9;--muted:#64748B;--border:rgba(255,255,255,0.06);--danger:#EF4444;--success:#22C55E;--warn:#F59E0B;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-    /* AUTH */
-    #authGate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-    .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 32px;max-width:380px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.4);}
-    .auth-logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--primary);margin-bottom:4px;}
-    .auth-logo span{color:var(--text);}
-    .auth-sub{font-size:0.82rem;color:var(--text-muted);margin-bottom:28px;}
-    .auth-label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-align:left;margin-bottom:6px;}
-    .auth-input{width:100%;padding:12px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.92rem;margin-bottom:14px;outline:none;transition:border-color 0.2s;}
-    .auth-input:focus{border-color:var(--primary);}
-    .auth-btn{width:100%;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.2s;}
-    .auth-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
-    .auth-error{color:var(--danger);font-size:0.82rem;margin-top:10px;min-height:18px;}
+/* AUTH */
+#authWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:36px 28px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.logo{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--primary);text-align:center;margin-bottom:4px;}
+.logo span{color:var(--text);}
+.sub{text-align:center;font-size:0.8rem;color:var(--muted);margin-bottom:28px;}
+.flabel{display:block;font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+input.inp{width:100%;padding:13px 14px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;margin-bottom:14px;transition:border-color .2s;}
+input.inp:focus{border-color:var(--primary);}
+.btn-main{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:all .2s;}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;}
+.amsg{min-height:20px;font-size:.8rem;margin-top:10px;text-align:center;}
+.amsg.err{color:var(--danger);}
+.amsg.ok{color:var(--success);}
+.amsg.info{color:var(--muted);}
 
-    /* LAYOUT */
-    #adminPanel{display:none;}
-    .top-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-    .logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--primary);}
-    .logo span{color:var(--text);}
-    .top-right{display:flex;align-items:center;gap:8px;}
-    .admin-badge{background:rgba(59,130,246,0.15);color:var(--primary);font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:100px;border:1px solid rgba(59,130,246,0.25);}
-    .icon-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
-    .icon-btn:hover{background:var(--surface3);}
-    .layout{display:flex;min-height:calc(100vh - 53px);}
-    .sidebar{width:210px;background:var(--surface);border-right:1px solid var(--border);padding:18px 0;flex-shrink:0;}
-    .sidebar-label{font-size:0.63rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:0 16px;margin-bottom:8px;margin-top:14px;}
-    .sidebar-label:first-child{margin-top:0;}
-    .sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;transition:all 0.15s;font-size:0.86rem;font-weight:500;color:var(--text-muted);border-left:3px solid transparent;}
-    .sidebar-item:hover{background:var(--surface2);color:var(--text);}
-    .sidebar-item.active{background:var(--primary-glow);color:var(--primary);border-left-color:var(--primary);font-weight:600;}
-    .s-icon{font-size:1rem;width:20px;text-align:center;}
-    .main{flex:1;padding:28px 24px;overflow-y:auto;max-width:820px;}
-    .page-section{display:none;}
-    .page-section.active{display:block;animation:fadeUp 0.3s ease both;}
-    .section-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:4px;}
-    .section-sub{font-size:0.82rem;color:var(--text-muted);margin-bottom:24px;}
+/* PANEL */
+#panel{display:none;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.tlogo{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:var(--primary);}
+.tlogo span{color:var(--text);}
+.tright{display:flex;gap:8px;align-items:center;}
+.badge{background:var(--pg);color:var(--primary);font-size:.65rem;font-weight:800;padding:3px 10px;border-radius:100px;border:1px solid rgba(59,130,246,.25);}
+.ibtn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;}
 
-    /* DESTINATION TABS */
-    .dest-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-    .dest-tab{padding:8px 16px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
-    .dest-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 53px);}
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;}
+.slabel{font-size:.6rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 14px;margin:14px 0 6px;}
+.slabel:first-child{margin-top:0;}
+.sitem{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;font-size:.84rem;font-weight:500;color:var(--muted);border-left:3px solid transparent;transition:all .15s;background:none;border-right:none;border-top:none;border-bottom:none;width:100%;font-family:'DM Sans',sans-serif;text-align:left;}
+.sitem:hover{background:var(--surface2);color:var(--text);}
+.sitem.active{background:var(--pg);color:var(--primary);border-left-color:var(--primary);font-weight:600;}
+.main{flex:1;padding:26px 22px;overflow-y:auto;max-width:820px;}
 
-    /* SUBJECT / YEAR SELECTOR */
-    .selector-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-    .sel-btn{padding:7px 14px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
-    .sel-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-    .year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px;margin-bottom:20px;}
-    .year-btn{padding:9px 6px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;font-family:'Syne',sans-serif;text-align:center;}
-    .year-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-    .year-btn.disabled{opacity:0.3;cursor:not-allowed;pointer-events:none;}
+/* SECTIONS */
+.sec{display:none;animation:up .3s ease both;}
+.sec.active{display:block;}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.stitle{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;margin-bottom:4px;}
+.ssub{font-size:.8rem;color:var(--muted);margin-bottom:22px;}
 
-    /* INPUT METHOD TABS */
-    .input-tabs{display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:20px;border:1px solid var(--border);}
-    .input-tab{flex:1;padding:9px 6px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.82rem;border-radius:10px;cursor:pointer;transition:all 0.2s;text-align:center;}
-    .input-tab.active{background:var(--primary);color:#fff;}
+/* TABS */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.tab{padding:7px 14px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.itabs{display:flex;background:var(--surface);border-radius:12px;padding:4px;border:1px solid var(--border);margin-bottom:18px;}
+.itab{flex:1;padding:8px 4px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;border-radius:8px;cursor:pointer;transition:all .2s;text-align:center;}
+.itab.active{background:var(--primary);color:#fff;}
 
-    /* UPLOAD ZONE */
-    .upload-zone{border:2px dashed var(--border);border-radius:16px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface);margin-bottom:16px;}
-    .upload-zone:hover,.upload-zone.drag-over{border-color:var(--primary);background:var(--primary-glow);}
-    .upload-icon{font-size:2.2rem;margin-bottom:10px;}
-    .upload-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;margin-bottom:4px;}
-    .upload-sub{font-size:0.78rem;color:var(--text-muted);}
-    .upload-sub strong{color:var(--primary);}
-    .selected-file{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:14px;align-items:center;gap:10px;}
-    .selected-file.show{display:flex;}
-    .file-name{font-size:0.85rem;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .file-size{font-size:0.72rem;color:var(--text-muted);flex-shrink:0;}
-    .remove-file{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;padding:2px 6px;}
-    .remove-file:hover{color:var(--danger);}
+/* YEAR GRID */
+.ygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:7px;margin-bottom:18px;}
+.ybtn{padding:9px 4px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;text-align:center;transition:all .2s;}
+.ybtn:hover,.ybtn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.ybtn.off{opacity:.3;cursor:not-allowed;pointer-events:none;}
 
-    /* IMAGE PREVIEW */
-    .img-preview-wrap{display:none;margin-bottom:14px;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
-    .img-preview-wrap.show{display:block;}
-    .img-preview-wrap img{width:100%;max-height:300px;object-fit:contain;background:var(--surface2);}
+/* UPLOAD */
+.zone{border:2px dashed var(--border);border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;background:var(--surface);margin-bottom:14px;transition:all .2s;}
+.zone:hover,.zone.over{border-color:var(--primary);background:var(--pg);}
+.zicon{font-size:2rem;margin-bottom:8px;}
+.ztitle{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;margin-bottom:3px;}
+.zsub{font-size:.75rem;color:var(--muted);}
+.zsub b{color:var(--primary);}
+.selfile{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:10px 13px;margin-bottom:13px;align-items:center;gap:9px;}
+.selfile.show{display:flex;}
+.fname{font-size:.83rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fsize{font-size:.7rem;color:var(--muted);flex-shrink:0;}
+.rmv{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.95rem;padding:2px 6px;}
+.rmv:hover{color:var(--danger);}
+.imgprev{display:none;border-radius:11px;overflow:hidden;border:1px solid var(--border);margin-bottom:13px;}
+.imgprev.show{display:block;}
+.imgprev img{width:100%;max-height:260px;object-fit:contain;background:var(--surface2);}
+textarea.ta{width:100%;min-height:170px;padding:13px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.86rem;line-height:1.6;resize:vertical;outline:none;margin-bottom:13px;transition:border-color .2s;}
+textarea.ta:focus{border-color:var(--primary);}
+.hint{font-size:.73rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
 
-    /* TEXT INPUT */
-    .text-input-wrap{display:none;}
-    .text-input-wrap.show{display:block;}
-    textarea.big-input{width:100%;min-height:180px;padding:14px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;line-height:1.6;resize:vertical;outline:none;transition:border-color 0.2s;margin-bottom:14px;}
-    textarea.big-input:focus{border-color:var(--primary);}
-    .text-hint{font-size:0.75rem;color:var(--text-muted);margin-bottom:14px;line-height:1.5;}
+/* BUTTONS */
+.xbtn{width:100%;padding:13px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:16px;transition:all .2s;}
+.xbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(59,130,246,.3);}
+.xbtn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.sbtn{flex:1;padding:12px;background:var(--success);color:#fff;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;}
+.sbtn:hover:not(:disabled){transform:translateY(-2px);}
+.sbtn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.dbtn{padding:12px 16px;background:transparent;border:1.5px solid var(--border);color:var(--muted);border-radius:11px;font-weight:600;font-size:.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.dbtn:hover{border-color:var(--danger);color:var(--danger);}
+.srow{display:flex;gap:9px;}
 
-    /* EXTRACT BTN */
-    .extract-btn{width:100%;padding:14px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
-    .extract-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(59,130,246,0.3);}
-    .extract-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+/* PROGRESS */
+.prog{display:none;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:16px;}
+.prog.on{display:block;animation:up .3s ease both;}
+.step{display:flex;align-items:center;gap:9px;font-size:.83rem;color:var(--muted);padding:4px 0;}
+.step.done{color:var(--success);}
+.step.cur{color:var(--text);font-weight:600;}
+.sico{width:22px;height:22px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;}
+.step.done .sico{background:rgba(34,197,94,.15);}
+.spin{width:11px;height:11px;border:2px solid var(--surface3);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    /* PROGRESS */
-    .ai-progress{display:none;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;}
-    .ai-progress.active{display:block;animation:fadeUp 0.3s ease both;}
-    .step{display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--text-muted);padding:5px 0;}
-    .step.done{color:var(--success);}
-    .step.active-step{color:var(--text);font-weight:600;}
-    .step-icon{width:24px;height:24px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:0.72rem;flex-shrink:0;}
-    .step.done .step-icon{background:rgba(34,197,94,0.15);color:var(--success);}
-    .step.active-step .step-icon{background:var(--primary-glow);}
-    .step-spinner{width:12px;height:12px;border:2px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;}
+/* PREVIEW */
+.pvbox{display:none;animation:up .3s ease both;}
+.pvbox.on{display:block;}
+.pvhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.pvtitle{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:800;}
+.pvct{font-size:.73rem;color:var(--muted);}
+.pvtabs{display:flex;gap:5px;margin-bottom:12px;}
+.pvtab{padding:5px 13px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.pvtab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.pvlist{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow-y:auto;margin-bottom:13px;}
+.pvlist::-webkit-scrollbar{width:3px;}
+.pvlist::-webkit-scrollbar-thumb{background:var(--primary);border-radius:100px;}
+.pc{background:var(--surface);border:1.5px solid var(--border);border-radius:11px;padding:12px 14px;}
+.pch{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.pct{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;}
+.pcpts{padding-left:14px;}
+.pcpts li{font-size:.76rem;color:var(--muted);line-height:1.6;margin-bottom:1px;}
+.pcex{font-size:.72rem;color:var(--muted);font-style:italic;margin-top:6px;padding:6px 9px;background:var(--surface2);border-radius:6px;border-left:2px solid var(--primary);}
+.qn{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:800;color:var(--primary);margin-bottom:3px;}
+.qt{font-size:.81rem;font-weight:600;margin-bottom:6px;line-height:1.5;}
+.qo{font-size:.74rem;color:var(--muted);}
+.qo.ok{color:var(--success);font-weight:700;}
+.qex{font-size:.7rem;color:var(--muted);font-style:italic;padding-top:5px;border-top:1px solid var(--border);margin-top:4px;}
 
-    /* PREVIEW */
-    .preview-box{display:none;animation:fadeUp 0.3s ease both;}
-    .preview-box.active{display:block;}
-    .preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-    .preview-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;}
-    .preview-count{font-size:0.75rem;color:var(--text-muted);}
-    .prev-tabs{display:flex;gap:6px;margin-bottom:14px;}
-    .prev-tab{padding:6px 14px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:0.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
-    .prev-tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
-    .preview-list{display:flex;flex-direction:column;gap:9px;max-height:380px;overflow-y:auto;margin-bottom:14px;padding-right:2px;}
-    .preview-list::-webkit-scrollbar{width:3px;}
-    .preview-list::-webkit-scrollbar-thumb{background:var(--primary);border-radius:100px;}
-    .preview-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:13px 15px;}
-    .pc-header{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
-    .pc-emoji{font-size:1.1rem;}
-    .pc-title{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:800;}
-    .pc-points{padding-left:15px;}
-    .pc-points li{font-size:0.78rem;color:var(--text-muted);line-height:1.65;margin-bottom:2px;}
-    .pc-example{font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:7px;padding:7px 10px;background:var(--surface2);border-radius:7px;border-left:2px solid var(--primary);}
-    .pq-num{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:800;color:var(--primary);margin-bottom:4px;}
-    .pq-text{font-size:0.83rem;font-weight:600;margin-bottom:7px;line-height:1.5;}
-    .pq-opts{display:flex;flex-direction:column;gap:3px;margin-bottom:6px;}
-    .pq-opt{font-size:0.76rem;color:var(--text-muted);}
-    .pq-opt.correct{color:var(--success);font-weight:700;}
-    .pq-exp{font-size:0.72rem;color:var(--text-muted);font-style:italic;padding-top:5px;border-top:1px solid var(--border);margin-top:4px;}
+/* MANAGE */
+.mlist{display:flex;flex-direction:column;gap:7px;}
+.mi{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:9px;}
+.mil{display:flex;align-items:center;gap:9px;flex:1;min-width:0;}
+.mico{font-size:1rem;flex-shrink:0;}
+.mnum{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;background:var(--surface2);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.min2{flex:1;min-width:0;}
+.mit{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mim{font-size:.69rem;color:var(--muted);}
+.delbtn{padding:4px 11px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
+.delbtn:hover{border-color:var(--danger);color:var(--danger);}
+.empty{text-align:center;padding:32px 16px;color:var(--muted);}
+.empty .ei{font-size:1.8rem;margin-bottom:8px;}
+.empty p{font-size:.8rem;line-height:1.5;}
+.loading{text-align:center;padding:26px;color:var(--muted);font-size:.8rem;}
+.lspin{width:24px;height:24px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 9px;}
 
-    /* SAVE BUTTONS */
-    .save-row{display:flex;gap:10px;}
-    .save-btn{flex:1;padding:13px;background:var(--success);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-    .save-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(34,197,94,0.3);}
-    .save-btn:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
-    .discard-btn{padding:13px 18px;background:transparent;border:1.5px solid var(--border);color:var(--text-muted);border-radius:12px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
-    .discard-btn:hover{border-color:var(--danger);color:var(--danger);}
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 16px;font-size:.8rem;font-weight:600;z-index:500;transition:transform .3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.3);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--success);color:var(--success);}
+.toast.err{border-color:var(--danger);color:var(--danger);}
+.toast.info{border-color:var(--primary);color:var(--primary);}
 
-    /* MANAGE LIST */
-    .manage-list{display:flex;flex-direction:column;gap:8px;}
-    .manage-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-    .mi-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
-    .mi-icon{font-size:1.1rem;flex-shrink:0;}
-    .mi-num{font-family:'Syne',sans-serif;font-size:0.78rem;font-weight:800;background:var(--surface2);width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .mi-info{flex:1;min-width:0;}
-    .mi-title{font-family:'Syne',sans-serif;font-size:0.84rem;font-weight:800;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .mi-meta{font-size:0.71rem;color:var(--text-muted);}
-    .del-btn{padding:5px 12px;border-radius:8px;font-size:0.74rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text-muted);transition:all 0.2s;font-family:'DM Sans',sans-serif;flex-shrink:0;}
-    .del-btn:hover{border-color:var(--danger);color:var(--danger);}
+/* MODAL */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:300px;width:100%;text-align:center;animation:up .25s ease;}
+.modal .mi2{font-size:1.8rem;margin-bottom:8px;}
+.modal h3{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;margin-bottom:6px;}
+.modal p{color:var(--muted);font-size:.78rem;margin-bottom:14px;line-height:1.5;}
+.mbrow{display:flex;gap:7px;}
+.mbtn{flex:1;padding:9px;border-radius:9px;font-weight:700;font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.mbtn.red{background:var(--danger);color:#fff;border:none;}
+.mbtn.grey{background:transparent;border:1.5px solid var(--border);color:var(--muted);}
 
-    /* MISC */
-    .form-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:7px;display:block;}
-    .empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);}
-    .empty-state .ei{font-size:2rem;margin-bottom:10px;}
-    .empty-state p{font-size:0.83rem;line-height:1.6;}
-    .spinner{width:26px;height:26px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 10px;}
-    .loading-wrap{text-align:center;padding:28px;color:var(--text-muted);font-size:0.83rem;}
-    .divider{height:1px;background:var(--border);margin:20px 0;}
-    .section-header-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;}
-
-    /* TOAST */
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 18px;font-size:0.83rem;font-weight:600;z-index:500;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.3);}
-    .toast.show{transform:translateX(-50%) translateY(0);}
-    .toast.success{border-color:var(--success);color:var(--success);}
-    .toast.error{border-color:var(--danger);color:var(--danger);}
-    .toast.info{border-color:var(--primary);color:var(--primary);}
-
-    /* MODAL */
-    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:24px;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px;max-width:320px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);animation:popIn 0.25s ease;}
-    @keyframes popIn{from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);}}
-    .modal-icon{font-size:2rem;margin-bottom:10px;}
-    .modal h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-bottom:7px;}
-    .modal p{color:var(--text-muted);font-size:0.8rem;margin-bottom:16px;line-height:1.5;}
-    .modal-btns{display:flex;gap:8px;}
-    .modal-btn{flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:0.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
-    .modal-btn.danger{background:var(--danger);color:#fff;border:none;}
-    .modal-btn.cancel-btn{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);}
-
-    @keyframes spin{to{transform:rotate(360deg);}}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
-    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:8px 4px 16px;overflow-x:auto;}
-    .mobile-nav-inner{display:flex;min-width:max-content;padding:0 4px;}
-    .mnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 11px;cursor:pointer;color:var(--text-muted);font-size:0.56rem;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;border-radius:10px;transition:all 0.2s;white-space:nowrap;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
-    .mnav-item.active{color:var(--primary);background:var(--primary-glow);}
-    .mnav-icon{font-size:1.1rem;}
-    @media(max-width:700px){
-      .sidebar{display:none;}
-      .mobile-nav{display:block;}
-      .main{padding:16px 14px;padding-bottom:90px;}
-    }
-  </style>
+/* MOBILE NAV */
+.mnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:7px 4px 14px;overflow-x:auto;}
+.mnavinner{display:flex;min-width:max-content;padding:0 4px;}
+.mni{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 11px;cursor:pointer;color:var(--muted);font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-radius:9px;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
+.mni.active{color:var(--primary);background:var(--pg);}
+.mni-icon{font-size:1.05rem;}
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .mnav{display:block;}
+  .main{padding:14px 13px;padding-bottom:85px;}
+}
+</style>
 </head>
 <body>
 
 <!-- AUTH -->
-<div id="authGate">
-  <div class="auth-card">
-    <div class="auth-logo">Ace<span>Unilorin</span> PQ</div>
-    <div class="auth-sub">Admin Panel — Authorised Access Only</div>
-    <label class="auth-label">Email</label>
-    <input class="auth-input" type="email" id="adminEmail" placeholder="your@email.com" onkeydown="if(event.key==='Enter')adminLogin()"/>
-    <label class="auth-label">Password</label>
-    <input class="auth-input" type="password" id="adminPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/>
-    <button class="auth-btn" onclick="this.textContent='Working...';adminLogin().finally(()=>this.textContent='Sign In →')">Sign In →</button>
-    <div class="auth-error" id="authError"></div>
+<div id="authWrap">
+  <div class="card">
+    <div class="logo">Ace<span>Unilorin</span> PQ</div>
+    <div class="sub">Admin Panel — Authorised Access Only</div>
+    <label class="flabel">Email</label>
+    <input type="email" id="aEmail" class="inp" placeholder="your@email.com"/>
+    <label class="flabel">Password</label>
+    <input type="password" id="aPass" class="inp" placeholder="••••••••"/>
+    <button class="btn-main" id="loginBtn" onclick="doLogin()">Sign In →</button>
+    <div class="amsg" id="aMsg"></div>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel">
-  <div class="top-bar">
-    <div class="logo">Ace<span>Unilorin</span> <span style="color:var(--text-muted);font-weight:500;font-size:0.88rem;">Admin</span></div>
-    <div class="top-right">
-      <span class="admin-badge">ADMIN</span>
-      <button class="icon-btn" onclick="toggleTheme()">☀️</button>
-      <button class="icon-btn" onclick="adminLogout()" title="Logout">🚪</button>
+<!-- PANEL -->
+<div id="panel">
+  <div class="topbar">
+    <div class="tlogo">Ace<span>Unilorin</span> <span style="color:var(--muted);font-size:.82rem;font-weight:500;">Admin</span></div>
+    <div class="tright">
+      <span class="badge">ADMIN</span>
+      <button class="ibtn" onclick="doLogout()" title="Logout">🚪</button>
     </div>
   </div>
-
   <div class="layout">
-    <!-- SIDEBAR -->
     <div class="sidebar">
-      <div class="sidebar-label">Upload</div>
-      <div class="sidebar-item active" onclick="showSection('study',this)"><span class="s-icon">📒</span>Study Content</div>
-      <div class="sidebar-item" onclick="showSection('pastq',this)"><span class="s-icon">📝</span>Past Questions</div>
-      <div class="sidebar-label">Manage</div>
-      <div class="sidebar-item" onclick="showSection('manage-notes',this)"><span class="s-icon">🗂️</span>Notes</div>
-      <div class="sidebar-item" onclick="showSection('manage-sq',this)"><span class="s-icon">❓</span>Study Questions</div>
-      <div class="sidebar-item" onclick="showSection('manage-pq',this)"><span class="s-icon">📋</span>Past Questions</div>
-      <div class="sidebar-label">Site</div>
-      <div class="sidebar-item" onclick="window.open('https://aide10.github.io/aceunilorin-pq','_blank')"><span class="s-icon">🌐</span>View Live</div>
+      <div class="slabel">Upload</div>
+      <button class="sitem active" onclick="goTo('study',this)"><span>📒</span>Study Content</button>
+      <button class="sitem" onclick="goTo('pastq',this)"><span>📝</span>Past Questions</button>
+      <div class="slabel">Manage</div>
+      <button class="sitem" onclick="goTo('mnotes',this)"><span>🗂️</span>Notes</button>
+      <button class="sitem" onclick="goTo('msq',this)"><span>❓</span>Study Questions</button>
+      <button class="sitem" onclick="goTo('mpq',this)"><span>📋</span>Past Questions</button>
+      <div class="slabel">Site</div>
+      <button class="sitem" onclick="window.open('https://aide10.github.io/aceunilorin-pq','_blank')"><span>🌐</span>View Live</button>
     </div>
-
-    <!-- MAIN -->
     <div class="main">
 
-      <!-- ══ STUDY CONTENT UPLOAD ══ -->
-      <div class="page-section active" id="section-study">
-        <div class="section-title">📒 Study Content Upload</div>
-        <div class="section-sub">Upload notes and quiz questions for each subject</div>
-
-        <!-- Destination: Notes or Questions -->
-        <label class="form-label">What are you uploading?</label>
-        <div class="dest-tabs" style="margin-bottom:16px;">
-          <button class="dest-tab active" onclick="setStudyDest('both',this)">📒 Notes + Questions</button>
-          <button class="dest-tab" onclick="setStudyDest('notes',this)">📒 Notes only</button>
-          <button class="dest-tab" onclick="setStudyDest('questions',this)">❓ Questions only</button>
+      <!-- STUDY UPLOAD -->
+      <div class="sec active" id="sec-study">
+        <div class="stitle">📒 Study Content Upload</div>
+        <div class="ssub">Upload notes and quiz questions for each subject</div>
+        <label class="flabel">What are you uploading?</label>
+        <div class="tabs" id="destTabs">
+          <button class="tab active" onclick="setDest('both',this)">📒 Notes + Questions</button>
+          <button class="tab" onclick="setDest('notes',this)">📒 Notes only</button>
+          <button class="tab" onclick="setDest('questions',this)">❓ Questions only</button>
         </div>
-
-        <!-- Subject -->
-        <label class="form-label">Subject</label>
-        <div class="selector-row" id="studySubjectRow">
-          <button class="sel-btn active" onclick="setStudySubject('english',this)">📖 English</button>
-          <button class="sel-btn" onclick="setStudySubject('math',this)">🔢 Mathematics</button>
-          <button class="sel-btn" onclick="setStudySubject('currentaffairs',this)">🌍 Current Affairs</button>
+        <label class="flabel">Subject</label>
+        <div class="tabs" id="subTabs">
+          <button class="tab active" onclick="setSub('english',this)">📖 English</button>
+          <button class="tab" onclick="setSub('math',this)">🔢 Maths</button>
+          <button class="tab" onclick="setSub('currentaffairs',this)">🌍 Current Affairs</button>
         </div>
-
-        <!-- Input method -->
-        <label class="form-label">Input method</label>
-        <div class="input-tabs" id="studyInputTabs">
-          <button class="input-tab active" onclick="setStudyInput('pdf',this)">📄 PDF</button>
-          <button class="input-tab" onclick="setStudyInput('image',this)">🖼️ Image</button>
-          <button class="input-tab" onclick="setStudyInput('file',this)">📁 File</button>
-          <button class="input-tab" onclick="setStudyInput('text',this)">📋 Paste</button>
+        <label class="flabel">Input method</label>
+        <div class="itabs" id="studyMTabs">
+          <button class="itab active" onclick="setM('study','pdf',this)">📄 PDF</button>
+          <button class="itab" onclick="setM('study','img',this)">🖼️ Image</button>
+          <button class="itab" onclick="setM('study','file',this)">📁 File</button>
+          <button class="itab" onclick="setM('study','text',this)">📋 Paste</button>
         </div>
-
-        <!-- PDF input -->
-        <div id="study-pdf-input">
-          <div class="upload-zone" id="studyPdfZone" onclick="document.getElementById('studyPdfFile').click()"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'studyPdfFile','studyPdfZone')">
-            <div class="upload-icon">📄</div>
-            <div class="upload-title">Drop PDF here or tap to browse</div>
-            <div class="upload-sub"><strong>PDF only</strong> · max 20MB</div>
+        <div id="study-pdf-wrap">
+          <div class="zone" id="study-pdf-zone" onclick="document.getElementById('study-pdf-inp').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event,'study','pdf')">
+            <div class="zicon">📄</div><div class="ztitle">Drop PDF or tap to browse</div><div class="zsub"><b>PDF only</b> · max 20MB</div>
           </div>
-          <input type="file" id="studyPdfFile" accept=".pdf" style="display:none" onchange="onFileSelected(event,'study','pdf')"/>
-          <div class="selected-file" id="studyPdfSelected">
-            <span style="font-size:1.2rem;">📄</span>
-            <span class="file-name" id="studyPdfName">—</span>
-            <span class="file-size" id="studyPdfSize">—</span>
-            <button class="remove-file" onclick="clearStudyInput()">✕</button>
-          </div>
+          <input type="file" id="study-pdf-inp" accept=".pdf" style="display:none" onchange="onPick(event,'study','pdf')"/>
+          <div class="selfile" id="study-pdf-sel"><span>📄</span><span class="fname" id="study-pdf-nm"></span><span class="fsize" id="study-pdf-sz"></span><button class="rmv" onclick="clearF('study')">✕</button></div>
         </div>
-
-        <!-- Image input -->
-        <div id="study-image-input" style="display:none;">
-          <div class="upload-zone" id="studyImgZone" onclick="document.getElementById('studyImgFile').click()"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'studyImgFile','studyImgZone')">
-            <div class="upload-icon">🖼️</div>
-            <div class="upload-title">Drop image here or tap to browse</div>
-            <div class="upload-sub"><strong>JPG, PNG, WEBP</strong> · max 10MB</div>
+        <div id="study-img-wrap" style="display:none">
+          <div class="zone" id="study-img-zone" onclick="document.getElementById('study-img-inp').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event,'study','img')">
+            <div class="zicon">🖼️</div><div class="ztitle">Drop image or tap to browse</div><div class="zsub"><b>JPG, PNG, WEBP</b> · max 10MB</div>
           </div>
-          <input type="file" id="studyImgFile" accept="image/*" style="display:none" onchange="onFileSelected(event,'study','image')"/>
-          <div class="img-preview-wrap" id="studyImgPreview">
-            <img id="studyImgTag" src="" alt="preview"/>
-          </div>
-          <div class="selected-file" id="studyImgSelected">
-            <span style="font-size:1.2rem;">🖼️</span>
-            <span class="file-name" id="studyImgName">—</span>
-            <span class="file-size" id="studyImgSize">—</span>
-            <button class="remove-file" onclick="clearStudyInput()">✕</button>
-          </div>
+          <input type="file" id="study-img-inp" accept="image/*" style="display:none" onchange="onPick(event,'study','img')"/>
+          <div class="imgprev" id="study-img-prev"><img id="study-img-tag" src="" alt=""/></div>
+          <div class="selfile" id="study-img-sel"><span>🖼️</span><span class="fname" id="study-img-nm"></span><span class="fsize" id="study-img-sz"></span><button class="rmv" onclick="clearF('study')">✕</button></div>
         </div>
-
-        <!-- File input (docx, epub, txt, pptx) -->
-        <div id="study-file-input" style="display:none;">
-          <div class="upload-zone" id="studyFileZone" onclick="document.getElementById('studyDocFile').click()"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'studyDocFile','studyFileZone')">
-            <div class="upload-icon">📁</div>
-            <div class="upload-title">Drop file here or tap to browse</div>
-            <div class="upload-sub"><strong>DOCX, DOC, EPUB, TXT, PPTX</strong> · max 20MB</div>
+        <div id="study-file-wrap" style="display:none">
+          <div class="zone" id="study-file-zone" onclick="document.getElementById('study-file-inp').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event,'study','file')">
+            <div class="zicon">📁</div><div class="ztitle">Drop file or tap to browse</div><div class="zsub"><b>DOCX, EPUB, TXT, PPTX</b> · max 20MB</div>
           </div>
-          <input type="file" id="studyDocFile" accept=".docx,.doc,.epub,.txt,.pptx,.ppt" style="display:none" onchange="onFileSelected(event,'study','doc')"/>
-          <div class="selected-file" id="studyDocSelected">
-            <span style="font-size:1.2rem;">📁</span>
-            <span class="file-name" id="studyDocName">—</span>
-            <span class="file-size" id="studyDocSize">—</span>
-            <button class="remove-file" onclick="clearStudyInput()">✕</button>
-          </div>
+          <input type="file" id="study-file-inp" accept=".docx,.doc,.epub,.txt,.pptx,.ppt" style="display:none" onchange="onPick(event,'study','file')"/>
+          <div class="selfile" id="study-file-sel"><span>📁</span><span class="fname" id="study-file-nm"></span><span class="fsize" id="study-file-sz"></span><button class="rmv" onclick="clearF('study')">✕</button></div>
         </div>
-
-        <!-- Text input -->
-        <div id="study-text-input" class="text-input-wrap" style="display:none;">
-          <div class="text-hint">Paste or type your notes/questions below. The AI will extract and format everything automatically.</div>
-          <textarea class="big-input" id="studyTextArea" placeholder="Paste your notes or questions here...&#10;&#10;Example:&#10;Concord — Subject and verb must agree in number.&#10;• Singular subject takes singular verb.&#10;• 'Everyone' is always singular.&#10;&#10;Q1. Which of the following is correct?&#10;A. The boys runs B. The boy run C. The boy runs D. The boys run&#10;Answer: C"></textarea>
+        <div id="study-text-wrap" style="display:none">
+          <div class="hint">Paste notes or questions below. AI will extract and format everything.</div>
+          <textarea class="ta" id="study-ta" placeholder="Paste your content here..."></textarea>
         </div>
-
-        <button class="extract-btn" id="studyExtractBtn" onclick="runStudyExtraction()" disabled>
-          <span>🤖</span> Extract with AI
-        </button>
-
-        <!-- Progress -->
-        <div class="ai-progress" id="studyProgress">
-          <div class="step" id="sp1"><div class="step-icon">📥</div> Reading content...</div>
-          <div class="step" id="sp2"><div class="step-icon">🧠</div> AI analysing...</div>
-          <div class="step" id="sp3"><div class="step-icon">📒</div> Extracting notes...</div>
-          <div class="step" id="sp4"><div class="step-icon">❓</div> Extracting questions...</div>
-          <div class="step" id="sp5"><div class="step-icon">✅</div> Done!</div>
+        <button class="xbtn" id="study-xbtn" onclick="runExtract('study')" disabled>🤖 Extract with AI</button>
+        <div class="prog" id="study-prog">
+          <div class="step" id="study-s1"><div class="sico">📥</div> Reading content...</div>
+          <div class="step" id="study-s2"><div class="sico">🧠</div> AI analysing...</div>
+          <div class="step" id="study-s3"><div class="sico">📒</div> Extracting notes...</div>
+          <div class="step" id="study-s4"><div class="sico">❓</div> Extracting questions...</div>
+          <div class="step" id="study-s5"><div class="sico">✅</div> Done!</div>
         </div>
-
-        <!-- Preview -->
-        <div class="preview-box" id="studyPreview">
-          <div class="preview-header">
-            <div class="preview-title">📋 Preview</div>
-            <div class="preview-count" id="studyPreviewCount">—</div>
+        <div class="pvbox" id="study-pv">
+          <div class="pvhead"><div class="pvtitle">📋 Preview</div><div class="pvct" id="study-pvct"></div></div>
+          <div class="pvtabs" id="study-pvtabs">
+            <button class="pvtab active" onclick="switchPV('notes',this)">📒 Notes</button>
+            <button class="pvtab" onclick="switchPV('questions',this)">❓ Questions</button>
           </div>
-          <div class="prev-tabs" id="studyPrevTabs">
-            <button class="prev-tab active" onclick="switchStudyPreview('notes',this)">📒 Notes</button>
-            <button class="prev-tab" onclick="switchStudyPreview('questions',this)">❓ Questions</button>
-          </div>
-          <div class="preview-list" id="studyPrevNotes"></div>
-          <div class="preview-list" id="studyPrevQuestions" style="display:none;"></div>
-          <div class="save-row">
-            <button class="discard-btn" onclick="discardStudy()">✕ Discard</button>
-            <button class="save-btn" id="studySaveBtn" onclick="saveStudyToFirestore()">💾 Save to Firestore</button>
+          <div class="pvlist" id="study-pvnotes"></div>
+          <div class="pvlist" id="study-pvqs" style="display:none"></div>
+          <div class="srow">
+            <button class="dbtn" onclick="discard('study')">✕ Discard</button>
+            <button class="sbtn" id="study-svbtn" onclick="saveStudy()">💾 Save to Firestore</button>
           </div>
         </div>
       </div>
 
-      <!-- ══ PAST QUESTIONS UPLOAD ══ -->
-      <div class="page-section" id="section-pastq">
-        <div class="section-title">📝 Past Questions Upload</div>
-        <div class="section-sub">Upload questions for a specific exam year</div>
-
-        <!-- Year selector -->
-        <label class="form-label">Select Year</label>
-        <div class="year-grid" id="yearGrid"></div>
-
-        <!-- Input method -->
-        <label class="form-label">Input method</label>
-        <div class="input-tabs">
-          <button class="input-tab active" onclick="setPQInput('pdf',this)">📄 PDF</button>
-          <button class="input-tab" onclick="setPQInput('image',this)">🖼️ Image</button>
-          <button class="input-tab" onclick="setPQInput('file',this)">📁 File</button>
-          <button class="input-tab" onclick="setPQInput('text',this)">📋 Paste</button>
+      <!-- PAST Q UPLOAD -->
+      <div class="sec" id="sec-pastq">
+        <div class="stitle">📝 Past Questions Upload</div>
+        <div class="ssub">Upload questions for a specific exam year</div>
+        <label class="flabel">Select Year</label>
+        <div class="ygrid" id="pq-ygrid"></div>
+        <label class="flabel">Input method</label>
+        <div class="itabs" id="pqMTabs">
+          <button class="itab active" onclick="setM('pq','pdf',this)">📄 PDF</button>
+          <button class="itab" onclick="setM('pq','img',this)">🖼️ Image</button>
+          <button class="itab" onclick="setM('pq','file',this)">📁 File</button>
+          <button class="itab" onclick="setM('pq','text',this)">📋 Paste</button>
         </div>
-
-        <!-- PDF -->
-        <div id="pq-pdf-input">
-          <div class="upload-zone" id="pqPdfZone" onclick="document.getElementById('pqPdfFile').click()"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'pqPdfFile','pqPdfZone')">
-            <div class="upload-icon">📄</div>
-            <div class="upload-title">Drop PDF here or tap to browse</div>
-            <div class="upload-sub"><strong>PDF only</strong> · max 20MB</div>
+        <div id="pq-pdf-wrap">
+          <div class="zone" id="pq-pdf-zone" onclick="document.getElementById('pq-pdf-inp').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event,'pq','pdf')">
+            <div class="zicon">📄</div><div class="ztitle">Drop PDF or tap to browse</div><div class="zsub"><b>PDF only</b> · max 20MB</div>
           </div>
-          <input type="file" id="pqPdfFile" accept=".pdf" style="display:none" onchange="onFileSelected(event,'pq','pdf')"/>
-          <div class="selected-file" id="pqPdfSelected">
-            <span style="font-size:1.2rem;">📄</span>
-            <span class="file-name" id="pqPdfName">—</span>
-            <span class="file-size" id="pqPdfSize">—</span>
-            <button class="remove-file" onclick="clearPQInput()">✕</button>
-          </div>
+          <input type="file" id="pq-pdf-inp" accept=".pdf" style="display:none" onchange="onPick(event,'pq','pdf')"/>
+          <div class="selfile" id="pq-pdf-sel"><span>📄</span><span class="fname" id="pq-pdf-nm"></span><span class="fsize" id="pq-pdf-sz"></span><button class="rmv" onclick="clearF('pq')">✕</button></div>
         </div>
-
-        <!-- Image -->
-        <div id="pq-image-input" style="display:none;">
-          <div class="upload-zone" id="pqImgZone" onclick="document.getElementById('pqImgFile').click()"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'pqImgFile','pqImgZone')">
-            <div class="upload-icon">🖼️</div>
-            <div class="upload-title">Drop image here or tap to browse</div>
-            <div class="upload-sub"><strong>JPG, PNG, WEBP</strong> · max 10MB</div>
+        <div id="pq-img-wrap" style="display:none">
+          <div class="zone" id="pq-img-zone" onclick="document.getElementById('pq-img-inp').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event,'pq','img')">
+            <div class="zicon">🖼️</div><div class="ztitle">Drop image or tap to browse</div><div class="zsub"><b>JPG, PNG, WEBP</b> · max 10MB</div>
           </div>
-          <input type="file" id="pqImgFile" accept="image/*" style="display:none" onchange="onFileSelected(event,'pq','image')"/>
-          <div class="img-preview-wrap" id="pqImgPreview"><img id="pqImgTag" src="" alt="preview"/></div>
-          <div class="selected-file" id="pqImgSelected">
-            <span style="font-size:1.2rem;">🖼️</span>
-            <span class="file-name" id="pqImgName">—</span>
-            <span class="file-size" id="pqImgSize">—</span>
-            <button class="remove-file" onclick="clearPQInput()">✕</button>
-          </div>
+          <input type="file" id="pq-img-inp" accept="image/*" style="display:none" onchange="onPick(event,'pq','img')"/>
+          <div class="imgprev" id="pq-img-prev"><img id="pq-img-tag" src="" alt=""/></div>
+          <div class="selfile" id="pq-img-sel"><span>🖼️</span><span class="fname" id="pq-img-nm"></span><span class="fsize" id="pq-img-sz"></span><button class="rmv" onclick="clearF('pq')">✕</button></div>
         </div>
-
-        <!-- File (docx, epub, txt, pptx) -->
-        <div id="pq-file-input" style="display:none;">
-          <div class="upload-zone" id="pqFileZone" onclick="document.getElementById('pqDocFile').click()"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event,'pqDocFile','pqFileZone')">
-            <div class="upload-icon">📁</div>
-            <div class="upload-title">Drop file here or tap to browse</div>
-            <div class="upload-sub"><strong>DOCX, DOC, EPUB, TXT, PPTX</strong> · max 20MB</div>
+        <div id="pq-file-wrap" style="display:none">
+          <div class="zone" id="pq-file-zone" onclick="document.getElementById('pq-file-inp').click()" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="onDrop(event,'pq','file')">
+            <div class="zicon">📁</div><div class="ztitle">Drop file or tap to browse</div><div class="zsub"><b>DOCX, EPUB, TXT, PPTX</b> · max 20MB</div>
           </div>
-          <input type="file" id="pqDocFile" accept=".docx,.doc,.epub,.txt,.pptx,.ppt" style="display:none" onchange="onFileSelected(event,'pq','doc')"/>
-          <div class="selected-file" id="pqDocSelected">
-            <span style="font-size:1.2rem;">📁</span>
-            <span class="file-name" id="pqDocName">—</span>
-            <span class="file-size" id="pqDocSize">—</span>
-            <button class="remove-file" onclick="clearPQInput()">✕</button>
-          </div>
+          <input type="file" id="pq-file-inp" accept=".docx,.doc,.epub,.txt,.pptx,.ppt" style="display:none" onchange="onPick(event,'pq','file')"/>
+          <div class="selfile" id="pq-file-sel"><span>📁</span><span class="fname" id="pq-file-nm"></span><span class="fsize" id="pq-file-sz"></span><button class="rmv" onclick="clearF('pq')">✕</button></div>
         </div>
-
-        <!-- Text -->
-        <div id="pq-text-input" class="text-input-wrap" style="display:none;">
-          <div class="text-hint">Paste your past questions below. Include options and answers where possible.</div>
-          <textarea class="big-input" id="pqTextArea" placeholder="Paste questions here...&#10;&#10;Example:&#10;1. What is the capital of Nigeria?&#10;A. Lagos  B. Abuja  C. Kano  D. Ibadan&#10;Answer: B&#10;&#10;2. Who wrote Things Fall Apart?&#10;A. Wole Soyinka  B. Chinua Achebe  C. Chimamanda Adichie  D. Ben Okri&#10;Answer: B"></textarea>
+        <div id="pq-text-wrap" style="display:none">
+          <div class="hint">Paste your past questions below. Include options and answers where possible.</div>
+          <textarea class="ta" id="pq-ta" placeholder="1. What is the capital of Nigeria?&#10;A. Lagos  B. Abuja  C. Kano  D. Ibadan&#10;Answer: B"></textarea>
         </div>
-
-        <button class="extract-btn" id="pqExtractBtn" onclick="runPQExtraction()" disabled>
-          <span>🤖</span> Extract Questions with AI
-        </button>
-
-        <!-- Progress -->
-        <div class="ai-progress" id="pqProgress">
-          <div class="step" id="pp1"><div class="step-icon">📥</div> Reading content...</div>
-          <div class="step" id="pp2"><div class="step-icon">🧠</div> AI analysing...</div>
-          <div class="step" id="pp3"><div class="step-icon">❓</div> Extracting questions...</div>
-          <div class="step" id="pp4"><div class="step-icon">✅</div> Done!</div>
+        <button class="xbtn" id="pq-xbtn" onclick="runExtract('pq')" disabled>🤖 Extract Questions with AI</button>
+        <div class="prog" id="pq-prog">
+          <div class="step" id="pq-s1"><div class="sico">📥</div> Reading content...</div>
+          <div class="step" id="pq-s2"><div class="sico">🧠</div> AI analysing...</div>
+          <div class="step" id="pq-s3"><div class="sico">❓</div> Extracting questions...</div>
+          <div class="step" id="pq-s4"><div class="sico">✅</div> Done!</div>
         </div>
-
-        <!-- Preview -->
-        <div class="preview-box" id="pqPreview">
-          <div class="preview-header">
-            <div class="preview-title">📋 Preview — <span id="pqPreviewYear">—</span></div>
-            <div class="preview-count" id="pqPreviewCount">—</div>
-          </div>
-          <div class="preview-list" id="pqPrevList"></div>
-          <div class="save-row">
-            <button class="discard-btn" onclick="discardPQ()">✕ Discard</button>
-            <button class="save-btn" id="pqSaveBtn" onclick="savePQToFirestore()">💾 Save to Firestore</button>
+        <div class="pvbox" id="pq-pv">
+          <div class="pvhead"><div class="pvtitle">📋 Preview — <span id="pq-pv-year"></span></div><div class="pvct" id="pq-pvct"></div></div>
+          <div class="pvlist" id="pq-pvlist"></div>
+          <div class="srow">
+            <button class="dbtn" onclick="discard('pq')">✕ Discard</button>
+            <button class="sbtn" id="pq-svbtn" onclick="savePQ()">💾 Save to Firestore</button>
           </div>
         </div>
       </div>
 
-      <!-- ══ MANAGE NOTES ══ -->
-      <div class="page-section" id="section-manage-notes">
-        <div class="section-title">🗂️ Manage Notes</div>
-        <div class="section-sub">View and delete study notes</div>
-        <div class="selector-row">
-          <button class="sel-btn active" onclick="loadManageNotes('english',this)">📖 English</button>
-          <button class="sel-btn" onclick="loadManageNotes('math',this)">🔢 Mathematics</button>
-          <button class="sel-btn" onclick="loadManageNotes('currentaffairs',this)">🌍 Current Affairs</button>
+      <!-- MANAGE NOTES -->
+      <div class="sec" id="sec-mnotes">
+        <div class="stitle">🗂️ Manage Notes</div>
+        <div class="ssub">View and delete study notes</div>
+        <div class="tabs" id="mnotesTabs">
+          <button class="tab active" onclick="loadNotes('english',this)">📖 English</button>
+          <button class="tab" onclick="loadNotes('math',this)">🔢 Maths</button>
+          <button class="tab" onclick="loadNotes('currentaffairs',this)">🌍 Current Affairs</button>
         </div>
-        <div id="manageNotesList"><div class="loading-wrap"><div class="spinner"></div>Loading...</div></div>
+        <div id="mnotes-list"><div class="loading"><div class="lspin"></div>Loading...</div></div>
       </div>
 
-      <!-- ══ MANAGE STUDY QUESTIONS ══ -->
-      <div class="page-section" id="section-manage-sq">
-        <div class="section-title">❓ Manage Study Questions</div>
-        <div class="section-sub">View and delete study quiz questions</div>
-        <div class="selector-row">
-          <button class="sel-btn active" onclick="loadManageSQ('english',this)">📖 English</button>
-          <button class="sel-btn" onclick="loadManageSQ('math',this)">🔢 Mathematics</button>
-          <button class="sel-btn" onclick="loadManageSQ('currentaffairs',this)">🌍 Current Affairs</button>
+      <!-- MANAGE STUDY Q -->
+      <div class="sec" id="sec-msq">
+        <div class="stitle">❓ Manage Study Questions</div>
+        <div class="ssub">View and delete study quiz questions</div>
+        <div class="tabs" id="msqTabs">
+          <button class="tab active" onclick="loadSQ('english',this)">📖 English</button>
+          <button class="tab" onclick="loadSQ('math',this)">🔢 Maths</button>
+          <button class="tab" onclick="loadSQ('currentaffairs',this)">🌍 Current Affairs</button>
         </div>
-        <div id="manageSQList"><div class="loading-wrap"><div class="spinner"></div>Loading...</div></div>
+        <div id="msq-list"><div class="loading"><div class="lspin"></div>Loading...</div></div>
       </div>
 
-      <!-- ══ MANAGE PAST QUESTIONS ══ -->
-      <div class="page-section" id="section-manage-pq">
-        <div class="section-title">📋 Manage Past Questions</div>
-        <div class="section-sub">View and delete past questions by year</div>
-        <label class="form-label">Select Year</label>
-        <div class="year-grid" id="manageYearGrid"></div>
-        <div id="managePQList"><div class="empty-state"><div class="ei">📅</div><p>Select a year above</p></div></div>
+      <!-- MANAGE PAST Q -->
+      <div class="sec" id="sec-mpq">
+        <div class="stitle">📋 Manage Past Questions</div>
+        <div class="ssub">View and delete past questions by year</div>
+        <label class="flabel">Select Year</label>
+        <div class="ygrid" id="mpq-ygrid"></div>
+        <div id="mpq-list"><div class="empty"><div class="ei">📅</div><p>Select a year above</p></div></div>
       </div>
 
     </div>
@@ -516,26 +386,26 @@
 </div>
 
 <!-- MOBILE NAV -->
-<div class="mobile-nav" id="mobileNav" style="display:none;">
-  <div class="mobile-nav-inner">
-    <button class="mnav-item active" onclick="showSection('study',this)"><span class="mnav-icon">📒</span>Study</button>
-    <button class="mnav-item" onclick="showSection('pastq',this)"><span class="mnav-icon">📝</span>Past Q</button>
-    <button class="mnav-item" onclick="showSection('manage-notes',this)"><span class="mnav-icon">🗂️</span>Notes</button>
-    <button class="mnav-item" onclick="showSection('manage-sq',this)"><span class="mnav-icon">❓</span>Study Q</button>
-    <button class="mnav-item" onclick="showSection('manage-pq',this)"><span class="mnav-icon">📋</span>Manage PQ</button>
-    <button class="mnav-item" onclick="window.open('https://aide10.github.io/aceunilorin-pq','_blank')"><span class="mnav-icon">🌐</span>Live</button>
+<div class="mnav" id="mnav" style="display:none">
+  <div class="mnavinner">
+    <button class="mni active" onclick="goTo('study',this)"><span class="mni-icon">📒</span>Study</button>
+    <button class="mni" onclick="goTo('pastq',this)"><span class="mni-icon">📝</span>Past Q</button>
+    <button class="mni" onclick="goTo('mnotes',this)"><span class="mni-icon">🗂️</span>Notes</button>
+    <button class="mni" onclick="goTo('msq',this)"><span class="mni-icon">❓</span>Study Q</button>
+    <button class="mni" onclick="goTo('mpq',this)"><span class="mni-icon">📋</span>Manage PQ</button>
+    <button class="mni" onclick="window.open('https://aide10.github.io/aceunilorin-pq','_blank')"><span class="mni-icon">🌐</span>Live</button>
   </div>
 </div>
 
 <!-- DELETE MODAL -->
-<div class="modal-overlay" id="deleteModal">
+<div class="overlay" id="delModal">
   <div class="modal">
-    <div class="modal-icon">🗑️</div>
+    <div class="mi2">🗑️</div>
     <h3>Delete this?</h3>
-    <p id="deleteModalDesc">This cannot be undone.</p>
-    <div class="modal-btns">
-      <button class="modal-btn cancel-btn" onclick="closeModal()">Cancel</button>
-      <button class="modal-btn danger" onclick="confirmDelete()">Delete</button>
+    <p id="delDesc">This cannot be undone.</p>
+    <div class="mbrow">
+      <button class="mbtn grey" onclick="closeModal()">Cancel</button>
+      <button class="mbtn red" onclick="confirmDel()">Delete</button>
     </div>
   </div>
 </div>
@@ -546,750 +416,336 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// Debug banner
-window.onerror=function(msg,src,line,col,err){
-  document.body.innerHTML='<div style="padding:24px;color:red;font-family:monospace;font-size:14px;background:#000;min-height:100vh;"><h2>JS Error</h2><p>'+msg+'</p><p>Line: '+line+'</p><p>'+src+'</p></div>';
-  return true;
-};
-
-const firebaseConfig={apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"};
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp({apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"});
 const auth=firebase.auth(), db=firebase.firestore();
-const ADMIN_UID='KNzxKAqIK7bCXX3YbS8oitSr2wh1';
-
-// ── THEME ──
-function toggleTheme(){const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.querySelector('.icon-btn[onclick="toggleTheme()"]').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
-const saved=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',saved);
+const AUID='KNzxKAqIK7bCXX3YbS8oitSr2wh1';
 
 // ── AUTH ──
-async function adminLogin(){
-  const email=document.getElementById('adminEmail').value.trim();
-  const pass=document.getElementById('adminPassword').value;
-  const err=document.getElementById('authError');
-  err.style.color='var(--text-muted)';
-  err.textContent='Signing in...';
-  if(!email||!pass){err.style.color='var(--danger)';err.textContent='Please enter email and password.';return;}
+async function doLogin(){
+  const email=document.getElementById('aEmail').value.trim();
+  const pass=document.getElementById('aPass').value;
+  if(!email||!pass){setMsg('Enter email and password','err');return;}
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='Signing in...';
+  setMsg('','');
   try{
-    const cred=await auth.signInWithEmailAndPassword(email,pass);
-    if(cred.user.uid!==ADMIN_UID){
-      await auth.signOut();
-      err.style.color='var(--danger)';
-      err.textContent='Access denied. UID: '+cred.user.uid;
-      return;
-    }
-    err.textContent='';
-  }catch(e){
-    err.style.color='var(--danger)';
-    err.textContent=e.code+': '+e.message;
-  }
+    const c=await auth.signInWithEmailAndPassword(email,pass);
+    if(c.user.uid!==AUID){await auth.signOut();setMsg('Access denied.','err');}
+  }catch(e){setMsg(e.message,'err');}
+  btn.disabled=false; btn.textContent='Sign In →';
 }
+function setMsg(t,type){
+  const m=document.getElementById('aMsg');
+  m.textContent=t;
+  m.className='amsg'+(type?' '+type:'');
+}
+async function doLogout(){await auth.signOut();}
+
+document.getElementById('aPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('aEmail').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
 auth.onAuthStateChanged(u=>{
-  if(u&&u.uid===ADMIN_UID){
-    document.getElementById('authGate').style.display='none';
-    document.getElementById('adminPanel').style.display='block';
-    document.getElementById('mobileNav').style.display='block';
-    buildYearGrids();
-    loadManageNotes('english');
-    loadManageSQ('english');
-  } else {
-    if(u&&u.uid!==ADMIN_UID) auth.signOut();
-    document.getElementById('authGate').style.display='flex';
-    document.getElementById('adminPanel').style.display='none';
-    document.getElementById('mobileNav').style.display='none';
-  }
+  const ok=u&&u.uid===AUID;
+  document.getElementById('authWrap').style.display=ok?'none':'flex';
+  document.getElementById('panel').style.display=ok?'block':'none';
+  document.getElementById('mnav').style.display=ok?'block':'none';
+  if(u&&u.uid!==AUID) auth.signOut();
+  if(ok){buildYears();loadNotes('english');loadSQ('english');}
 });
-async function adminLogout(){await auth.signOut();}
 
-// ── SECTIONS ──
-function showSection(name,el){
-  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.mnav-item').forEach(s=>s.classList.remove('active'));
-  document.getElementById('section-'+name).classList.add('active');
-  el.classList.add('active');
-  // Also activate matching mobile nav item
-  document.querySelectorAll('.mnav-item').forEach(b=>{
-    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+name+"'")) b.classList.add('active');
+// ── NAV ──
+function goTo(name,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sitem,.mni').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.sitem,.mni').forEach(b=>{
+    if((b.getAttribute('onclick')||'').includes("'"+name+"'")) b.classList.add('active');
   });
 }
 
-// ── YEAR GRIDS ──
-const FREE_YEARS=[2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
-const PREMIUM_YEARS=[2021,2022,2023,2024,2025];
-const NO_EXAM=[2016,2020];
-let selectedYear=null, manageSelectedYear=null;
+// ── YEARS ──
+const FREE=[2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
+const PREM=[2021,2022,2023,2024,2025];
+const NONE=[2016,2020];
+let selYear=null, mPQYear=null;
 
-function buildYearGrids(){
-  ['yearGrid','manageYearGrid'].forEach(id=>{
-    const g=document.getElementById(id);
+function buildYears(){
+  ['pq-ygrid','mpq-ygrid'].forEach(gid=>{
+    const g=document.getElementById(gid), isM=gid==='mpq-ygrid';
     g.innerHTML='';
-    const isManage=id==='manageYearGrid';
-    [...FREE_YEARS,...PREMIUM_YEARS].sort((a,b)=>a-b).forEach(y=>{
-      const btn=document.createElement('button');
-      btn.className='year-btn';
-      btn.textContent=y;
-      btn.onclick=isManage?()=>selectManageYear(y,btn):()=>selectUploadYear(y,btn);
-      g.appendChild(btn);
+    [...FREE,...PREM].sort((a,b)=>a-b).forEach(y=>{
+      const b=document.createElement('button');
+      b.className='ybtn'; b.textContent=y;
+      b.onclick=isM?()=>{mPQYear=y;document.querySelectorAll('#mpq-ygrid .ybtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');loadPQ(y);}:()=>{selYear=y;document.querySelectorAll('#pq-ygrid .ybtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');chkPQ();};
+      g.appendChild(b);
     });
-    NO_EXAM.forEach(y=>{
-      const btn=document.createElement('button');
-      btn.className='year-btn disabled';
-      btn.textContent=y+'*';
-      btn.title='No exam this year';
-      g.appendChild(btn);
-    });
+    NONE.forEach(y=>{const b=document.createElement('button');b.className='ybtn off';b.textContent=y+'*';b.title='No exam';g.appendChild(b);});
   });
 }
 
-function selectUploadYear(y,btn){
-  selectedYear=y;
-  document.querySelectorAll('#yearGrid .year-btn').forEach(b=>b.classList.remove('active'));
+// ── STATE ──
+let studySub='english', studyDest='both', studyM='pdf', studyFile=null;
+let pqM='pdf', pqFile=null;
+let studyOut={notes:[],questions:[]}, pqOut=[];
+
+function setDest(d,btn){studyDest=d;document.querySelectorAll('#destTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function setSub(s,btn){studySub=s;document.querySelectorAll('#subTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function chkPQ(){document.getElementById('pq-xbtn').disabled=!(selYear&&(pqM==='text'||pqFile));}
+
+function setM(ctx,m,btn){
+  const isS=ctx==='study';
+  if(isS){studyM=m;studyFile=null;}else{pqM=m;pqFile=null;}
+  const tabId=isS?'studyMTabs':'pqMTabs';
+  document.querySelectorAll('#'+tabId+' .itab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  checkPQExtractReady();
+  ['pdf','img','file','text'].forEach(t=>{
+    const el=document.getElementById(ctx+'-'+t+'-wrap');
+    if(el) el.style.display=t===m?'block':'none';
+  });
+  if(isS) document.getElementById('study-xbtn').disabled=(m!=='text');
+  else chkPQ();
+  document.getElementById(ctx+'-prog').classList.remove('on');
+  document.getElementById(ctx+'-pv').classList.remove('on');
 }
 
-function selectManageYear(y,btn){
-  manageSelectedYear=y;
-  document.querySelectorAll('#manageYearGrid .year-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  loadManagePQ(y);
-}
-
-// ── STUDY CONTENT STATE ──
-let studySubject='english', studyDest='both', studyInputMethod='pdf';
-let studyFile=null, studyExtracted={notes:[],questions:[]};
-
-function setStudyDest(dest,btn){
-  studyDest=dest;
-  document.querySelectorAll('#section-study .dest-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
-function setStudySubject(s,btn){
-  studySubject=s;
-  document.querySelectorAll('#studySubjectRow .sel-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
-function setStudyInput(method,btn){
-  studyInputMethod=method;
-  document.querySelectorAll('#studyInputTabs .input-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('study-pdf-input').style.display=method==='pdf'?'block':'none';
-  document.getElementById('study-image-input').style.display=method==='image'?'block':'none';
-  document.getElementById('study-file-input').style.display=method==='file'?'block':'none';
-  document.getElementById('study-text-input').style.display=method==='text'?'block':'none';
-  if(method==='text') document.getElementById('studyExtractBtn').disabled=false;
-  else {studyFile=null; document.getElementById('studyExtractBtn').disabled=true;}
-  document.getElementById('studyProgress').classList.remove('active');
-  document.getElementById('studyPreview').classList.remove('active');
-}
-
-// ── PQ STATE ──
-let pqInputMethod='pdf', pqFile=null, pqExtracted=[];
-
-function setPQInput(method,btn){
-  pqInputMethod=method;
-  document.querySelectorAll('#section-pastq .input-tabs .input-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('pq-pdf-input').style.display=method==='pdf'?'block':'none';
-  document.getElementById('pq-image-input').style.display=method==='image'?'block':'none';
-  document.getElementById('pq-file-input').style.display=method==='file'?'block':'none';
-  document.getElementById('pq-text-input').style.display=method==='text'?'block':'none';
-  if(method==='text') checkPQExtractReady();
-  else {pqFile=null; document.getElementById('pqExtractBtn').disabled=true;}
-  document.getElementById('pqProgress').classList.remove('active');
-  document.getElementById('pqPreview').classList.remove('active');
-}
-
-function checkPQExtractReady(){
-  const ready=selectedYear&&(pqInputMethod==='text'||pqFile!=null);
-  document.getElementById('pqExtractBtn').disabled=!ready;
-}
-
-// ── FILE HANDLING ──
-function handleDrop(e,inputId,zoneId){
+// ── FILE ──
+function onDrop(e,ctx,type){
   e.preventDefault();
-  document.getElementById(zoneId).classList.remove('drag-over');
-  const file=e.dataTransfer.files[0];
-  if(file) simulateFileSelect(file,inputId);
+  document.getElementById(ctx+'-'+type+'-zone').classList.remove('over');
+  const f=e.dataTransfer.files[0];
+  if(f) handleFile(f,ctx,type);
 }
-
-function onFileSelected(e,section,type){
-  const file=e.target.files[0];
-  if(!file) return;
-  let inputId;
-  if(section==='study'){
-    if(type==='pdf') inputId='studyPdfFile';
-    else if(type==='image') inputId='studyImgFile';
-    else inputId='studyDocFile';
-  } else {
-    if(type==='pdf') inputId='pqPdfFile';
-    else if(type==='image') inputId='pqImgFile';
-    else inputId='pqDocFile';
-  }
-  simulateFileSelect(file, inputId);
-}
-
-function simulateFileSelect(file,inputId){
-  const isStudy=inputId.startsWith('study');
-  const isPdf=inputId.includes('Pdf')||file.type==='application/pdf';
-  const isImg=inputId.includes('Img')||file.type.startsWith('image/');
-  const isDoc=inputId.includes('Doc');
-  if(file.size>20*1024*1024){showToast('File too large. Max 20MB','error');return;}
-
-  if(isStudy){
-    studyFile=file;
-    if(isPdf){
-      document.getElementById('studyPdfName').textContent=file.name;
-      document.getElementById('studyPdfSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-      document.getElementById('studyPdfSelected').classList.add('show');
-      document.getElementById('studyPdfZone').style.display='none';
-    } else if(isImg){
-      document.getElementById('studyImgName').textContent=file.name;
-      document.getElementById('studyImgSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-      document.getElementById('studyImgSelected').classList.add('show');
-      document.getElementById('studyImgZone').style.display='none';
-      const reader=new FileReader();
-      reader.onload=e=>{document.getElementById('studyImgTag').src=e.target.result;document.getElementById('studyImgPreview').classList.add('show');}
-      reader.readAsDataURL(file);
-    } else {
-      document.getElementById('studyDocName').textContent=file.name;
-      document.getElementById('studyDocSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-      document.getElementById('studyDocSelected').classList.add('show');
-      document.getElementById('studyFileZone').style.display='none';
-    }
-    document.getElementById('studyExtractBtn').disabled=false;
-  } else {
-    pqFile=file;
-    if(isPdf){
-      document.getElementById('pqPdfName').textContent=file.name;
-      document.getElementById('pqPdfSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-      document.getElementById('pqPdfSelected').classList.add('show');
-      document.getElementById('pqPdfZone').style.display='none';
-    } else if(isImg){
-      document.getElementById('pqImgName').textContent=file.name;
-      document.getElementById('pqImgSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-      document.getElementById('pqImgSelected').classList.add('show');
-      document.getElementById('pqImgZone').style.display='none';
-      const reader=new FileReader();
-      reader.onload=e=>{document.getElementById('pqImgTag').src=e.target.result;document.getElementById('pqImgPreview').classList.add('show');}
-      reader.readAsDataURL(file);
-    } else {
-      document.getElementById('pqDocName').textContent=file.name;
-      document.getElementById('pqDocSize').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-      document.getElementById('pqDocSelected').classList.add('show');
-      document.getElementById('pqFileZone').style.display='none';
-    }
-    checkPQExtractReady();
-  }
-}
-
-function clearStudyInput(){
-  studyFile=null;
-  ['studyPdfSelected','studyImgSelected','studyImgPreview','studyDocSelected'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.style.display='';}});
-  ['studyPdfZone','studyImgZone','studyFileZone'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
-  ['studyPdfFile','studyImgFile','studyDocFile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('studyExtractBtn').disabled=true;
-  document.getElementById('studyProgress').classList.remove('active');
-  document.getElementById('studyPreview').classList.remove('active');
-}
-
-function clearPQInput(){
-  pqFile=null;
-  ['pqPdfSelected','pqImgSelected','pqImgPreview','pqDocSelected'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.style.display='';}});
-  ['pqPdfZone','pqImgZone','pqFileZone'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
-  ['pqPdfFile','pqImgFile','pqDocFile'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  checkPQExtractReady();
-  document.getElementById('pqProgress').classList.remove('active');
-  document.getElementById('pqPreview').classList.remove('active');
-}
-
-// ── FILE TO BASE64 ──
-// ── LAZY LOAD HELPER ──
-function loadScript(src){
-  return new Promise((res,rej)=>{
-    if(document.querySelector('script[src="'+src+'"]')){res();return;}
-    const s=document.createElement('script');
-    s.src=src;
-    s.onload=res;
-    s.onerror=()=>rej(new Error('Failed to load: '+src));
-    document.head.appendChild(s);
-  });
-}
-
-// ── EXTRACT TEXT FROM DOC/EPUB/TXT/PPTX ──
-async function extractTextFromFile(file){
-  const name=file.name.toLowerCase();
-  const ext=name.split('.').pop();
-
-  // Load required libraries on demand
-  if(ext==='docx'||ext==='doc'){
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
-  }
-  if(ext==='epub'||ext==='pptx'||ext==='ppt'){
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
-  }
-
-  // TXT — just read directly
-  if(ext==='txt'){
-    return new Promise((res,rej)=>{
-      const r=new FileReader();
-      r.onload=e=>res(e.target.result);
-      r.onerror=()=>rej(new Error('Failed to read TXT'));
-      r.readAsText(file);
-    });
-  }
-
-  // DOCX/DOC — use mammoth
-  if(ext==='docx'||ext==='doc'){
-    const arrayBuffer=await file.arrayBuffer();
-    const result=await mammoth.extractRawText({arrayBuffer});
-    return result.value||'';
-  }
-
-  // PPTX/PPT — unzip and extract text from slides
-  if(ext==='pptx'||ext==='ppt'){
-    const zip=await JSZip.loadAsync(file);
-    let text='';
-    const slideFiles=Object.keys(zip.files).filter(f=>f.match(/ppt\/slides\/slide[0-9]+\.xml$/));
-    slideFiles.sort();
-    for(const sf of slideFiles){
-      const xml=await zip.files[sf].async('string');
-      // Extract text from <a:t> tags
-      const matches=xml.match(/<a:t[^>]*>([^<]+)<\/a:t>/g)||[];
-      const slideText=matches.map(m=>m.replace(/<[^>]+>/g,'')).join(' ');
-      text+=slideText+'
-
-';
-    }
-    return text.trim()||'(No readable text found in PPTX)';
-  }
-
-  // EPUB — unzip and extract from HTML/XHTML content files
-  if(ext==='epub'){
-    const zip=await JSZip.loadAsync(file);
-    let text='';
-    const contentFiles=Object.keys(zip.files).filter(f=>
-      (f.endsWith('.html')||f.endsWith('.xhtml')||f.endsWith('.htm'))
-      &&!f.includes('toc')&&!f.includes('nav')
-    );
-    contentFiles.sort();
-    for(const cf of contentFiles.slice(0,30)){ // limit to 30 chapters
-      const html=await zip.files[cf].async('string');
-      // Strip HTML tags
-      const plain=html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'')
-                      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
-                      .replace(/<[^>]+>/g,' ')
-                      .replace(/&nbsp;/g,' ')
-                      .replace(/&amp;/g,'&')
-                      .replace(/&lt;/g,'<')
-                      .replace(/&gt;/g,'>')
-                      .replace(/\s+/g,' ')
-                      .trim();
-      text+=plain+'
-
-';
-    }
-    return text.substring(0,50000)||'(No readable text found in EPUB)'; // cap at 50k chars
-  }
-
-  throw new Error('Unsupported file type: '+ext);
-}
-
-function fileToBase64(file){
-  return new Promise((res,rej)=>{
+function onPick(e,ctx,type){const f=e.target.files[0];if(f) handleFile(f,ctx,type);}
+function handleFile(file,ctx,type){
+  if(file.size>20*1024*1024){toast('File too large. Max 20MB','err');return;}
+  if(ctx==='study') studyFile=file; else pqFile=file;
+  document.getElementById(ctx+'-'+type+'-zone').style.display='none';
+  document.getElementById(ctx+'-'+type+'-nm').textContent=file.name;
+  document.getElementById(ctx+'-'+type+'-sz').textContent=(file.size/1024/1024).toFixed(2)+' MB';
+  document.getElementById(ctx+'-'+type+'-sel').classList.add('show');
+  if(type==='img'){
     const r=new FileReader();
-    r.onload=()=>res(r.result.split(',')[1]);
-    r.onerror=()=>rej(new Error('Failed to read file'));
+    r.onload=ev=>{document.getElementById(ctx+'-img-tag').src=ev.target.result;document.getElementById(ctx+'-img-prev').classList.add('show');}
     r.readAsDataURL(file);
+  }
+  if(ctx==='study') document.getElementById('study-xbtn').disabled=false;
+  else chkPQ();
+}
+function clearF(ctx){
+  if(ctx==='study'){studyFile=null;document.getElementById('study-xbtn').disabled=true;}
+  else{pqFile=null;chkPQ();}
+  ['pdf','img','file'].forEach(t=>{
+    const z=document.getElementById(ctx+'-'+t+'-zone');
+    const s=document.getElementById(ctx+'-'+t+'-sel');
+    const p=document.getElementById(ctx+'-img-prev');
+    if(z) z.style.display='';
+    if(s) s.classList.remove('show');
+    if(p) p.classList.remove('show');
+    const inp=document.getElementById(ctx+'-'+t+'-inp');
+    if(inp) inp.value='';
   });
+  document.getElementById(ctx+'-prog').classList.remove('on');
+  document.getElementById(ctx+'-pv').classList.remove('on');
 }
 
-// ── SET STEP ──
-function setStep(prefix,n,status,total){
+// ── UTILS ──
+function toB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file);});}
+function loadLib(src){return new Promise((res,rej)=>{if(document.querySelector('script[src="'+src+'"]')){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Failed to load '+src));document.head.appendChild(s);});}
+async function extractText(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='txt'){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Failed to read TXT'));r.readAsText(file);});}
+  if(ext==='docx'||ext==='doc'){await loadLib('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');const ab=await file.arrayBuffer();const r=await mammoth.extractRawText({arrayBuffer:ab});return r.value||'';}
+  if(ext==='pptx'||ext==='ppt'){await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');const zip=await JSZip.loadAsync(file);let txt='';const slides=Object.keys(zip.files).filter(f=>/ppt\/slides\/slide[0-9]+\.xml$/.test(f)).sort();for(const s of slides){const xml=await zip.files[s].async('string');const m=xml.match(/<a:t[^>]*>([^<]+)<\/a:t>/g)||[];txt+=m.map(x=>x.replace(/<[^>]+>/g,'')).join(' ')+'\n\n';}return txt.trim()||'(No text)';}
+  if(ext==='epub'){await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');const zip=await JSZip.loadAsync(file);let txt='';const fs=Object.keys(zip.files).filter(f=>(f.endsWith('.html')||f.endsWith('.xhtml'))&&!f.includes('toc')&&!f.includes('nav')).sort();for(const f of fs.slice(0,30)){const html=await zip.files[f].async('string');txt+=html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()+'\n\n';}return txt.substring(0,50000)||'(No text)';}
+  throw new Error('Unsupported file type: .'+ext);
+}
+
+// ── STEP UI ──
+function step(ctx,n,total,status){
   for(let i=1;i<=total;i++){
-    const s=document.getElementById(prefix+i);
-    if(!s) continue;
-    s.className='step';
-    if(i<n){s.classList.add('done');s.querySelector('.step-icon').textContent='✅';}
-    else if(i===n){
-      s.classList.add('active-step');
-      if(status==='loading') s.querySelector('.step-icon').innerHTML='<div class="step-spinner"></div>';
-      else if(status==='done'){s.querySelector('.step-icon').textContent='✅';s.classList.remove('active-step');s.classList.add('done');}
-    }
+    const el=document.getElementById(ctx+'-s'+i);if(!el)continue;
+    el.className='step';
+    const ico=el.querySelector('.sico');
+    if(i<n){el.classList.add('done');ico.textContent='✅';}
+    else if(i===n){el.classList.add('cur');if(status==='load')ico.innerHTML='<div class="spin"></div>';else if(status==='done'){ico.textContent='✅';el.classList.remove('cur');el.classList.add('done');}}
   }
 }
 
-// ── CALL CLAUDE API ──
-async function callClaude(messages, maxTokens=8000){
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'anthropic-dangerous-direct-browser-access':'true'
-    },
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTokens,messages})
-  });
-  if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error '+res.status);}
-  const data=await res.json();
-  return data.content.map(c=>c.text||'').join('').trim();
+// ── CLAUDE ──
+async function claude(messages,max=8000){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:max,messages})});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error '+r.status);}
+  const d=await r.json();
+  return d.content.map(c=>c.text||'').join('').trim();
+}
+function buildMsg(method,file,b64,text,prompt){
+  const isText=method==='text'||method==='file';
+  if(isText) return [{role:'user',content:[{type:'text',text:prompt+'\n\nContent:\n'+text}]}];
+  if(file&&file.type.startsWith('image/')) return [{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:b64}},{type:'text',text:prompt}]}];
+  return [{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},{type:'text',text:prompt}]}];
 }
 
-function buildContent(method,file,base64,text){
-  if(method==='text') return[{type:'text',text}];
-  const isImg=file&&file.type.startsWith('image/');
-  if(isImg) return[{type:'image',source:{type:'base64',media_type:file.type,data:base64}},{type:'text',text:'Extract content from this image.'}];
-  return[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:'Extract content from this PDF.'}];
-}
-
-// ══ STUDY EXTRACTION ══
-async function runStudyExtraction(){
-  const btn=document.getElementById('studyExtractBtn');
-  btn.disabled=true;
-  document.getElementById('studyProgress').classList.add('active');
-  document.getElementById('studyPreview').classList.remove('active');
-
-  const subjectLabel=studySubject==='english'?'Use of English':studySubject==='math'?'Mathematics':'Current Affairs';
-  const extractNotes=studyDest==='both'||studyDest==='notes';
-  const extractQuestions=studyDest==='both'||studyDest==='questions';
-
+// ── EXTRACTION ──
+async function runExtract(ctx){
+  const isS=ctx==='study';
+  const xbtn=document.getElementById(ctx+'-xbtn');
+  xbtn.disabled=true;
+  document.getElementById(ctx+'-prog').classList.add('on');
+  document.getElementById(ctx+'-pv').classList.remove('on');
+  const total=isS?5:4;
+  const method=isS?studyM:pqM;
+  const file=isS?studyFile:pqFile;
   try{
-    setStep('sp',1,'loading',5);
-    let base64='', text='';
-    if(studyInputMethod==='text'){
-      text=document.getElementById('studyTextArea').value;
-    } else if(studyInputMethod==='file'){
-      showToast('Extracting text from file...','info');
-      text=await extractTextFromFile(studyFile);
-      if(!text.trim()) throw new Error('Could not extract text from this file.');
+    step(ctx,1,total,'load');
+    let b64='',text='';
+    if(method==='text') text=document.getElementById(ctx+'-ta').value;
+    else if(method==='file'){toast('Reading file...','info');text=await extractText(file);if(!text.trim())throw new Error('Could not extract text from file.');}
+    else b64=await toB64(file);
+    step(ctx,1,total,'done'); step(ctx,2,total,'load');
+
+    let prompt,raw,parsed;
+    if(isS){
+      const subLabel=studySub==='english'?'Use of English':studySub==='math'?'Mathematics':'Current Affairs';
+      const doN=studyDest==='both'||studyDest==='notes';
+      const doQ=studyDest==='both'||studyDest==='questions';
+      prompt=`Extract educational content for a Nigerian university (Unilorin) POST-UTME study app. Subject: ${subLabel}.
+${doN?'Extract study NOTES: distinct topics, each with emoji, title, order number (1,2,3...), 4-8 bullet point strings, optional example string.':''}
+${doQ?'Extract QUESTIONS: full question text, options A-D (E if present), correct answer letter, brief explanation.':''}
+Return ONLY valid JSON, no markdown backticks:
+{"notes":[{"emoji":"📌","title":"Topic Title","order":1,"content":["point 1","point 2"],"example":"optional tip"}],"questions":[{"number":1,"question":"Question text?","optionA":"Option A","optionB":"Option B","optionC":"Option C","optionD":"Option D","optionE":null,"answer":"A","explanation":"Brief explanation"}]}
+${!doN?'Set notes to [].':''} ${!doQ?'Set questions to [].':''}`;
+      step(ctx,2,total,'done'); step(ctx,3,total,'load');
+      raw=await claude(buildMsg(method,file,b64,text,prompt));
+      step(ctx,3,total,'done'); step(ctx,4,total,'load');
+      parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      studyOut={notes:parsed.notes||[],questions:parsed.questions||[]};
+      step(ctx,4,total,'done'); step(ctx,5,total,'done');
+      renderStudyPV();
+      toast(studyOut.notes.length+' topics · '+studyOut.questions.length+' questions 🎉','ok');
     } else {
-      base64=await fileToBase64(studyFile);
+      if(!selYear) throw new Error('Select a year first.');
+      prompt=`Extract ALL multiple choice questions from this ${selYear} Unilorin POST-UTME past question paper.
+For each: number, full question text, options A-D (and E if present), correct answer letter, brief explanation.
+Return ONLY valid JSON, no markdown backticks:
+{"questions":[{"number":1,"question":"Question text?","optionA":"Option A","optionB":"Option B","optionC":"Option C","optionD":"Option D","optionE":null,"answer":"A","explanation":"Brief explanation"}]}`;
+      step(ctx,2,total,'done'); step(ctx,3,total,'load');
+      raw=await claude(buildMsg(method,file,b64,text,prompt),10000);
+      parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+      pqOut=parsed.questions||[];
+      step(ctx,3,total,'done'); step(ctx,4,total,'done');
+      renderPQPV();
+      toast(pqOut.length+' questions for '+selYear+' 🎉','ok');
     }
-    setStep('sp',1,'done',5);
-    setStep('sp',2,'loading',5);
-
-    const prompt=`Extract educational content from this material for a Nigerian university (Unilorin) post-UTME study app. Subject: ${subjectLabel}.
-
-${extractNotes?`Extract STUDY NOTES:
-- Identify distinct topics
-- For each: short title, relevant emoji, order number (1,2,3...), 4-8 concise bullet points, optional example/tip`:'Do NOT extract notes.'}
-
-${extractQuestions?`Extract MULTIPLE CHOICE QUESTIONS:
-- Full question text, options A/B/C/D (and E if present), correct answer letter, brief explanation`:'Do NOT extract questions.'}
-
-Respond ONLY with valid JSON. No markdown, no backticks, no explanation:
-{
-  "notes": [{"emoji":"📌","title":"Topic","order":1,"content":["point 1","point 2"],"example":"optional tip"}],
-  "questions": [{"number":1,"question":"Question text?","optionA":"A","optionB":"B","optionC":"C","optionD":"D","optionE":null,"answer":"A","explanation":"Why A is correct"}]
-}
-${!extractNotes?'Set "notes" to [].':""}
-${!extractQuestions?'Set "questions" to [].':""}`;
-
-    setStep('sp',2,'done',5);
-    setStep('sp',3,'loading',5);
-
-    const content=studyInputMethod==='text'
-      ?[{type:'text',text:prompt+'\n\nContent:\n'+text}]
-      :(studyFile.type.startsWith('image/')
-        ?[{type:'image',source:{type:'base64',media_type:studyFile.type,data:base64}},{type:'text',text:prompt}]
-        :[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]);
-
-    const raw=await callClaude([{role:'user',content}]);
-    setStep('sp',3,'done',5);
-    setStep('sp',4,'loading',5);
-
-    const clean=raw.replace(/```json|```/g,'').trim();
-    let parsed;
-    try{parsed=JSON.parse(clean);}catch(e){throw new Error('AI returned invalid JSON. Please try again.');}
-
-    studyExtracted={notes:parsed.notes||[],questions:parsed.questions||[]};
-    setStep('sp',4,'done',5);
-    setStep('sp',5,'done',5);
-
-    renderStudyPreview();
-    document.getElementById('studyPreview').classList.add('active');
-    showToast(`Found ${studyExtracted.notes.length} topics & ${studyExtracted.questions.length} questions 🎉`,'success');
-  }catch(e){showToast('Error: '+e.message,'error');console.error(e);}
-  btn.disabled=false;
+    document.getElementById(ctx+'-pv').classList.add('on');
+  }catch(e){toast('Error: '+e.message,'err');console.error(e);}
+  xbtn.disabled=false;
 }
 
-function renderStudyPreview(){
-  document.getElementById('studyPreviewCount').textContent=`${studyExtracted.notes.length} topics · ${studyExtracted.questions.length} questions`;
-  const letters=['A','B','C','D','E'];
-
-  document.getElementById('studyPrevNotes').innerHTML=studyExtracted.notes.length
-    ?studyExtracted.notes.map(n=>`<div class="preview-card">
-        <div class="pc-header"><span class="pc-emoji">${n.emoji||'📌'}</span><span class="pc-title">${n.title}</span></div>
-        <ul class="pc-points">${(n.content||[]).map(p=>`<li>${p}</li>`).join('')}</ul>
-        ${n.example?`<div class="pc-example">💡 ${n.example}</div>`:''}
-      </div>`).join('')
-    :'<div class="empty-state"><div class="ei">📭</div><p>No notes found.</p></div>';
-
-  document.getElementById('studyPrevQuestions').innerHTML=studyExtracted.questions.length
-    ?studyExtracted.questions.map((q,i)=>{
-        const opts=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE];
-        return`<div class="preview-card">
-          <div class="pq-num">Q${q.number||i+1}</div>
-          <div class="pq-text">${q.question}</div>
-          <div class="pq-opts">${opts.map((o,i)=>o?`<div class="pq-opt${letters[i]===q.answer?' correct':''}">${letters[i]}. ${o}${letters[i]===q.answer?' ✓':''}</div>`:'').join('')}</div>
-          ${q.explanation?`<div class="pq-exp">💡 ${q.explanation}</div>`:''}
-        </div>`;
-      }).join('')
-    :'<div class="empty-state"><div class="ei">❓</div><p>No questions found.</p></div>';
+// ── PREVIEWS ──
+const LS=['A','B','C','D','E'];
+function renderStudyPV(){
+  document.getElementById('study-pvct').textContent=studyOut.notes.length+' topics · '+studyOut.questions.length+' questions';
+  document.getElementById('study-pvnotes').innerHTML=studyOut.notes.length
+    ?studyOut.notes.map(n=>`<div class="pc"><div class="pch"><span>${n.emoji||'📌'}</span><span class="pct">${n.title}</span></div><ul class="pcpts">${(n.content||[]).map(p=>`<li>${p}</li>`).join('')}</ul>${n.example?`<div class="pcex">💡 ${n.example}</div>`:''}</div>`).join('')
+    :'<div class="empty"><div class="ei">📭</div><p>No notes found</p></div>';
+  document.getElementById('study-pvqs').innerHTML=studyOut.questions.length
+    ?studyOut.questions.map((q,i)=>`<div class="pc"><div class="qn">Q${q.number||i+1}</div><div class="qt">${q.question}</div>${LS.map(l=>q['option'+l]?`<div class="qo${l===q.answer?' ok':''}">${l}. ${q['option'+l]}${l===q.answer?' ✓':''}</div>`:'').join('')}${q.explanation?`<div class="qex">💡 ${q.explanation}</div>`:''}</div>`).join('')
+    :'<div class="empty"><div class="ei">❓</div><p>No questions found</p></div>';
+}
+function renderPQPV(){
+  document.getElementById('pq-pv-year').textContent=selYear;
+  document.getElementById('pq-pvct').textContent=pqOut.length+' questions';
+  document.getElementById('pq-pvlist').innerHTML=pqOut.length
+    ?pqOut.map((q,i)=>`<div class="pc"><div class="qn">Q${q.number||i+1}</div><div class="qt">${q.question}</div>${LS.map(l=>q['option'+l]?`<div class="qo${l===q.answer?' ok':''}">${l}. ${q['option'+l]}${l===q.answer?' ✓':''}</div>`:'').join('')}${q.explanation?`<div class="qex">💡 ${q.explanation}</div>`:''}</div>`).join('')
+    :'<div class="empty"><div class="ei">❓</div><p>No questions found</p></div>';
+}
+function switchPV(tab,btn){
+  document.querySelectorAll('#study-pvtabs .pvtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('study-pvnotes').style.display=tab==='notes'?'flex':'none';
+  document.getElementById('study-pvqs').style.display=tab==='questions'?'flex':'none';
+}
+function discard(ctx){
+  if(ctx==='study') studyOut={notes:[],questions:[]}; else pqOut=[];
+  document.getElementById(ctx+'-pv').classList.remove('on');
+  document.getElementById(ctx+'-prog').classList.remove('on');
+  clearF(ctx);
+  const ta=document.getElementById(ctx+'-ta');if(ta)ta.value='';
 }
 
-function switchStudyPreview(tab,btn){
-  document.querySelectorAll('#studyPrevTabs .prev-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('studyPrevNotes').style.display=tab==='notes'?'flex':'none';
-  document.getElementById('studyPrevQuestions').style.display=tab==='questions'?'flex':'none';
-}
-
-function discardStudy(){
-  studyExtracted={notes:[],questions:[]};
-  document.getElementById('studyPreview').classList.remove('active');
-  document.getElementById('studyProgress').classList.remove('active');
-  clearStudyInput();
-  document.getElementById('studyTextArea').value='';
-}
-
-async function saveStudyToFirestore(){
-  const btn=document.getElementById('studySaveBtn');
-  btn.disabled=true; btn.innerHTML='⏳ Saving...';
-  let saved=0,failed=0;
+// ── SAVE ──
+async function saveStudy(){
+  const btn=document.getElementById('study-svbtn');
+  btn.disabled=true;btn.textContent='⏳ Saving...';
   const ts=firebase.firestore.FieldValue.serverTimestamp();
-  try{
-    for(const note of studyExtracted.notes){
-      try{await db.collection('studynotes').doc(studySubject).collection('topics').add({...note,createdAt:ts,updatedAt:ts});saved++;}
-      catch(e){failed++;console.error(e);}
-    }
-    for(const q of studyExtracted.questions){
-      try{await db.collection('studyquestions').doc(studySubject).collection('questions').add({...q,createdAt:ts,updatedAt:ts});saved++;}
-      catch(e){failed++;console.error(e);}
-    }
-    showToast(`✅ Saved ${saved} items${failed?' ('+failed+' failed)':''}!`,'success');
-    discardStudy();
-    loadManageNotes(studySubject);
-    loadManageSQ(studySubject);
-  }catch(e){showToast('Save failed: '+e.message,'error');}
-  btn.disabled=false; btn.innerHTML='💾 Save to Firestore';
+  let ok=0,fail=0;
+  for(const n of studyOut.notes){try{await db.collection('studynotes').doc(studySub).collection('topics').add({...n,createdAt:ts,updatedAt:ts});ok++;}catch(e){fail++;}}
+  for(const q of studyOut.questions){try{await db.collection('studyquestions').doc(studySub).collection('questions').add({...q,createdAt:ts,updatedAt:ts});ok++;}catch(e){fail++;}}
+  toast('✅ Saved '+ok+' items'+(fail?' ('+fail+' failed)':''),'ok');
+  discard('study');loadNotes(studySub);loadSQ(studySub);
+  btn.disabled=false;btn.textContent='💾 Save to Firestore';
 }
-
-// ══ PAST QUESTIONS EXTRACTION ══
-async function runPQExtraction(){
-  if(!selectedYear){showToast('Please select a year first','error');return;}
-  const btn=document.getElementById('pqExtractBtn');
-  btn.disabled=true;
-  document.getElementById('pqProgress').classList.add('active');
-  document.getElementById('pqPreview').classList.remove('active');
-
-  try{
-    setStep('pp',1,'loading',4);
-    let base64='', text='';
-    if(pqInputMethod==='text'){
-      text=document.getElementById('pqTextArea').value;
-    } else if(pqInputMethod==='file'){
-      showToast('Extracting text from file...','info');
-      text=await extractTextFromFile(pqFile);
-      if(!text.trim()) throw new Error('Could not extract text from this file.');
-    } else {
-      base64=await fileToBase64(pqFile);
-    }
-    setStep('pp',1,'done',4);
-    setStep('pp',2,'loading',4);
-
-    const prompt=`Extract ALL multiple choice questions from this ${selectedYear} Unilorin POST-UTME past question paper.
-
-For each question extract:
-- Question number
-- Full question text (exactly as written)
-- Options A, B, C, D (and E if present)
-- Correct answer letter
-- Brief explanation of why that answer is correct
-
-Respond ONLY with valid JSON. No markdown, no backticks:
-{
-  "questions": [
-    {
-      "number": 1,
-      "question": "Full question text?",
-      "optionA": "Option A",
-      "optionB": "Option B",
-      "optionC": "Option C",
-      "optionD": "Option D",
-      "optionE": null,
-      "answer": "A",
-      "explanation": "Brief explanation"
-    }
-  ]
-}`;
-
-    const content=pqInputMethod==='text'
-      ?[{type:'text',text:prompt+'\n\nContent:\n'+text}]
-      :(pqFile.type.startsWith('image/')
-        ?[{type:'image',source:{type:'base64',media_type:pqFile.type,data:base64}},{type:'text',text:prompt}]
-        :[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]);
-
-    setStep('pp',2,'done',4);
-    setStep('pp',3,'loading',4);
-
-    const raw=await callClaude([{role:'user',content}],10000);
-    const clean=raw.replace(/```json|```/g,'').trim();
-    let parsed;
-    try{parsed=JSON.parse(clean);}catch(e){throw new Error('AI returned invalid JSON. Please try again.');}
-
-    pqExtracted=parsed.questions||[];
-    setStep('pp',3,'done',4);
-    setStep('pp',4,'done',4);
-
-    renderPQPreview();
-    document.getElementById('pqPreview').classList.add('active');
-    showToast(`Found ${pqExtracted.length} questions for ${selectedYear} 🎉`,'success');
-  }catch(e){showToast('Error: '+e.message,'error');console.error(e);}
-  btn.disabled=false;
-}
-
-function renderPQPreview(){
-  document.getElementById('pqPreviewYear').textContent=selectedYear;
-  document.getElementById('pqPreviewCount').textContent=pqExtracted.length+' questions';
-  const letters=['A','B','C','D','E'];
-  document.getElementById('pqPrevList').innerHTML=pqExtracted.length
-    ?pqExtracted.map((q,i)=>{
-        const opts=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE];
-        return`<div class="preview-card">
-          <div class="pq-num">Q${q.number||i+1}</div>
-          <div class="pq-text">${q.question}</div>
-          <div class="pq-opts">${opts.map((o,j)=>o?`<div class="pq-opt${letters[j]===q.answer?' correct':''}">${letters[j]}. ${o}${letters[j]===q.answer?' ✓':''}</div>`:'').join('')}</div>
-          ${q.explanation?`<div class="pq-exp">💡 ${q.explanation}</div>`:''}
-        </div>`;
-      }).join('')
-    :'<div class="empty-state"><div class="ei">❓</div><p>No questions found.</p></div>';
-}
-
-function discardPQ(){
-  pqExtracted=[];
-  document.getElementById('pqPreview').classList.remove('active');
-  document.getElementById('pqProgress').classList.remove('active');
-  clearPQInput();
-  document.getElementById('pqTextArea').value='';
-}
-
-async function savePQToFirestore(){
-  if(!selectedYear){showToast('No year selected','error');return;}
-  const btn=document.getElementById('pqSaveBtn');
-  btn.disabled=true; btn.innerHTML='⏳ Saving...';
-  let saved=0,failed=0;
+async function savePQ(){
+  if(!selYear){toast('No year selected','err');return;}
+  const btn=document.getElementById('pq-svbtn');
+  btn.disabled=true;btn.textContent='⏳ Saving...';
   const ts=firebase.firestore.FieldValue.serverTimestamp();
-  try{
-    const col=db.collection('pastquestions').doc(String(selectedYear)).collection('questions');
-    for(const q of pqExtracted){
-      try{await col.add({...q,year:selectedYear,createdAt:ts,updatedAt:ts});saved++;}
-      catch(e){failed++;console.error(e);}
-    }
-    showToast(`✅ Saved ${saved} questions for ${selectedYear}${failed?' ('+failed+' failed)':''}!`,'success');
-    discardPQ();
-  }catch(e){showToast('Save failed: '+e.message,'error');}
-  btn.disabled=false; btn.innerHTML='💾 Save to Firestore';
+  let ok=0,fail=0;
+  for(const q of pqOut){try{await db.collection('pastquestions').doc(String(selYear)).collection('questions').add({...q,year:selYear,createdAt:ts,updatedAt:ts});ok++;}catch(e){fail++;}}
+  toast('✅ Saved '+ok+' questions for '+selYear+(fail?' ('+fail+' failed)':''),'ok');
+  discard('pq');
+  btn.disabled=false;btn.textContent='💾 Save to Firestore';
 }
 
-// ══ MANAGE ══
-let manageNotesSubject='english', manageSQSubject='english', managePQYear=null;
-
-async function loadManageNotes(subject,btn){
-  manageNotesSubject=subject;
-  if(btn){document.querySelectorAll('#section-manage-notes .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-  const el=document.getElementById('manageNotesList');
-  el.innerHTML='<div class="loading-wrap"><div class="spinner"></div>Loading...</div>';
+// ── MANAGE ──
+let mNS='english', mSQS='english';
+async function loadNotes(sub,btn){
+  mNS=sub;
+  if(btn){document.querySelectorAll('#mnotesTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  const el=document.getElementById('mnotes-list');
+  el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
   try{
-    const snap=await db.collection('studynotes').doc(subject).collection('topics').orderBy('order').get();
-    if(snap.empty){el.innerHTML='<div class="empty-state"><div class="ei">📭</div><p>No notes yet. Upload a PDF to add notes.</p></div>';return;}
-    el.innerHTML='<div class="manage-list">'+snap.docs.map(doc=>{
-      const t=doc.data();
-      return`<div class="manage-item">
-        <div class="mi-left"><span class="mi-icon">${t.emoji||'📌'}</span>
-          <div class="mi-info"><div class="mi-title">${t.title}</div><div class="mi-meta">${(t.content||[]).length} points</div></div>
-        </div>
-        <button class="del-btn" onclick="promptDelete('note','${doc.id}','${t.title.replace(/'/g,"\\'")}')">Delete</button>
-      </div>`;
-    }).join('')+'</div>';
-  }catch(e){el.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+    const snap=await db.collection('studynotes').doc(sub).collection('topics').orderBy('order').get();
+    if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📭</div><p>No notes yet</p></div>';return;}
+    el.innerHTML='<div class="mlist">'+snap.docs.map(d=>{const t=d.data();return`<div class="mi"><div class="mil"><span class="mico">${t.emoji||'📌'}</span><div class="min2"><div class="mit">${t.title}</div><div class="mim">${(t.content||[]).length} points</div></div></div><button class="delbtn" onclick="askDel('note','${d.id}','${(t.title||'').replace(/'/g,"\\'")}')">Delete</button></div>`;}).join('')+'</div>';
+  }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
 }
-
-async function loadManageSQ(subject,btn){
-  manageSQSubject=subject;
-  if(btn){document.querySelectorAll('#section-manage-sq .sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-  const el=document.getElementById('manageSQList');
-  el.innerHTML='<div class="loading-wrap"><div class="spinner"></div>Loading...</div>';
+async function loadSQ(sub,btn){
+  mSQS=sub;
+  if(btn){document.querySelectorAll('#msqTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+  const el=document.getElementById('msq-list');
+  el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
   try{
-    const snap=await db.collection('studyquestions').doc(subject).collection('questions').orderBy('number').get();
-    if(snap.empty){el.innerHTML='<div class="empty-state"><div class="ei">❓</div><p>No questions yet.</p></div>';return;}
-    el.innerHTML='<div class="manage-list">'+snap.docs.map(doc=>{
-      const q=doc.data();
-      return`<div class="manage-item">
-        <div class="mi-left"><span class="mi-num">${q.number||'?'}</span>
-          <div class="mi-info"><div class="mi-title">${(q.question||'').substring(0,65)}${(q.question||'').length>65?'…':''}</div>
-            <div class="mi-meta">Answer: <strong style="color:var(--success)">${q.answer||'?'}</strong></div>
-          </div>
-        </div>
-        <button class="del-btn" onclick="promptDelete('studyq','${doc.id}','Q${q.number}')">Delete</button>
-      </div>`;
-    }).join('')+'</div>';
-  }catch(e){el.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+    const snap=await db.collection('studyquestions').doc(sub).collection('questions').orderBy('number').get();
+    if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">❓</div><p>No questions yet</p></div>';return;}
+    el.innerHTML='<div class="mlist">'+snap.docs.map(d=>{const q=d.data();return`<div class="mi"><div class="mil"><span class="mnum">${q.number||'?'}</span><div class="min2"><div class="mit">${(q.question||'').substring(0,60)}…</div><div class="mim">Ans: <b style="color:var(--success)">${q.answer||'?'}</b></div></div></div><button class="delbtn" onclick="askDel('sq','${d.id}','Q${q.number}')">Delete</button></div>`;}).join('')+'</div>';
+  }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
 }
-
-async function loadManagePQ(year){
-  managePQYear=year;
-  const el=document.getElementById('managePQList');
-  el.innerHTML='<div class="loading-wrap"><div class="spinner"></div>Loading...</div>';
+async function loadPQ(year){
+  const el=document.getElementById('mpq-list');
+  el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
   try{
     const snap=await db.collection('pastquestions').doc(String(year)).collection('questions').orderBy('number').get();
-    if(snap.empty){el.innerHTML=`<div class="empty-state"><div class="ei">📭</div><p>No questions for ${year} yet.</p></div>`;return;}
-    el.innerHTML=`<div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">${snap.docs.length} questions for ${year}</div><div class="manage-list">`+snap.docs.map(doc=>{
-      const q=doc.data();
-      return`<div class="manage-item">
-        <div class="mi-left"><span class="mi-num">${q.number||'?'}</span>
-          <div class="mi-info"><div class="mi-title">${(q.question||'').substring(0,65)}${(q.question||'').length>65?'…':''}</div>
-            <div class="mi-meta">Answer: <strong style="color:var(--success)">${q.answer||'?'}</strong></div>
-          </div>
-        </div>
-        <button class="del-btn" onclick="promptDelete('pastq','${doc.id}','Q${q.number}')">Delete</button>
-      </div>`;
-    }).join('')+'</div>';
-  }catch(e){el.innerHTML=`<div class="empty-state"><div class="ei">⚠️</div><p>${e.message}</p></div>`;}
+    if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📭</div><p>No questions for '+year+' yet</p></div>';return;}
+    el.innerHTML='<div style="font-size:.73rem;color:var(--muted);margin-bottom:10px;">'+snap.docs.length+' questions for '+year+'</div><div class="mlist">'+snap.docs.map(d=>{const q=d.data();return`<div class="mi"><div class="mil"><span class="mnum">${q.number||'?'}</span><div class="min2"><div class="mit">${(q.question||'').substring(0,60)}…</div><div class="mim">Ans: <b style="color:var(--success)">${q.answer||'?'}</b></div></div></div><button class="delbtn" onclick="askDel('pq','${d.id}','Q${q.number}')">Delete</button></div>`;}).join('')+'</div>';
+  }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
 }
 
 // ── DELETE ──
-let deleteTarget={type:null,id:null};
-function promptDelete(type,id,label){
-  deleteTarget={type,id};
-  document.getElementById('deleteModalDesc').textContent=`Delete "${label}"? This cannot be undone.`;
-  document.getElementById('deleteModal').classList.add('open');
-}
-function closeModal(){document.getElementById('deleteModal').classList.remove('open');}
-async function confirmDelete(){
+let delT={type:null,id:null};
+function askDel(type,id,label){delT={type,id};document.getElementById('delDesc').textContent='Delete "'+label+'"? This cannot be undone.';document.getElementById('delModal').classList.add('open');}
+function closeModal(){document.getElementById('delModal').classList.remove('open');}
+async function confirmDel(){
   closeModal();
-  const{type,id}=deleteTarget;
   try{
-    if(type==='note'){
-      await db.collection('studynotes').doc(manageNotesSubject).collection('topics').doc(id).delete();
-      showToast('Deleted','success'); loadManageNotes(manageNotesSubject);
-    } else if(type==='studyq'){
-      await db.collection('studyquestions').doc(manageSQSubject).collection('questions').doc(id).delete();
-      showToast('Deleted','success'); loadManageSQ(manageSQSubject);
-    } else if(type==='pastq'){
-      await db.collection('pastquestions').doc(String(managePQYear)).collection('questions').doc(id).delete();
-      showToast('Deleted','success'); loadManagePQ(managePQYear);
-    }
-  }catch(e){showToast('Delete failed: '+e.message,'error');}
+    if(delT.type==='note'){await db.collection('studynotes').doc(mNS).collection('topics').doc(delT.id).delete();toast('Deleted','ok');loadNotes(mNS);}
+    else if(delT.type==='sq'){await db.collection('studyquestions').doc(mSQS).collection('questions').doc(delT.id).delete();toast('Deleted','ok');loadSQ(mSQS);}
+    else if(delT.type==='pq'){await db.collection('pastquestions').doc(String(mPQYear)).collection('questions').doc(delT.id).delete();toast('Deleted','ok');loadPQ(mPQYear);}
+  }catch(e){toast('Delete failed: '+e.message,'err');}
 }
 
 // ── TOAST ──
-let toastTimer;
-function showToast(msg,type='info'){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+type+' show';
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
-}
+let tT;
+function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3500);}
 </script>
 </body>
 </html>
