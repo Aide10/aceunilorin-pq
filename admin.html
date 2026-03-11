@@ -516,7 +516,7 @@
 </div>
 
 <!-- MOBILE NAV -->
-<div class="mobile-nav" id="mobileNav">
+<div class="mobile-nav" id="mobileNav" style="display:none;">
   <div class="mobile-nav-inner">
     <button class="mnav-item active" onclick="showSection('study',this)"><span class="mnav-icon">📒</span>Study</button>
     <button class="mnav-item" onclick="showSection('pastq',this)"><span class="mnav-icon">📝</span>Past Q</button>
@@ -571,6 +571,7 @@ auth.onAuthStateChanged(u=>{
   if(u&&u.uid===ADMIN_UID){
     document.getElementById('authGate').style.display='none';
     document.getElementById('adminPanel').style.display='block';
+    document.getElementById('mobileNav').style.display='block';
     buildYearGrids();
     loadManageNotes('english');
     loadManageSQ('english');
@@ -578,6 +579,7 @@ auth.onAuthStateChanged(u=>{
     if(u&&u.uid!==ADMIN_UID) auth.signOut();
     document.getElementById('authGate').style.display='flex';
     document.getElementById('adminPanel').style.display='none';
+    document.getElementById('mobileNav').style.display='none';
   }
 });
 async function adminLogout(){await auth.signOut();}
