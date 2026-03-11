@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leaderboard — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"]{--bg:#0A0F1E;--surface:#131C2E;--surface2:#1A2640;--surface3:#21304F;--primary:#3B82F6;--pg:rgba(59,130,246,0.15);--text:#F1F5F9;--muted:#64748B;--border:rgba(255,255,255,0.06);--gold:#F59E0B;--silver:#94A3B8;--bronze:#CD7C3A;}
+    :root[data-theme="light"]{--bg:#F1F5FB;--surface:#FFFFFF;--surface2:#E8EFF9;--surface3:#D8E4F4;--primary:#2563EB;--pg:rgba(37,99,235,0.1);--text:#0F172A;--muted:#64748B;--border:rgba(0,0,0,0.07);--gold:#D97706;--silver:#64748B;--bronze:#92400E;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px;}
+
+    /* HEADER */
+    .header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .back-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:1rem;transition:background .2s;}
+    .back-btn:hover{background:var(--surface3);}
+    .header-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;}
+    .theme-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;}
+
+    /* HERO */
+    .hero{padding:28px 18px 20px;text-align:center;}
+    .hero-icon{font-size:2.8rem;margin-bottom:10px;display:block;}
+    .hero-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:6px;}
+    .hero-sub{font-size:.83rem;color:var(--muted);line-height:1.6;max-width:280px;margin:0 auto;}
+
+    /* MY RANK CARD */
+    .my-rank-wrap{padding:0 18px 20px;}
+    .my-rank-card{background:linear-gradient(135deg,#3B82F6,#6366F1);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;}
+    .my-rank-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);}
+    .my-rank-card::after{content:'';position:absolute;bottom:-20px;right:30px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.05);}
+    .mrn{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#fff;min-width:52px;text-align:center;position:relative;z-index:1;}
+    .mrn span{display:block;font-size:.6rem;font-weight:600;opacity:.8;letter-spacing:.5px;text-transform:uppercase;}
+    .mri{flex:1;position:relative;z-index:1;}
+    .mri-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#fff;margin-bottom:2px;}
+    .mri-meta{font-size:.74rem;color:rgba(255,255,255,0.75);}
+    .mrs{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;position:relative;z-index:1;text-align:right;}
+    .mrs span{display:block;font-size:.6rem;font-weight:600;opacity:.8;text-transform:uppercase;letter-spacing:.5px;}
+    .my-rank-card.grey{background:var(--surface2);border:1px solid var(--border);}
+    .my-rank-card.grey .mrn,.my-rank-card.grey .mri-name,.my-rank-card.grey .mrs{color:var(--text);}
+    .my-rank-card.grey .mri-meta,.my-rank-card.grey .mrn span,.my-rank-card.grey .mrs span{color:var(--muted);}
+
+    /* FILTER */
+    .filter-wrap{padding:0 18px 16px;}
+    .filter-tabs{display:flex;background:var(--surface);border-radius:12px;padding:4px;border:1px solid var(--border);}
+    .ftab{flex:1;padding:9px 6px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;border-radius:8px;cursor:pointer;transition:all .2s;text-align:center;}
+    .ftab.active{background:var(--primary);color:#fff;}
+
+    /* PODIUM */
+    .podium-wrap{padding:0 18px 24px;}
+    .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;height:175px;}
+    .podium-slot{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;max-width:110px;}
+    .p-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#fff;border:3px solid transparent;position:relative;flex-shrink:0;}
+    .p-avatar .crown{position:absolute;top:-15px;font-size:1rem;}
+    .p1 .p-avatar{width:60px;height:60px;font-size:1.3rem;}
+    .p-name{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:800;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px;}
+    .p-val{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;color:var(--primary);}
+    .p-num{font-size:.65rem;color:var(--muted);font-weight:700;}
+    .p-block{border-radius:10px 10px 0 0;width:100%;}
+    .p1 .p-block{background:linear-gradient(180deg,rgba(245,158,11,.22),rgba(245,158,11,.05));height:95px;border:1px solid rgba(245,158,11,.3);}
+    .p2 .p-block{background:linear-gradient(180deg,rgba(148,163,184,.18),rgba(148,163,184,.04));height:68px;border:1px solid rgba(148,163,184,.2);}
+    .p3 .p-block{background:linear-gradient(180deg,rgba(205,124,58,.18),rgba(205,124,58,.04));height:52px;border:1px solid rgba(205,124,58,.2);}
+
+    /* LIST */
+    .list-wrap{padding:0 18px;}
+    .list-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .list-title{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+    .list-ct{font-size:.72rem;color:var(--muted);}
+    .lb-row{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;transition:border-color .2s;animation:sIn .3s ease both;}
+    .lb-row:hover{border-color:rgba(59,130,246,.4);}
+    .lb-row.me{border-color:var(--primary);background:var(--pg);}
+    @keyframes sIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+    .lb-rank{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;color:var(--muted);min-width:30px;text-align:center;font-size:1.1rem;}
+    .lb-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:#fff;flex-shrink:0;}
+    .lb-info{flex:1;min-width:0;}
+    .lb-name{font-family:'Syne',sans-serif;font-size:.84rem;font-weight:800;display:flex;align-items:center;gap:5px;min-width:0;}
+    .lb-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .lb-meta{font-size:.7rem;color:var(--muted);margin-top:1px;}
+    .lb-right{text-align:right;flex-shrink:0;}
+    .lb-score{font-family:'Syne',sans-serif;font-size:.98rem;font-weight:800;color:var(--primary);}
+    .lb-slabel{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    .me-tag{background:var(--primary);color:#fff;font-size:.55rem;font-weight:800;padding:2px 6px;border-radius:100px;flex-shrink:0;}
+
+    /* STATES */
+    .loading-wrap{text-align:center;padding:40px 20px;color:var(--muted);}
+    .spinner{width:30px;height:30px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty-wrap{text-align:center;padding:40px 20px;}
+    .empty-icon{font-size:2.5rem;margin-bottom:12px;}
+    .empty-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-bottom:6px;}
+    .empty-sub{font-size:.8rem;color:var(--muted);line-height:1.6;}
+    .play-btn{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:11px 22px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none;transition:all .2s;}
+    .play-btn:hover{transform:translateY(-2px);}
+    .load-more{width:100%;padding:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.83rem;cursor:pointer;margin-top:4px;transition:all .2s;}
+    .load-more:hover{border-color:var(--primary);color:var(--primary);}
+
+    /* SKELETON */
+    .skel{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:14px;height:62px;margin-bottom:8px;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* BOTTOM NAV */
+    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 16px;z-index:50;}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--muted);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:4px 0;transition:color .2s;}
+    .nav-item.active,.nav-item:hover{color:var(--primary);}
+    .nav-icon{font-size:1.15rem;}
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="header-title">🏆 Leaderboard</div>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">☀️</button>
+  </div>
+
+  <div class="hero">
+    <span class="hero-icon">🏆</span>
+    <div class="hero-title">Top Performers</div>
+    <div class="hero-sub">Compete with other students. Take more mocks to climb the ranks!</div>
+  </div>
+
+  <div class="my-rank-wrap" id="myRankWrap" style="display:none">
+    <div class="my-rank-card" id="myRankCard">
+      <div class="mrn" id="mrn">—<span>Your Rank</span></div>
+      <div class="mri">
+        <div class="mri-name" id="mriName">—</div>
+        <div class="mri-meta" id="mriMeta">—</div>
+      </div>
+      <div class="mrs" id="mrs">—<span>Best Score</span></div>
+    </div>
+  </div>
+
+  <div class="filter-wrap">
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="setFilter('score',this)">🏆 Best Score</button>
+      <button class="ftab" onclick="setFilter('mocks',this)">⏱️ Most Mocks</button>
+    </div>
+  </div>
+
+  <div class="podium-wrap" id="podiumWrap" style="display:none">
+    <div class="podium" id="podium"></div>
+  </div>
+
+  <div class="list-wrap">
+    <div class="list-hdr">
+      <div class="list-title">Rankings</div>
+      <div class="list-ct" id="listCt"></div>
+    </div>
+    <div id="lbList">
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    </div>
+    <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMore()">Load more...</button>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="pastquestions.html" class="nav-item"><span class="nav-icon">📝</span>PQs</a>
+    <a href="mock.html" class="nav-item"><span class="nav-icon">⏱️</span>Mock</a>
+    <a href="study.html" class="nav-item"><span class="nav-icon">📖</span>Study</a>
+    <a href="leaderboard.html" class="nav-item active"><span class="nav-icon">🏆</span>Ranks</a>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    firebase.initializeApp({apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"});
+    const auth=firebase.auth(), db=firebase.firestore();
+
+    // ── THEME ──
+    const th=localStorage.getItem('theme')||'dark';
+    document.documentElement.setAttribute('data-theme',th);
+    document.getElementById('themeBtn').textContent=th==='dark'?'☀️':'🌙';
+    function toggleTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('themeBtn').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
+
+    // ── STATE ──
+    let entries=[], myUID=null, myEntry=null, filterMode='score', loaded=0;
+    const PAGE=20;
+    const COLORS=['#3B82F6','#8B5CF6','#EC4899','#10B981','#F59E0B','#EF4444','#06B6D4','#F97316'];
+    function avColor(n){let h=0;for(let i=0;i<(n||'?').length;i++)h=(n||'?').charCodeAt(i)+((h<<5)-h);return COLORS[Math.abs(h)%COLORS.length];}
+    function avInit(n){return(n||'?')[0].toUpperCase();}
+
+    // ── AUTH ──
+    auth.onAuthStateChanged(async u=>{
+      if(!u){window.location.href='auth.html';return;}
+      myUID=u.uid;
+      await load();
+    });
+
+    // ── LOAD ──
+    async function load(){
+      showSkel();
+      try{
+        const field=filterMode==='score'?'bestScore':'mocksTaken';
+        const snap=await db.collection('leaderboard').orderBy(field,'desc').limit(100).get();
+        entries=snap.docs.map((d,i)=>({...d.data(),uid:d.id,rank:i+1}));
+        myEntry=entries.find(e=>e.uid===myUID)||null;
+        if(!myEntry){
+          const d=await db.collection('leaderboard').doc(myUID).get();
+          if(d.exists) myEntry={...d.data(),uid:myUID,rank:'100+'};
+        }
+        renderMyRank();
+        renderPodium();
+        loaded=0;
+        renderList(true);
+      }catch(e){
+        document.getElementById('lbList').innerHTML=`<div class="empty-wrap"><div class="empty-icon">⚠️</div><div class="empty-title">Couldn't load</div><div class="empty-sub">${e.message}</div></div>`;
+      }
+    }
+
+    // ── MY RANK ──
+    function renderMyRank(){
+      if(!myEntry){document.getElementById('myRankWrap').style.display='none';return;}
+      document.getElementById('myRankWrap').style.display='block';
+      const hasScore=(myEntry.bestScore||0)>0;
+      document.getElementById('myRankCard').className='my-rank-card'+(hasScore?'':' grey');
+      document.getElementById('mrn').innerHTML=(myEntry.rank||'—')+'<span>Your Rank</span>';
+      document.getElementById('mriName').textContent='@'+(myEntry.username||'You');
+      document.getElementById('mriMeta').textContent=(myEntry.mocksTaken||0)+' mock'+(myEntry.mocksTaken!==1?'s':'')+' taken';
+      document.getElementById('mrs').innerHTML=(myEntry.bestScore||0)+'%<span>Best Score</span>';
+    }
+
+    // ── PODIUM ──
+    function renderPodium(){
+      const top=entries.slice(0,3);
+      if(!top.length){document.getElementById('podiumWrap').style.display='none';return;}
+      document.getElementById('podiumWrap').style.display='block';
+      // Display order: 2nd left, 1st centre, 3rd right
+      const display=[top[1],top[0],top[2]].map((e,di)=>({e,cls:['p2','p1','p3'][di],crown:['','👑',''][di]}));
+      document.getElementById('podium').innerHTML=display.map(({e,cls,crown})=>{
+        if(!e) return '<div class="podium-slot '+cls+'"></div>';
+        const isMe=e.uid===myUID;
+        const val=filterMode==='score'?(e.bestScore||0)+'%':(e.mocksTaken||0)+' mocks';
+        return `<div class="podium-slot ${cls}">
+          <div class="p-avatar" style="background:${avColor(e.username||e.fullName)};border-color:${avColor(e.username||e.fullName)}">
+            ${crown?`<span class="crown">${crown}</span>`:''}
+            ${avInit(e.username||e.fullName)}
+          </div>
+          <div class="p-name">${e.username||'Student'}${isMe?' 👈':''}</div>
+          <div class="p-val">${val}</div>
+          <div class="p-num">#${e.rank}</div>
+          <div class="p-block"></div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── LIST ──
+    function renderList(reset){
+      if(reset) loaded=0;
+      const chunk=entries.slice(loaded,loaded+PAGE);
+      loaded+=chunk.length;
+
+      if(!entries.length){
+        document.getElementById('lbList').innerHTML=`<div class="empty-wrap"><div class="empty-icon">🏁</div><div class="empty-title">No rankings yet</div><div class="empty-sub">Be the first! Take a mock exam to get on the board.</div><a href="mock.html" class="play-btn">⏱️ Take a Mock</a></div>`;
+        document.getElementById('listCt').textContent='';
+        document.getElementById('loadMoreBtn').style.display='none';
+        return;
+      }
+
+      document.getElementById('listCt').textContent=entries.length+' students';
+      const html=chunk.map((e,ci)=>{
+        const isMe=e.uid===myUID;
+        const medal=e.rank===1?'🥇':e.rank===2?'🥈':e.rank===3?'🥉':'#'+e.rank;
+        const val=filterMode==='score'?(e.bestScore||0)+'%':(e.mocksTaken||0);
+        const vlabel=filterMode==='score'?'Best Score':'Mocks';
+        return `<div class="lb-row${isMe?' me':''}" style="animation-delay:${ci*25}ms">
+          <div class="lb-rank">${medal}</div>
+          <div class="lb-av" style="background:${avColor(e.username||e.fullName)}">${avInit(e.username||e.fullName)}</div>
+          <div class="lb-info">
+            <div class="lb-name"><span class="lb-name-text">${e.username||e.fullName||'Student'}</span>${isMe?'<span class="me-tag">YOU</span>':''}</div>
+            <div class="lb-meta">${e.mocksTaken||0} mock${(e.mocksTaken||0)!==1?'s':''} · Last: ${e.lastScore||0}%</div>
+          </div>
+          <div class="lb-right">
+            <div class="lb-score">${val}</div>
+            <div class="lb-slabel">${vlabel}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+      if(reset) document.getElementById('lbList').innerHTML=html;
+      else document.getElementById('lbList').insertAdjacentHTML('beforeend',html);
+      document.getElementById('loadMoreBtn').style.display=loaded<entries.length?'block':'none';
+    }
+
+    function loadMore(){renderList(false);}
+    function setFilter(mode,btn){filterMode=mode;document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');load();}
+    function showSkel(){document.getElementById('lbList').innerHTML='<div class="skel"></div>'.repeat(6);document.getElementById('podiumWrap').style.display='none';document.getElementById('loadMoreBtn').style.display='none';}
+  </script>
+</body>
+</html>
