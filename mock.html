@@ -430,24 +430,16 @@
       }
       updateLoadingOverlay(`Loaded ${yearPools.length} year(s) of questions...`);
 
-      // Step 2: Pick questions evenly across years (round-robin), then fill remainder
+      // Step 2: Flatten all pools, shuffle everything, pick up to TARGET
       if (yearPools.length > 0) {
-        // Shuffle each year's pool
-        yearPools.forEach(pool => pool.sort(() => Math.random() - 0.5));
-        // Round-robin pick to spread questions evenly across years
-        let i = 0;
-        const yearIndices = new Array(yearPools.length).fill(0);
-        while (allQuestions.length < TARGET) {
-          const pool = yearPools[i % yearPools.length];
-          const idx = yearIndices[i % yearPools.length];
-          if (idx < pool.length) {
-            allQuestions.push(pool[idx]);
-            yearIndices[i % yearPools.length]++;
-          }
-          i++;
-          // Safety: if we've cycled through all pools and still not enough, break
-          if (i > yearPools.length * 200) break;
+        // Merge all questions from all loaded years
+        const allPooled = yearPools.flat();
+        // Full Fisher-Yates shuffle for true randomness
+        for (let i = allPooled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [allPooled[i], allPooled[j]] = [allPooled[j], allPooled[i]];
         }
+        allQuestions = allPooled.slice(0, TARGET);
       }
 
       // If full mock, also mix in study questions to fill up to TARGET
@@ -572,14 +564,43 @@
     const opts = document.getElementById('optionsContainer');
     opts.innerHTML = '';
     const letters = ['A','B','C','D','E'];
-    const options = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
+    const rawOptions = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
 
-    options.forEach((opt, i) => {
-      if (!opt) return;
+    // Build option objects with original letter and text
+    let optObjs = rawOptions
+      .map((text, i) => ({ text, origLetter: letters[i] }))
+      .filter(o => o.text);
+
+    // Shuffle options — but keep shuffle consistent per question using question index as seed
+    // Use stored shuffle if already seen this question, else generate and store
+    if (!q._shuffled) {
+      for (let i = optObjs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [optObjs[i], optObjs[j]] = [optObjs[j], optObjs[i]];
+      }
+      q._shuffled = optObjs; // cache so re-visiting question shows same order
+    } else {
+      optObjs = q._shuffled;
+    }
+
+    // Map new display letters A,B,C... to original correct answer
+    const correctOrigLetter = q.answer; // e.g. 'B'
+    let displayCorrectLetter = 'A';
+
+    optObjs.forEach((opt, i) => {
+      const displayLetter = letters[i];
+      if (opt.origLetter === correctOrigLetter) displayCorrectLetter = displayLetter;
+    });
+
+    // Store the remapped correct letter on question for grading
+    q._displayAnswer = displayCorrectLetter;
+
+    optObjs.forEach((opt, i) => {
+      const displayLetter = letters[i];
       const div = document.createElement('div');
-      div.className = 'option' + (userAnswers[currentIndex] === letters[i] ? ' selected' : '');
-      div.onclick = () => selectAnswer(letters[i]);
-      div.innerHTML = `<div class="option-letter">${letters[i]}</div><div class="option-text">${opt}</div>`;
+      div.className = 'option' + (userAnswers[currentIndex] === displayLetter ? ' selected' : '');
+      div.onclick = () => selectAnswer(displayLetter);
+      div.innerHTML = `<div class="option-letter">${displayLetter}</div><div class="option-text">${opt.text}</div>`;
       opts.appendChild(div);
     });
 
@@ -658,18 +679,32 @@
 
     questions.forEach((q, i) => {
       const userAns = userAnswers[i] || null;
-      const correctAns = q.answer || q.correctAnswer;
+      // Use the display-remapped correct answer (accounts for option shuffling)
+      const correctAns = q._displayAnswer || q.answer || q.correctAnswer;
       let status = 'skipped';
       if (userAns) {
         if (userAns === correctAns) { correct++; status = 'correct'; }
         else { wrong++; status = 'wrong'; }
       } else { skipped++; }
 
+      // Build review options using shuffled order if available
+      const letters = ['A','B','C','D','E'];
+      let rOptA = q.optionA, rOptB = q.optionB, rOptC = q.optionC, rOptD = q.optionD, rOptE = q.optionE || null;
+      if (q._shuffled) {
+        q._shuffled.forEach((o, idx) => {
+          if (idx === 0) rOptA = o.text;
+          if (idx === 1) rOptB = o.text;
+          if (idx === 2) rOptC = o.text;
+          if (idx === 3) rOptD = o.text;
+          if (idx === 4) rOptE = o.text;
+        });
+      }
+
       reviewData.push({
         question: q.question || q.text,
-        optionA: q.optionA, optionB: q.optionB,
-        optionC: q.optionC, optionD: q.optionD,
-        optionE: q.optionE || null,
+        optionA: rOptA, optionB: rOptB,
+        optionC: rOptC, optionD: rOptD,
+        optionE: rOptE,
         correctAnswer: correctAns,
         userAnswer: userAns,
         explanation: q.explanation || '',
