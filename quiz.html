@@ -27,110 +27,47 @@
     .blob { position:fixed; border-radius:50%; filter:blur(80px); opacity:0.1; pointer-events:none; z-index:0; }
     .blob-1 { width:400px; height:400px; background:#3B82F6; top:-100px; right:-80px; }
     .blob-2 { width:300px; height:300px; background:#6366F1; bottom:0; left:-60px; }
-
-    /* NAV */
-    nav {
-      position:sticky; top:0; z-index:100;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 20px;
-      background:rgba(15,23,42,0.8); backdrop-filter:blur(16px);
-      border-bottom:1px solid var(--border);
-    }
+    nav { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:rgba(15,23,42,0.8); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); }
     [data-theme="light"] nav { background:rgba(240,244,255,0.85); }
     .nav-logo { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; color:var(--primary); text-decoration:none; }
     .nav-logo span { color:var(--text); }
     .nav-right { display:flex; align-items:center; gap:10px; }
     .theme-toggle { background:var(--surface2); border:1px solid var(--border); color:var(--text); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
-
     .content { max-width:600px; margin:0 auto; padding:0 0 48px; position:relative; z-index:1; }
-
-    /* SCREENS */
     .screen { display:none; }
     .screen.active { display:block; animation:fadeUp 0.4s ease both; }
-
-    /* ── LOADING ── */
-    .loading-wrap {
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      min-height:60vh; gap:16px;
-    }
-    .spinner-lg {
-      width:48px; height:48px; border:4px solid var(--surface2);
-      border-top-color:var(--primary); border-radius:50%;
-      animation:spin 0.8s linear infinite;
-    }
+    .loading-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; }
+    .spinner-lg { width:48px; height:48px; border:4px solid var(--surface2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .loading-text { color:var(--text-muted); font-size:0.92rem; }
-
-    /* ── CBT HEADER ── */
-    .cbt-header {
-      position:sticky; top:57px; z-index:90;
-      background:var(--bg); padding:12px 20px;
-      border-bottom:1px solid var(--border);
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .year-badge {
-      font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800;
-      background:var(--primary-glow); color:var(--primary);
-      padding:5px 12px; border-radius:100px;
-      border:1px solid rgba(59,130,246,0.3);
-    }
+    .cbt-header { position:sticky; top:57px; z-index:90; background:var(--bg); padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .year-badge { font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; background:var(--primary-glow); color:var(--primary); padding:5px 12px; border-radius:100px; border:1px solid rgba(59,130,246,0.3); }
     .progress-wrap { flex:1; }
     .progress-bar-bg { background:var(--surface2); border-radius:100px; height:6px; overflow:hidden; }
     .progress-bar-fill { height:100%; background:var(--primary); border-radius:100px; transition:width 0.3s; }
     .progress-label { font-size:0.7rem; color:var(--text-muted); margin-top:3px; text-align:right; }
-
-    /* ── QUESTION ── */
     .question-wrap { padding:24px 20px; }
     .q-number { font-size:0.78rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
     .q-text { font-size:1rem; font-weight:600; line-height:1.65; margin-bottom:22px; color:var(--text); }
-
     .options { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
-    .option {
-      background:var(--surface); border:2px solid var(--border);
-      border-radius:14px; padding:13px 16px;
-      display:flex; align-items:center; gap:14px;
-      cursor:pointer; transition:all 0.2s;
-    }
+    .option { background:var(--surface); border:2px solid var(--border); border-radius:14px; padding:13px 16px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all 0.2s; }
     .option:hover { border-color:var(--primary); background:var(--primary-glow); }
     .option.selected { border-color:var(--primary); background:var(--primary-glow); }
-    .option-letter {
-      width:32px; height:32px; border-radius:8px;
-      background:var(--surface2); display:flex; align-items:center; justify-content:center;
-      font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800;
-      flex-shrink:0; transition:all 0.2s;
-    }
+    .option-letter { width:32px; height:32px; border-radius:8px; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; flex-shrink:0; transition:all 0.2s; }
     .option.selected .option-letter { background:var(--primary); color:#fff; }
     .option-text { font-size:0.92rem; line-height:1.4; }
-
-    /* ── NAV BTNS ── */
     .nav-btns { display:flex; gap:10px; padding:0 20px 20px; }
-    .nav-btn {
-      flex:1; padding:13px; border-radius:12px;
-      font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem;
-      cursor:pointer; border:1.5px solid var(--border);
-      background:var(--surface); color:var(--text);
-      transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px;
-    }
+    .nav-btn { flex:1; padding:13px; border-radius:12px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; border:1.5px solid var(--border); background:var(--surface); color:var(--text); transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
     .nav-btn:hover { border-color:var(--primary); color:var(--primary); }
     .nav-btn:disabled { opacity:0.4; cursor:not-allowed; }
     .nav-btn.submit-btn { background:var(--primary); color:#fff; border-color:var(--primary); }
     .nav-btn.submit-btn:hover { box-shadow:0 6px 20px var(--primary-glow); }
-
-    /* ── Q GRID ── */
     .q-grid-wrap { padding:0 20px 24px; }
     .q-grid-title { font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; }
     .q-grid { display:flex; flex-wrap:wrap; gap:7px; }
-    .q-dot {
-      width:30px; height:30px; border-radius:7px;
-      background:var(--surface2); border:1.5px solid var(--border);
-      display:flex; align-items:center; justify-content:center;
-      font-size:0.68rem; font-weight:700; cursor:pointer;
-      transition:all 0.15s; color:var(--text-muted);
-    }
+    .q-dot { width:30px; height:30px; border-radius:7px; background:var(--surface2); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:700; cursor:pointer; transition:all 0.15s; color:var(--text-muted); }
     .q-dot.answered { background:var(--primary); color:#fff; border-color:var(--primary); }
     .q-dot.current { border-color:var(--primary); color:var(--primary); }
-
-    /* ── SUBMIT MODAL ── */
     .modal-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:24px; }
     .modal-overlay.open { display:flex; }
     .modal { background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:36px 28px; max-width:380px; width:100%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.5); animation:popIn 0.3s ease; }
@@ -145,8 +82,6 @@
     .btn-confirm { background:var(--primary); color:#fff; padding:13px; border-radius:12px; font-weight:700; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.95rem; transition:all 0.2s; }
     .btn-confirm:hover { transform:translateY(-2px); }
     .btn-cancel-modal { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); padding:11px; border-radius:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.88rem; }
-
-    /* ── RESULTS SCREEN ── */
     .results-wrap { padding:24px 20px; display:flex; flex-direction:column; gap:18px; }
     .result-header { text-align:center; padding:28px 24px; background:var(--surface); border-radius:20px; box-shadow:var(--card-shadow); }
     .result-header h2 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:6px; }
@@ -157,7 +92,6 @@
     .r-ring-fill { fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
     .r-ring-text { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; fill:var(--text); text-anchor:middle; dominant-baseline:central; transform:rotate(90deg); transform-origin:center; }
     .r-ring-grade { font-size:0.48rem; font-weight:700; fill:var(--text-muted); text-anchor:middle; dominant-baseline:central; transform:rotate(90deg); transform-origin:center; }
-
     .result-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
     .r-stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 10px; text-align:center; }
     .r-stat-val { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
@@ -165,15 +99,12 @@
     .r-stat.correct .r-stat-val { color:#22C55E; }
     .r-stat.wrong .r-stat-val { color:#EF4444; }
     .r-stat.skipped .r-stat-val { color:#F59E0B; }
-
     .result-actions { display:flex; flex-direction:column; gap:10px; }
     .btn { padding:14px; border-radius:13px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; }
     .btn-primary { background:var(--primary); color:#fff; }
     .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px var(--primary-glow); }
     .btn-outline { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); }
     .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
-
-    /* ── REVIEW ── */
     .review-section { display:flex; flex-direction:column; gap:14px; }
     .review-title { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:800; }
     .review-filter { display:flex; gap:8px; flex-wrap:wrap; }
@@ -201,7 +132,6 @@
     .explanation-box { background:var(--primary-glow); border:1px solid rgba(59,130,246,0.2); border-radius:9px; padding:11px 13px; font-size:0.8rem; line-height:1.6; }
     .explanation-box strong { color:var(--primary); font-weight:700; }
     .no-explanation { font-size:0.75rem; color:var(--text-muted); font-style:italic; }
-
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
   </style>
 </head>
@@ -217,7 +147,6 @@
   </div>
 </nav>
 
-<!-- ── LOADING ── -->
 <div class="screen active" id="loadingScreen">
   <div class="content">
     <div class="loading-wrap">
@@ -227,7 +156,6 @@
   </div>
 </div>
 
-<!-- ── CBT ── -->
 <div class="screen" id="cbtScreen">
   <div class="cbt-header">
     <div class="year-badge" id="yearBadge">2006</div>
@@ -255,7 +183,6 @@
   </div>
 </div>
 
-<!-- ── RESULTS ── -->
 <div class="screen" id="resultsScreen">
   <div class="results-wrap">
     <div class="result-header">
@@ -296,7 +223,6 @@
   </div>
 </div>
 
-<!-- ── SUBMIT MODAL ── -->
 <div class="modal-overlay" id="submitModal">
   <div class="modal">
     <div class="modal-icon">📋</div>
@@ -313,7 +239,6 @@
   </div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -332,7 +257,6 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // Theme
   function toggleTheme() {
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
@@ -344,24 +268,17 @@
   document.documentElement.setAttribute('data-theme', saved);
   document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
 
-  // Auth check
   auth.onAuthStateChanged(user => { if (!user) window.location.href = 'auth.html'; });
 
-  // Get year from URL
   const params = new URLSearchParams(window.location.search);
   const year = params.get('year');
 
-  // State
-  const BATCH_SIZE = 5;
+  // ── STATE ──
   let questions = [];
   let currentIndex = 0;
   let userAnswers = {};
-  let lastDoc = null;
-  let hasMore = true;
-  let isLoadingMore = false;
-  let totalLoaded = 0;
 
-  // Load first batch
+  // ── LOAD QUESTIONS (Single Document Fetch) ──
   async function loadQuestions() {
     if (!year) {
       document.getElementById('loadingText').textContent = 'No year specified. Please go back.';
@@ -369,65 +286,37 @@
     }
     try {
       document.getElementById('loadingText').textContent = `Loading ${year} questions...`;
-      await loadBatch();
-      if (questions.length === 0) {
+      
+      const docRef = db.collection('pastquestions').doc(String(year));
+      const docSnap = await docRef.get();
+
+      if (!docSnap.exists) {
         document.getElementById('loadingText').textContent = `No questions found for ${year} yet. Check back soon!`;
         return;
       }
+
+      const data = docSnap.data();
+      questions = data.questions || [];
+
+      if (questions.length === 0) {
+        document.getElementById('loadingText').textContent = `No questions found in this document.`;
+        return;
+      }
+
       document.getElementById('yearBadge').textContent = `${year} PQ`;
       document.getElementById('resultYear').textContent = `${year} Past Questions`;
       showScreen('cbtScreen');
       renderQuestion();
       buildQGrid();
+
     } catch (err) {
       document.getElementById('loadingText').textContent = 'Failed to load questions. Check your connection.';
       console.error(err);
     }
   }
 
-  // Load next batch of 5
-  async function loadBatch() {
-    if (!hasMore || isLoadingMore) return;
-    isLoadingMore = true;
-    try {
-      let query = db.collection('pastquestions').doc(String(year))
-        .collection('questions').orderBy('number').limit(BATCH_SIZE);
-      if (lastDoc) query = query.startAfter(lastDoc);
-
-      const snap = await query.get();
-      if (snap.empty || snap.docs.length < BATCH_SIZE) hasMore = false;
-      if (!snap.empty) {
-        lastDoc = snap.docs[snap.docs.length - 1];
-        const newQuestions = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-        questions = [...questions, ...newQuestions];
-        totalLoaded = questions.length;
-        buildQGrid();
-        renderQuestion();
-      }
-    } catch (err) {
-      console.error('Batch load error:', err);
-      showToast('Failed to load next questions. Check your connection.');
-    }
-    isLoadingMore = false;
-  }
-
-  // Toast for errors
-  function showToast(msg) {
-    let toast = document.getElementById('quizToast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'quizToast';
-      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface);border:1px solid #EF4444;color:#EF4444;padding:10px 20px;border-radius:12px;font-size:0.85rem;font-weight:600;z-index:300;transition:transform 0.3s;';
-      document.body.appendChild(toast);
-    }
-    toast.textContent = msg;
-    toast.style.transform = 'translateX(-50%) translateY(0)';
-    setTimeout(() => { toast.style.transform = 'translateX(-50%) translateY(80px)'; }, 3000);
-  }
-
   loadQuestions();
 
-  // Render question
   function renderQuestion() {
     const q = questions[currentIndex];
     const total = questions.length;
@@ -450,14 +339,12 @@
       opts.appendChild(div);
     });
 
-    // Progress
     const answered = Object.keys(userAnswers).length;
-    document.getElementById('progressBar').style.width = `${(answered / questions.length) * 100}%`;
-    document.getElementById('progressLabel').textContent = `${answered} / ${questions.length}${hasMore ? '+' : ''} answered`;
+    document.getElementById('progressBar').style.width = `${(answered / total) * 100}%`;
+    document.getElementById('progressLabel').textContent = `${answered} / ${total} answered`;
 
-    // Buttons — only show Submit when on last question AND no more to load
     document.getElementById('prevBtn').disabled = currentIndex === 0;
-    const isLast = currentIndex === questions.length - 1 && !hasMore;
+    const isLast = currentIndex === total - 1;
     document.getElementById('nextBtn').style.display = (!isLast) ? 'flex' : 'none';
     document.getElementById('submitBtn').style.display = isLast ? 'flex' : 'none';
 
@@ -470,16 +357,10 @@
   }
 
   function navigate(dir) {
-    const newIndex = Math.max(0, Math.min(questions.length - 1, currentIndex + dir));
-    currentIndex = newIndex;
-    // Auto-load next batch when student reaches last 2 questions of current batch
-    if (hasMore && !isLoadingMore && currentIndex >= questions.length - 2) {
-      loadBatch();
-    }
+    currentIndex = Math.max(0, Math.min(questions.length - 1, currentIndex + dir));
     renderQuestion();
   }
 
-  // Q Grid
   function buildQGrid() {
     const grid = document.getElementById('qGrid');
     grid.innerHTML = '';
@@ -503,7 +384,6 @@
     });
   }
 
-  // Submit modal
   function openSubmitModal() {
     const answered = Object.keys(userAnswers).length;
     document.getElementById('modalAnswered').textContent = answered;
@@ -513,7 +393,6 @@
   function closeSubmitModal() { document.getElementById('submitModal').classList.remove('open'); }
   document.getElementById('submitModal').addEventListener('click', e => { if (e.target === document.getElementById('submitModal')) closeSubmitModal(); });
 
-  // Submit quiz
   function submitQuiz() {
     closeSubmitModal();
     let correct = 0, wrong = 0, skipped = 0;
@@ -539,7 +418,6 @@
       });
     });
 
-    // Show results
     const total = questions.length;
     const percentage = Math.round((correct / total) * 100);
 
@@ -571,17 +449,13 @@
   }
 
   function retryQuiz() {
-    questions = [];
     currentIndex = 0;
     userAnswers = {};
-    lastDoc = null;
-    hasMore = true;
-    isLoadingMore = false;
-    showScreen('loadingScreen');
-    loadQuestions();
+    showScreen('cbtScreen');
+    renderQuestion();
+    updateQGrid();
   }
 
-  // Review
   let currentReviewData = [];
   function renderReview(filter, data) {
     if (data) currentReviewData = data;
@@ -642,7 +516,6 @@
     renderReview(filter);
   }
 
-  // Screen switch
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
