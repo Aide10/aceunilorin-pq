@@ -375,7 +375,7 @@ textarea.ta:focus{border-color:var(--primary);}
       <!-- MANAGE PAST Q -->
       <div class="sec" id="sec-mpq">
         <div class="stitle">📋 Manage Past Questions</div>
-        <div class="ssub">View and delete past questions by year</div>
+        <div class="ssub">Browse, edit and delete past questions by year</div>
         <label class="flabel">Select Year</label>
         <div class="ygrid" id="mpq-ygrid"></div>
         <div id="mpq-list"><div class="empty"><div class="ei">📅</div><p>Select a year above</p></div></div>
@@ -573,7 +573,7 @@ function step(ctx,n,total,status){
 
 // ── CLAUDE ──
 async function claude(messages,max=8000){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:max,messages})});
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'YOUR_ANTHROPIC_API_KEY','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:max,messages})});
   if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error '+r.status);}
   const d=await r.json();
   return d.content.map(c=>c.text||'').join('').trim();
@@ -726,8 +726,86 @@ async function loadPQ(year){
   try{
     const snap=await db.collection('pastquestions').doc(String(year)).collection('questions').orderBy('number').get();
     if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📭</div><p>No questions for '+year+' yet</p></div>';return;}
-    el.innerHTML='<div style="font-size:.73rem;color:var(--muted);margin-bottom:10px;">'+snap.docs.length+' questions for '+year+'</div><div class="mlist">'+snap.docs.map(d=>{const q=d.data();return`<div class="mi"><div class="mil"><span class="mnum">${q.number||'?'}</span><div class="min2"><div class="mit">${(q.question||'').substring(0,60)}…</div><div class="mim">Ans: <b style="color:var(--success)">${q.answer||'?'}</b></div></div></div><button class="delbtn" onclick="askDel('pq','${d.id}','Q${q.number}')">Delete</button></div>`;}).join('')+'</div>';
+    const total=snap.docs.length;
+    let html='<div style="font-size:.73rem;color:var(--muted);margin-bottom:12px;">'+total+' questions for '+year+' — tap any question to edit</div>';
+    snap.docs.forEach(d=>{
+      const q=d.data();
+      const opts=['A','B','C','D','E'];
+      const optsHtml=opts.map(l=>{
+        const val=q['option'+l]||'';
+        if(!val && l==='E') return '';
+        return `<div style="margin-bottom:6px;">
+          <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Option ${l}</label>
+          <input data-field="option${l}" data-id="${d.id}" data-year="${year}" value="${(val||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
+        </div>`;
+      }).join('');
+      html+=`<div class="qedit-card" id="qcard-${d.id}" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
+        <div class="qedit-head" onclick="toggleQEdit('${d.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+            <span style="background:var(--surface2);color:var(--primary);font-family:'Syne',sans-serif;font-weight:800;font-size:.75rem;padding:4px 9px;border-radius:6px;flex-shrink:0;">Q${q.number||'?'}</span>
+            <span style="font-size:.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${(q.question||'').substring(0,55)}${(q.question||'').length>55?'…':''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px;">
+            <span style="background:rgba(34,197,94,.15);color:var(--success);font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:100px;">→${q.answer||'?'}</span>
+            <span class="qedit-arrow" id="arrow-${d.id}" style="color:var(--muted);font-size:.8rem;transition:transform .2s;">▼</span>
+          </div>
+        </div>
+        <div class="qedit-body" id="qbody-${d.id}" style="display:none;padding:0 14px 14px;">
+          <div style="margin-bottom:6px;">
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Question</label>
+            <textarea data-field="question" data-id="${d.id}" data-year="${year}" style="width:100%;min-height:70px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">${q.question||''}</textarea>
+          </div>
+          ${optsHtml}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div>
+              <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Correct Answer</label>
+              <select data-field="answer" data-id="${d.id}" data-year="${year}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;">
+                ${['A','B','C','D','E'].map(l=>`<option value="${l}" ${q.answer===l?'selected':''}>${l}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Q Number</label>
+              <input type="number" data-field="number" data-id="${d.id}" data-year="${year}" value="${q.number||''}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Explanation</label>
+            <textarea data-field="explanation" data-id="${d.id}" data-year="${year}" style="width:100%;min-height:60px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">${q.explanation||''}</textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="saveQ('${d.id}','${year}')" style="flex:1;padding:10px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">💾 Save</button>
+            <button onclick="askDel('pq','${d.id}','Q${q.number}')" style="padding:10px 14px;background:transparent;border:1.5px solid var(--danger);color:var(--danger);border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">🗑️</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
+}
+
+function toggleQEdit(id){
+  const body=document.getElementById('qbody-'+id);
+  const arrow=document.getElementById('arrow-'+id);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(180deg)';
+}
+
+async function saveQ(docId, year){
+  const card=document.getElementById('qcard-'+docId);
+  const fields=card.querySelectorAll('[data-field][data-id]');
+  const update={};
+  fields.forEach(f=>{
+    const val=f.tagName==='TEXTAREA'?f.value:(f.type==='number'?parseInt(f.value)||f.value:f.value);
+    update[f.dataset.field]=val;
+  });
+  try{
+    await db.collection('pastquestions').doc(String(year)).collection('questions').doc(docId).update(update);
+    toast('Q saved ✓','ok');
+    // Update header preview
+    const head=card.querySelector('.qedit-head span:nth-child(2)');
+    if(head && update.question) head.textContent=(update.question||'').substring(0,55)+((update.question||'').length>55?'…':'');
+  }catch(e){toast('Save failed: '+e.message,'err');}
 }
 
 // ── DELETE ──
