@@ -218,9 +218,6 @@
   <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
 </nav>
 
-<!-- ══════════════════════════════════════
-     SCREEN 1: LOBBY
-══════════════════════════════════════ -->
 <div class="screen active" id="lobbyScreen">
   <div class="content">
     <div class="page-header">
@@ -229,7 +226,6 @@
       <p>Simulate the real Unilorin CBT experience.</p>
     </div>
 
-    <!-- Mock type selection -->
     <div class="mock-type-grid">
       <div class="mock-type-card selected" onclick="selectMockType('pq', this)">
         <div class="mock-type-icon">📝</div>
@@ -243,7 +239,6 @@
       </div>
     </div>
 
-    <!-- Info -->
     <div class="info-card">
       <div class="info-item">
         <div class="info-val">50</div>
@@ -264,12 +259,8 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN 2: CBT
-══════════════════════════════════════ -->
 <div class="screen" id="cbtScreen">
 
-  <!-- Sticky header -->
   <div class="cbt-header">
     <div class="timer-wrap">
       <span class="timer-icon">⏱️</span>
@@ -283,21 +274,18 @@
     </div>
   </div>
 
-  <!-- Question -->
   <div class="question-wrap">
     <div class="q-number" id="qNumber">Question 1 of 50</div>
     <div class="q-text" id="qText">Loading question...</div>
     <div class="options" id="optionsContainer"></div>
   </div>
 
-  <!-- Navigation buttons -->
   <div class="nav-btns">
     <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
     <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
     <button class="nav-btn submit-btn" id="submitBtn" onclick="openSubmitModal()" style="display:none;">Submit ✓</button>
   </div>
 
-  <!-- Question grid -->
   <div class="q-grid-wrap">
     <div class="q-grid-title">Question Navigator</div>
     <div class="q-grid" id="qGrid"></div>
@@ -305,9 +293,6 @@
 
 </div>
 
-<!-- ══════════════════════════════════════
-     CONFIRM SUBMIT MODAL
-══════════════════════════════════════ -->
 <div class="modal-overlay" id="submitModal">
   <div class="modal">
     <div class="modal-icon">📋</div>
@@ -334,7 +319,6 @@
   </div>
 </div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -390,14 +374,12 @@
     const btn = document.querySelector('#lobbyScreen .btn-primary');
     btn.disabled = true;
 
-    // Show loading overlay
     showLoadingOverlay('Preparing your mock exam...');
 
     try {
       const freeYears = [2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
       const premiumYears = [2021,2022,2023,2024,2025];
 
-      // Check premium
       const user = auth.currentUser;
       let isPremium = false;
       if (user) {
@@ -406,35 +388,38 @@
       }
 
       let yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
-
       const TARGET = 50;
       let allQuestions = [];
 
-      // Step 1: Fetch ALL years in PARALLEL (much faster on mobile)
       updateLoadingOverlay('Loading questions...');
       const yearPools = [];
+      
+      // Step 1: Fetch ALL years in PARALLEL using the Single Document method
       const fetchResults = await Promise.allSettled(
         yearsToUse.map(year =>
-          db.collection('pastquestions').doc(String(year))
-            .collection('questions').limit(200).get()
-            .then(snap => ({ year, snap }))
+          db.collection('pastquestions').doc(String(year)).get()
+            .then(docSnap => ({ year, docSnap }))
         )
       );
+
       for (const result of fetchResults) {
-        if (result.status === 'fulfilled') {
-          const { year, snap } = result.value;
-          const qs = [];
-          snap.forEach(d => qs.push({ ...d.data(), id: d.id, year }));
-          if (qs.length > 0) yearPools.push(qs);
+        if (result.status === 'fulfilled' && result.value.docSnap.exists) {
+          const { year, docSnap } = result.value;
+          const data = docSnap.data();
+          
+          if (data.questions && Array.isArray(data.questions)) {
+            // Add the year to each question so the UI tags it properly
+            const qs = data.questions.map(q => ({ ...q, year }));
+            if (qs.length > 0) yearPools.push(qs);
+          }
         }
       }
+      
       updateLoadingOverlay(`Loaded ${yearPools.length} year(s) of questions...`);
 
-      // Step 2: Flatten all pools, shuffle everything, pick up to TARGET
+      // Step 2: Flatten, shuffle, pick up to TARGET
       if (yearPools.length > 0) {
-        // Merge all questions from all loaded years
         const allPooled = yearPools.flat();
-        // Full Fisher-Yates shuffle for true randomness
         for (let i = allPooled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [allPooled[i], allPooled[j]] = [allPooled[j], allPooled[i]];
@@ -442,7 +427,8 @@
         allQuestions = allPooled.slice(0, TARGET);
       }
 
-      // If full mock, also mix in study questions to fill up to TARGET
+      // If full mock, also mix in study questions 
+      // (Leaving this exactly as you had it so it doesn't break if studyquestions is still a subcollection)
       if (mockType === 'full' && allQuestions.length < TARGET) {
         const subjects = ['english', 'math', 'currentaffairs'];
         const studyPools = [];
@@ -474,7 +460,6 @@
         return;
       }
 
-      // Shuffle and cap at 50
       allQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, TARGET);
       questions = allQuestions;
       userAnswers = {};
@@ -518,7 +503,6 @@
     const textEl = document.getElementById('loadingOverlayText');
     const barEl = document.getElementById('loadingOverlayBar');
     if (textEl) textEl.textContent = msg;
-    // Parse progress from msg for bar
     const match = msg.match(/(\d+)\/(\d+)/);
     if (match && barEl) barEl.style.width = `${Math.round((+match[1] / +match[2]) * 100)}%`;
   }
@@ -566,25 +550,21 @@
     const letters = ['A','B','C','D','E'];
     const rawOptions = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
 
-    // Build option objects with original letter and text
     let optObjs = rawOptions
       .map((text, i) => ({ text, origLetter: letters[i] }))
       .filter(o => o.text);
 
-    // Shuffle options — but keep shuffle consistent per question using question index as seed
-    // Use stored shuffle if already seen this question, else generate and store
     if (!q._shuffled) {
       for (let i = optObjs.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [optObjs[i], optObjs[j]] = [optObjs[j], optObjs[i]];
       }
-      q._shuffled = optObjs; // cache so re-visiting question shows same order
+      q._shuffled = optObjs; 
     } else {
       optObjs = q._shuffled;
     }
 
-    // Map new display letters A,B,C... to original correct answer
-    const correctOrigLetter = q.answer; // e.g. 'B'
+    const correctOrigLetter = q.answer;
     let displayCorrectLetter = 'A';
 
     optObjs.forEach((opt, i) => {
@@ -592,7 +572,6 @@
       if (opt.origLetter === correctOrigLetter) displayCorrectLetter = displayLetter;
     });
 
-    // Store the remapped correct letter on question for grading
     q._displayAnswer = displayCorrectLetter;
 
     optObjs.forEach((opt, i) => {
@@ -604,17 +583,14 @@
       opts.appendChild(div);
     });
 
-    // Update progress
     const answered = Object.keys(userAnswers).length;
     document.getElementById('progressBar').style.width = `${(answered / total) * 100}%`;
     document.getElementById('progressLabel').textContent = `${answered} / ${total} answered`;
 
-    // Prev/Next/Submit buttons
     document.getElementById('prevBtn').disabled = currentIndex === 0;
     document.getElementById('nextBtn').style.display = currentIndex < total - 1 ? 'flex' : 'none';
     document.getElementById('submitBtn').style.display = currentIndex === total - 1 ? 'flex' : 'none';
 
-    // Update grid
     updateQGrid();
   }
 
@@ -679,7 +655,6 @@
 
     questions.forEach((q, i) => {
       const userAns = userAnswers[i] || null;
-      // Use the display-remapped correct answer (accounts for option shuffling)
       const correctAns = q._displayAnswer || q.answer || q.correctAnswer;
       let status = 'skipped';
       if (userAns) {
@@ -687,7 +662,6 @@
         else { wrong++; status = 'wrong'; }
       } else { skipped++; }
 
-      // Build review options using shuffled order if available
       const letters = ['A','B','C','D','E'];
       let rOptA = q.optionA, rOptB = q.optionB, rOptC = q.optionC, rOptD = q.optionD, rOptE = q.optionE || null;
       if (q._shuffled) {
@@ -716,11 +690,9 @@
       ? formatTime(Math.floor((Date.now() - mockStartTime) / 1000))
       : '25:00';
 
-    // Save result
     const result = { correct, wrong, skipped, timeTaken, timeUp, mockType, reviewData };
     localStorage.setItem('mockResult', JSON.stringify(result));
 
-    // Save to Firestore leaderboard
     saveToLeaderboard(correct);
 
     window.location.href = 'results.html';
@@ -753,7 +725,6 @@
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      // Update user stats
       await db.collection('userStats').doc(user.uid).set({
         mocksTaken,
         bestScore: Math.max(score, prevBest),
@@ -763,7 +734,6 @@
     } catch (e) { console.error('Leaderboard save error:', e); }
   }
 
-  // ── SCREEN SWITCH ──
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
