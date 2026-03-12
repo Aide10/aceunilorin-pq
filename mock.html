@@ -407,40 +407,70 @@
 
       let yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
 
-      // Shuffle years so question variety is random
-      yearsToUse = yearsToUse.sort(() => Math.random() - 0.5);
-
-      let allQuestions = [];
       const TARGET = 50;
-      const BATCH = 5;
+      let allQuestions = [];
 
-      // Fetch 5 questions per year, cycling through years until we have 50
-      for (const year of yearsToUse) {
-        if (allQuestions.length >= TARGET) break;
-        updateLoadingOverlay(`Loading questions... ${allQuestions.length}/${TARGET}`);
-        try {
-          const snap = await db.collection('pastquestions').doc(String(year))
-            .collection('questions').limit(BATCH).get();
-          snap.forEach(d => allQuestions.push({ ...d.data(), id: d.id, year }));
-        } catch (e) {
-          console.warn(`Skipped year ${year}:`, e.message);
-          // Network hiccup on one year — skip and continue
+      // Step 1: Fetch ALL years in PARALLEL (much faster on mobile)
+      updateLoadingOverlay('Loading questions...');
+      const yearPools = [];
+      const fetchResults = await Promise.allSettled(
+        yearsToUse.map(year =>
+          db.collection('pastquestions').doc(String(year))
+            .collection('questions').limit(200).get()
+            .then(snap => ({ year, snap }))
+        )
+      );
+      for (const result of fetchResults) {
+        if (result.status === 'fulfilled') {
+          const { year, snap } = result.value;
+          const qs = [];
+          snap.forEach(d => qs.push({ ...d.data(), id: d.id, year }));
+          if (qs.length > 0) yearPools.push(qs);
+        }
+      }
+      updateLoadingOverlay(`Loaded ${yearPools.length} year(s) of questions...`);
+
+      // Step 2: Pick questions evenly across years (round-robin), then fill remainder
+      if (yearPools.length > 0) {
+        // Shuffle each year's pool
+        yearPools.forEach(pool => pool.sort(() => Math.random() - 0.5));
+        // Round-robin pick to spread questions evenly across years
+        let i = 0;
+        const yearIndices = new Array(yearPools.length).fill(0);
+        while (allQuestions.length < TARGET) {
+          const pool = yearPools[i % yearPools.length];
+          const idx = yearIndices[i % yearPools.length];
+          if (idx < pool.length) {
+            allQuestions.push(pool[idx]);
+            yearIndices[i % yearPools.length]++;
+          }
+          i++;
+          // Safety: if we've cycled through all pools and still not enough, break
+          if (i > yearPools.length * 200) break;
         }
       }
 
-      // If full mock, also fetch study questions in batches of 5
+      // If full mock, also mix in study questions to fill up to TARGET
       if (mockType === 'full' && allQuestions.length < TARGET) {
         const subjects = ['english', 'math', 'currentaffairs'];
+        const studyPools = [];
         for (const subject of subjects) {
-          if (allQuestions.length >= TARGET) break;
-          updateLoadingOverlay(`Loading study questions... ${allQuestions.length}/${TARGET}`);
           try {
             const snap = await db.collection('studyquestions').doc(subject)
-              .collection('questions').limit(BATCH).get();
-            snap.forEach(d => allQuestions.push({ ...d.data(), id: d.id, subject }));
-          } catch (e) {
-            console.warn(`Skipped subject ${subject}:`, e.message);
-          }
+              .collection('questions').limit(100).get();
+            const qs = [];
+            snap.forEach(d => qs.push({ ...d.data(), id: d.id, subject }));
+            if (qs.length > 0) studyPools.push(qs);
+          } catch (e) { console.warn("Skipped subject:", e.message); }
+        }
+        studyPools.forEach(pool => pool.sort(() => Math.random() - 0.5));
+        let si = 0, guard = 0;
+        const sIdx = new Array(studyPools.length).fill(0);
+        while (allQuestions.length < TARGET && studyPools.length > 0 && guard++ < 500) {
+          const p = studyPools[si % studyPools.length];
+          const ix = sIdx[si % studyPools.length];
+          if (ix < p.length) { allQuestions.push(p[ix]); sIdx[si % studyPools.length]++; }
+          si++;
         }
       }
 
@@ -535,7 +565,8 @@
     const q = questions[currentIndex];
     const total = questions.length;
 
-    document.getElementById('qNumber').textContent = `Question ${currentIndex + 1} of ${total}`;
+    const yearTag = q.year ? ` <span style="font-size:.65rem;background:rgba(59,130,246,.15);color:#3B82F6;padding:2px 8px;border-radius:100px;border:1px solid rgba(59,130,246,.25);font-weight:700;vertical-align:middle;">${q.year}</span>` : '';
+    document.getElementById('qNumber').innerHTML = `Question ${currentIndex + 1} of ${total}${yearTag}`;
     document.getElementById('qText').textContent = q.question || q.text || 'Question text not available';
 
     const opts = document.getElementById('optionsContainer');
