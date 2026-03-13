@@ -306,7 +306,6 @@
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
 
-  <!-- NAV -->
   <nav>
     <a href="index.html" class="nav-logo">Ace<span>Unilorin</span> PQ</a>
     <div class="nav-right">
@@ -315,14 +314,12 @@
     </div>
   </nav>
 
-  <!-- PAGE HEADER -->
   <div class="page-header">
     <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
     <h1>📝 Past Questions</h1>
     <p>Select a year to start practising real Unilorin past questions.</p>
   </div>
 
-  <!-- FILTER -->
   <div class="filter-bar">
     <span class="filter-label">Filter:</span>
     <button class="filter-btn active" onclick="filterYears('all', this)">All Years</button>
@@ -330,30 +327,24 @@
     <button class="filter-btn" onclick="filterYears('premium', this)">Premium</button>
   </div>
 
-  <!-- LEGEND -->
   <div class="legend">
     <div class="legend-item"><div class="legend-dot free"></div> Free access</div>
     <div class="legend-item"><div class="legend-dot locked"></div> Premium (one-time unlock)</div>
   </div>
 
-  <!-- YEARS -->
   <div class="years-section">
 
-    <!-- FREE YEARS -->
     <div class="section-label" id="free-label">Free Years</div>
     <div class="years-grid" id="free-grid">
-      <!-- 2006–2015 + 2017–2019 (free, no 2016) -->
-    </div>
+      </div>
 
-    <!-- PREMIUM YEARS -->
     <div class="section-label" id="premium-label">Premium Years</div>
     <div class="years-grid" id="premium-grid">
-      <!-- 2021–2025 (no 2020) -->
+      <div style="color:var(--text-muted); font-size: 0.85rem;">Checking access...</div>
     </div>
 
   </div>
 
-  <!-- UPGRADE MODAL -->
   <div class="modal-overlay" id="upgradeModal">
     <div class="modal">
       <div class="modal-icon">🔒</div>
@@ -367,7 +358,24 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+      authDomain: "aceunilorin-pq.firebaseapp.com",
+      projectId: "aceunilorin-pq",
+      storageBucket: "aceunilorin-pq.firebasestorage.app",
+      messagingSenderId: "152163357125",
+      appId: "1:152163357125:web:23dc8652f9789197623bac",
+      measurementId: "G-PQ1H0EWQ2L"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
     // Theme
     function toggleTheme() {
       const html = document.documentElement;
@@ -419,20 +427,55 @@
       }
     });
 
-    // Build premium year cards
-    const premiumGrid = document.getElementById('premium-grid');
-    premiumYears.forEach(year => {
-      const card = document.createElement('div');
-      card.className = 'year-card locked premium-year';
-      card.dataset.type = 'premium';
-      card.onclick = () => showUpgradeModal(year);
-      card.innerHTML = `
-        <span class="lock-icon">🔒</span>
-        <div class="year-num">${year}</div>
-        <div class="year-label">Past Questions</div>
-        <div class="premium-badge">Premium</div>
-      `;
-      premiumGrid.appendChild(card);
+    // Build Premium Grid dynamically based on User Status
+    function buildPremiumGrid(isPremium) {
+      const premiumGrid = document.getElementById('premium-grid');
+      premiumGrid.innerHTML = ''; // clear loading text
+
+      premiumYears.forEach(year => {
+        if (isPremium) {
+          // Unlocked State
+          const card = document.createElement('a');
+          card.href = `quiz.html?year=${year}`;
+          card.className = 'year-card premium-year';
+          card.dataset.type = 'premium';
+          card.innerHTML = `
+            <div class="year-num">${year}</div>
+            <div class="year-label">Past Questions</div>
+            <div class="premium-badge" style="background:var(--primary);color:#fff;">Unlocked</div>
+          `;
+          premiumGrid.appendChild(card);
+        } else {
+          // Locked State
+          const card = document.createElement('div');
+          card.className = 'year-card locked premium-year';
+          card.dataset.type = 'premium';
+          card.onclick = () => showUpgradeModal(year);
+          card.innerHTML = `
+            <span class="lock-icon">🔒</span>
+            <div class="year-num">${year}</div>
+            <div class="year-label">Past Questions</div>
+            <div class="premium-badge">Premium</div>
+          `;
+          premiumGrid.appendChild(card);
+        }
+      });
+    }
+
+    // Check Auth and Fetch User Status
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        const isPremium = doc.exists && doc.data().isPremium === true;
+        buildPremiumGrid(isPremium);
+      } catch (err) {
+        console.error("Failed to fetch user status:", err);
+        buildPremiumGrid(false); // Default to locked if network fails
+      }
     });
 
     // Filter
@@ -440,7 +483,7 @@
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      const freeCards = document.querySelectorAll('.free-year');
+      const freeCards = document.querySelectorAll('.free-year, .unavailable-year');
       const premCards = document.querySelectorAll('.premium-year');
       const freeLabel = document.getElementById('free-label');
       const premLabel = document.getElementById('premium-label');
@@ -469,7 +512,8 @@
       document.getElementById('upgradeModal').classList.remove('open');
     }
     function goToUpgrade() {
-      window.location.href = 'upgrade.html';
+      // Assuming you have an upgrade or payment page
+      window.location.href = 'dashboard.html'; 
     }
 
     // Close modal on overlay click
