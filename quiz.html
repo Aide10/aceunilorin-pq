@@ -23,7 +23,19 @@
       font-family: 'DM Sans', sans-serif; background: var(--bg);
       color: var(--text); min-height: 100vh;
       transition: background 0.3s, color 0.3s; padding-bottom: 48px;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
     }
+
+    /* SECURITY FIX: Hide content by default */
+    .content { 
+      max-width:600px; 
+      margin:0 auto; 
+      padding:0 0 48px; 
+      position:relative; 
+      z-index:1; 
+      display: none; 
+    }
+
     .blob { position:fixed; border-radius:50%; filter:blur(80px); opacity:0.1; pointer-events:none; z-index:0; }
     .blob-1 { width:400px; height:400px; background:#3B82F6; top:-100px; right:-80px; }
     .blob-2 { width:300px; height:300px; background:#6366F1; bottom:0; left:-60px; }
@@ -33,19 +45,23 @@
     .nav-logo span { color:var(--text); }
     .nav-right { display:flex; align-items:center; gap:10px; }
     .theme-toggle { background:var(--surface2); border:1px solid var(--border); color:var(--text); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
-    .content { max-width:600px; margin:0 auto; padding:0 0 48px; position:relative; z-index:1; }
+    
     .screen { display:none; }
     .screen.active { display:block; animation:fadeUp 0.4s ease both; }
     .loading-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; }
     .spinner-lg { width:48px; height:48px; border:4px solid var(--surface2); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
-    .loading-text { color:var(--text-muted); font-size:0.92rem; }
-    .cbt-header { position:sticky; top:57px; z-index:90; background:var(--bg); padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    
+    .cbt-header { position:sticky; top:57px; z-index:90; background:var(--bg); padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
     .year-badge { font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; background:var(--primary-glow); color:var(--primary); padding:5px 12px; border-radius:100px; border:1px solid rgba(59,130,246,0.3); }
-    .progress-wrap { flex:1; }
+    .stats-badge { display: flex; gap: 8px; }
+    .stat-item { background:var(--surface2); padding:5px 10px; border-radius:100px; font-size:0.8rem; white-space:nowrap; }
+    .progress-wrap { flex:1; min-width:150px; }
     .progress-bar-bg { background:var(--surface2); border-radius:100px; height:6px; overflow:hidden; }
     .progress-bar-fill { height:100%; background:var(--primary); border-radius:100px; transition:width 0.3s; }
     .progress-label { font-size:0.7rem; color:var(--text-muted); margin-top:3px; text-align:right; }
+    .saved-indicator { font-size:0.7rem; color:var(--text-muted); text-align:right; margin-top:2px; }
+
     .question-wrap { padding:24px 20px; }
     .q-number { font-size:0.78rem; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
     .q-text { font-size:1rem; font-weight:600; line-height:1.65; margin-bottom:22px; color:var(--text); }
@@ -56,18 +72,23 @@
     .option-letter { width:32px; height:32px; border-radius:8px; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; flex-shrink:0; transition:all 0.2s; }
     .option.selected .option-letter { background:var(--primary); color:#fff; }
     .option-text { font-size:0.92rem; line-height:1.4; }
+
     .nav-btns { display:flex; gap:10px; padding:0 20px 20px; }
     .nav-btn { flex:1; padding:13px; border-radius:12px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; border:1.5px solid var(--border); background:var(--surface); color:var(--text); transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; }
     .nav-btn:hover { border-color:var(--primary); color:var(--primary); }
     .nav-btn:disabled { opacity:0.4; cursor:not-allowed; }
     .nav-btn.submit-btn { background:var(--primary); color:#fff; border-color:var(--primary); }
     .nav-btn.submit-btn:hover { box-shadow:0 6px 20px var(--primary-glow); }
+    .nav-btn.restart-btn { background:var(--surface2); color:var(--text-muted); border-color:var(--border); }
+    .nav-btn.restart-btn:hover { border-color:#EF4444; color:#EF4444; }
+
     .q-grid-wrap { padding:0 20px 24px; }
     .q-grid-title { font-size:0.75rem; color:var(--text-muted); font-weight:600; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; }
     .q-grid { display:flex; flex-wrap:wrap; gap:7px; }
     .q-dot { width:30px; height:30px; border-radius:7px; background:var(--surface2); border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:700; cursor:pointer; transition:all 0.15s; color:var(--text-muted); }
     .q-dot.answered { background:var(--primary); color:#fff; border-color:var(--primary); }
     .q-dot.current { border-color:var(--primary); color:var(--primary); }
+
     .modal-overlay { position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.7); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:24px; }
     .modal-overlay.open { display:flex; }
     .modal { background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:36px 28px; max-width:380px; width:100%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.5); animation:popIn 0.3s ease; }
@@ -82,6 +103,7 @@
     .btn-confirm { background:var(--primary); color:#fff; padding:13px; border-radius:12px; font-weight:700; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.95rem; transition:all 0.2s; }
     .btn-confirm:hover { transform:translateY(-2px); }
     .btn-cancel-modal { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); padding:11px; border-radius:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.88rem; }
+
     .results-wrap { padding:24px 20px; display:flex; flex-direction:column; gap:18px; }
     .result-header { text-align:center; padding:28px 24px; background:var(--surface); border-radius:20px; box-shadow:var(--card-shadow); }
     .result-header h2 { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:6px; }
@@ -92,20 +114,35 @@
     .r-ring-fill { fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
     .r-ring-text { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; fill:var(--text); text-anchor:middle; dominant-baseline:central; transform:rotate(90deg); transform-origin:center; }
     .r-ring-grade { font-size:0.48rem; font-weight:700; fill:var(--text-muted); text-anchor:middle; dominant-baseline:central; transform:rotate(90deg); transform-origin:center; }
-    .result-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    
+    .progress-history { background: var(--surface); border-radius: 16px; padding: 20px; margin: 10px 0; border: 1px solid var(--border); }
+    .history-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 15px; color: var(--primary); }
+    .history-grid { display: flex; flex-direction: column; gap: 12px; }
+    .history-row { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+    .history-date { min-width: 70px; color: var(--text-muted); font-size: 0.8rem; }
+    .history-score-bar { flex: 1; height: 8px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+    .history-score-fill { height: 100%; background: var(--primary); border-radius: 100px; transition: width 0.3s; }
+    .history-score-value { min-width: 45px; font-weight: 600; color: var(--text); }
+    .history-stats { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+    .history-best { color: #22C55E; font-weight: 600; }
+    .history-streak { color: #F59E0B; font-weight: 600; }
+    
+    .result-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:15px; }
     .r-stat { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 10px; text-align:center; }
     .r-stat-val { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; }
     .r-stat-label { font-size:0.7rem; color:var(--text-muted); margin-top:3px; }
     .r-stat.correct .r-stat-val { color:#22C55E; }
     .r-stat.wrong .r-stat-val { color:#EF4444; }
     .r-stat.skipped .r-stat-val { color:#F59E0B; }
+    
     .result-actions { display:flex; flex-direction:column; gap:10px; }
     .btn { padding:14px; border-radius:13px; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.95rem; cursor:pointer; border:none; transition:all 0.2s; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; }
     .btn-primary { background:var(--primary); color:#fff; }
     .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px var(--primary-glow); }
     .btn-outline { background:transparent; border:1.5px solid var(--border); color:var(--text-muted); }
     .btn-outline:hover { border-color:var(--primary); color:var(--primary); }
-    .review-section { display:flex; flex-direction:column; gap:14px; }
+    
+    .review-section { display:flex; flex-direction:column; gap:14px; margin-top:20px; }
     .review-title { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:800; }
     .review-filter { display:flex; gap:8px; flex-wrap:wrap; }
     .filter-btn { padding:6px 14px; border-radius:100px; border:1.5px solid var(--border); background:var(--surface); color:var(--text-muted); font-size:0.78rem; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif; }
@@ -132,6 +169,7 @@
     .explanation-box { background:var(--primary-glow); border:1px solid rgba(59,130,246,0.2); border-radius:9px; padding:11px 13px; font-size:0.8rem; line-height:1.6; }
     .explanation-box strong { color:var(--primary); font-weight:700; }
     .no-explanation { font-size:0.75rem; color:var(--text-muted); font-style:italic; }
+    .offline-toast { position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 300px; margin: 0 auto; padding: 12px; border-radius: 100px; color: white; text-align: center; font-weight: 600; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: opacity 0.3s; }
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
   </style>
 </head>
@@ -147,78 +185,94 @@
   </div>
 </nav>
 
-<div class="screen active" id="loadingScreen">
-  <div class="content">
+<div class="content">
+  <div class="screen active" id="loadingScreen">
     <div class="loading-wrap">
       <div class="spinner-lg"></div>
-      <div class="loading-text" id="loadingText">Loading questions...</div>
-    </div>
-  </div>
-</div>
-
-<div class="screen" id="cbtScreen">
-  <div class="cbt-header">
-    <div class="year-badge" id="yearBadge">2006</div>
-    <div class="progress-wrap">
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
-      <div class="progress-label" id="progressLabel">0 answered</div>
+      <div class="loading-text" id="loadingText">Authenticating...</div>
     </div>
   </div>
 
-  <div class="question-wrap">
-    <div class="q-number" id="qNumber">Question 1</div>
-    <div class="q-text" id="qText"></div>
-    <div class="options" id="optionsContainer"></div>
-  </div>
-
-  <div class="nav-btns">
-    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
-    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
-    <button class="nav-btn submit-btn" id="submitBtn" onclick="openSubmitModal()" style="display:none;">Submit ✓</button>
-  </div>
-
-  <div class="q-grid-wrap">
-    <div class="q-grid-title">Question Navigator</div>
-    <div class="q-grid" id="qGrid"></div>
-  </div>
-</div>
-
-<div class="screen" id="resultsScreen">
-  <div class="results-wrap">
-    <div class="result-header">
-      <h2 id="resultYear">2006 Past Questions</h2>
-      <p>Here's how you performed</p>
-      <div class="result-ring-wrap">
-        <svg class="result-ring" width="120" height="120" viewBox="0 0 120 120">
-          <circle class="r-ring-bg" cx="60" cy="60" r="50"/>
-          <circle class="r-ring-fill" id="rRingFill" cx="60" cy="60" r="50" stroke="#3B82F6" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
-          <text class="r-ring-text" x="60" y="55" id="rRingText">0%</text>
-          <text class="r-ring-grade" x="60" y="70" id="rRingGrade"></text>
-        </svg>
+  <div class="screen" id="cbtScreen">
+    <div class="cbt-header">
+      <div class="year-badge" id="yearBadge">2006</div>
+      <div class="stats-badge" id="statsBadge">
+        <span class="stat-item">📊 <span id="answeredCount">0</span>/<span id="totalCount">0</span></span>
+        <span class="stat-item">⏳ <span id="remainingCount">0</span> left</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+        <div class="progress-label" id="progressLabel">0 answered</div>
+        <div class="saved-indicator" id="savedIndicator">💾 Saved</div>
       </div>
     </div>
 
-    <div class="result-stats">
-      <div class="r-stat correct"><div class="r-stat-val" id="rCorrect">0</div><div class="r-stat-label">Correct</div></div>
-      <div class="r-stat wrong"><div class="r-stat-val" id="rWrong">0</div><div class="r-stat-label">Wrong</div></div>
-      <div class="r-stat skipped"><div class="r-stat-val" id="rSkipped">0</div><div class="r-stat-label">Skipped</div></div>
+    <div class="question-wrap">
+      <div class="q-number" id="qNumber">Question 1</div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsContainer"></div>
     </div>
 
-    <div class="result-actions">
-      <button class="btn btn-primary" onclick="retryQuiz()">🔁 Try Again</button>
-      <a href="pastquestions.html" class="btn btn-outline">📝 Other Years</a>
-      <a href="dashboard.html" class="btn btn-outline">🏠 Dashboard</a>
+    <div class="nav-btns">
+      <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+      <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+      <button class="nav-btn restart-btn" id="restartBtn" onclick="openRestartModal()">↺ Restart</button>
+      <button class="nav-btn submit-btn" id="submitBtn" onclick="openSubmitModal()" style="display:none;">Submit ✓</button>
     </div>
 
-    <div class="review-section">
-      <div class="review-title">📋 Question Review</div>
-      <div class="review-filter">
-        <button class="filter-btn active" onclick="filterReview('all', this)">All</button>
-        <button class="filter-btn f-correct" onclick="filterReview('correct', this)">✅ Correct</button>
-        <button class="filter-btn f-wrong" onclick="filterReview('wrong', this)">❌ Wrong</button>
-        <button class="filter-btn f-skipped" onclick="filterReview('skipped', this)">⏭️ Skipped</button>
+    <div class="q-grid-wrap">
+      <div class="q-grid-title">Question Navigator</div>
+      <div class="q-grid" id="qGrid"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="resultsScreen">
+    <div class="results-wrap">
+      <div class="result-header">
+        <h2 id="resultYear">2006 Past Questions</h2>
+        <p>Here's how you performed</p>
+        <div class="result-ring-wrap">
+          <svg class="result-ring" width="120" height="120" viewBox="0 0 120 120">
+            <circle class="r-ring-bg" cx="60" cy="60" r="50"/>
+            <circle class="r-ring-fill" id="rRingFill" cx="60" cy="60" r="50" stroke="#3B82F6" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+            <text class="r-ring-text" x="60" y="55" id="rRingText">0%</text>
+            <text class="r-ring-grade" x="60" y="70" id="rRingGrade"></text>
+          </svg>
+        </div>
       </div>
-      <div class="review-cards" id="reviewCards"></div>
+
+      <div class="progress-history" id="progressHistory">
+        <div class="history-title">📈 Your Journey with <span id="historyYear">2006</span></div>
+        <div class="history-grid" id="historyGrid">
+          <!-- Will be filled by JavaScript -->
+        </div>
+        <div class="history-stats" id="historyStats">
+          <!-- Will be filled by JavaScript -->
+        </div>
+      </div>
+
+      <div class="result-stats">
+        <div class="r-stat correct"><div class="r-stat-val" id="rCorrect">0</div><div class="r-stat-label">Correct</div></div>
+        <div class="r-stat wrong"><div class="r-stat-val" id="rWrong">0</div><div class="r-stat-label">Wrong</div></div>
+        <div class="r-stat skipped"><div class="r-stat-val" id="rSkipped">0</div><div class="r-stat-label">Skipped</div></div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn-primary" onclick="retryQuiz()">🔁 Try Again</button>
+        <a href="pastquestions.html" class="btn btn-outline">📝 Other Years</a>
+        <a href="dashboard.html" class="btn btn-outline">🏠 Back to Dashboard</a>
+      </div>
+
+      <div class="review-section">
+        <div class="review-title">📋 Question Review</div>
+        <div class="review-filter">
+          <button class="filter-btn active" onclick="filterReview('all', this)">All</button>
+          <button class="filter-btn f-correct" onclick="filterReview('correct', this)">✅ Correct</button>
+          <button class="filter-btn f-wrong" onclick="filterReview('wrong', this)">❌ Wrong</button>
+          <button class="filter-btn f-skipped" onclick="filterReview('skipped', this)">⏭️ Skipped</button>
+        </div>
+        <div class="review-cards" id="reviewCards"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -258,6 +312,36 @@
   const db = firebase.firestore();
   db.enablePersistence({synchronizeTabs: true}).catch(err => console.error("Cache error:", err));
 
+  // Security: No Right Click/Copy
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['c','a','p','u'].includes(e.key.toLowerCase())) e.preventDefault();
+  });
+
+  // Offline detector
+  function updateOnlineStatus() {
+    const existing = document.getElementById('onlineStatus');
+    if (existing) existing.remove();
+    
+    const status = document.createElement('div');
+    status.id = 'onlineStatus';
+    status.className = 'offline-toast';
+    status.style.background = navigator.onLine ? '#22C55E' : '#EF4444';
+    status.textContent = navigator.onLine ? '🟢 Back Online!' : '🔴 You\'re offline - progress still saved';
+    
+    document.body.appendChild(status);
+    
+    setTimeout(() => {
+      status.style.opacity = '0';
+      setTimeout(() => status.remove(), 300);
+    }, 3000);
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+
+  // Theme Toggle
   function toggleTheme() {
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
@@ -265,26 +349,143 @@
     document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
   }
-  const saved = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-  document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+  
+  // Initialize theme
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
-  auth.onAuthStateChanged(user => { if (!user) window.location.href = 'auth.html'; });
+  // AUTH LOGIC - Only show content after auth
+  auth.onAuthStateChanged(user => { 
+    if (!user) {
+      window.location.href = 'auth.html';
+    } else {
+      document.querySelector('.content').style.display = 'block';
+      loadQuestions();
+    }
+  });
 
   const params = new URLSearchParams(window.location.search);
   const year = params.get('year');
-
-  // ── STATE ──
   let questions = [];
   let currentIndex = 0;
   let userAnswers = {};
+  let currentReviewData = [];
 
-  // ── LOAD QUESTIONS (Single Document Fetch) ──
-  async function loadQuestions() {
-    if (!year) {
-      document.getElementById('loadingText').textContent = 'No year specified. Please go back.';
+  // LOCAL STORAGE (Progress Saving)
+  function saveQuizState() {
+    if (!year) return;
+    localStorage.setItem(`quiz_state_${year}`, JSON.stringify({
+      userAnswers: userAnswers,
+      currentIndex: currentIndex,
+      lastSaved: new Date().toISOString()
+    }));
+    
+    const indicator = document.getElementById('savedIndicator');
+    if (indicator) {
+      indicator.textContent = '💾 Saved just now';
+      setTimeout(() => {
+        indicator.textContent = '💾 Saved';
+      }, 3000);
+    }
+  }
+
+  function loadQuizState() {
+    const saved = localStorage.getItem(`quiz_state_${year}`);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        userAnswers = state.userAnswers || {};
+        currentIndex = state.currentIndex || 0;
+        return true;
+      } catch (e) {
+        console.error('Failed to parse saved state');
+      }
+    }
+    return false;
+  }
+
+  function clearQuizState() {
+    localStorage.removeItem(`quiz_state_${year}`);
+  }
+
+  // PROGRESS HISTORY
+  function saveHistory(score) {
+    const key = `history_${year}`;
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    history.push({ 
+      date: new Date().toLocaleDateString(), 
+      score: score,
+      timestamp: Date.now()
+    });
+    if (history.length > 10) history.shift();
+    localStorage.setItem(key, JSON.stringify(history));
+  }
+
+  function loadHistory() {
+    const key = `history_${year}`;
+    return JSON.parse(localStorage.getItem(key) || '[]');
+  }
+
+  function displayHistory() {
+    const history = loadHistory();
+    const grid = document.getElementById('historyGrid');
+    const stats = document.getElementById('historyStats');
+    
+    if (history.length === 0) {
+      grid.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:10px;">Complete your first attempt to see progress!</div>';
+      stats.innerHTML = '';
       return;
     }
+    
+    // Calculate stats
+    const scores = history.map(h => h.score);
+    const best = Math.max(...scores);
+    const latest = scores[scores.length - 1];
+    const average = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    
+    // Determine trend
+    let trend = '';
+    if (history.length >= 2) {
+      const lastTwo = history.slice(-2).map(h => h.score);
+      if (lastTwo[1] > lastTwo[0]) trend = '📈 Improving';
+      else if (lastTwo[1] < lastTwo[0]) trend = '📉 Review needed';
+      else trend = '➡️ Consistent';
+    }
+    
+    // Show newest first
+    grid.innerHTML = history.slice().reverse().map((h, index) => {
+      const isLatest = index === 0;
+      return `
+        <div class="history-row">
+          <span class="history-date">${h.date}</span>
+          <div class="history-score-bar">
+            <div class="history-score-fill" style="width: ${h.score}%"></div>
+          </div>
+          <span class="history-score-value" style="${isLatest ? 'color: var(--primary); font-weight:700;' : ''}">${h.score}%</span>
+        </div>
+      `;
+    }).join('');
+    
+    stats.innerHTML = `
+      <span class="history-best">🏆 Best: ${best}%</span>
+      <span>📊 Avg: ${average}%</span>
+      <span class="history-streak">${trend}</span>
+    `;
+  }
+
+  async function loadQuestions() {
+    if (!year) {
+      document.getElementById('loadingText').innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:2rem;margin-bottom:12px;">📅</div>
+          <div style="font-weight:700;font-size:1rem;margin-bottom:8px;">No year selected</div>
+          <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:20px;">Please go back and select a year to practice.</div>
+          <a href="pastquestions.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;font-size:0.88rem;text-decoration:none;">← Pick a Year</a>
+        </div>`;
+      return;
+    }
+    
     try {
       document.getElementById('loadingText').textContent = `Loading ${year} questions...`;
       
@@ -292,74 +493,88 @@
       const docSnap = await docRef.get();
 
       if (!docSnap.exists) {
-        document.getElementById('loadingText').textContent = `No questions found for ${year} yet. Check back soon!`;
+        document.getElementById('loadingText').textContent = `No questions found for ${year} yet.`;
         return;
       }
 
-      const data = docSnap.data();
-      questions = data.questions || [];
+      questions = docSnap.data().questions || [];
 
       if (questions.length === 0) {
-        document.getElementById('loadingText').textContent = `No questions found in this document.`;
+        document.getElementById('loadingText').textContent = `No questions available.`;
         return;
       }
+
+      loadQuizState();
 
       document.getElementById('yearBadge').textContent = `${year} PQ`;
       document.getElementById('resultYear').textContent = `${year} Past Questions`;
+      document.getElementById('historyYear').textContent = year;
+      document.getElementById('totalCount').textContent = questions.length;
+      
       showScreen('cbtScreen');
-      renderQuestion();
       buildQGrid();
+      renderQuestion();
 
     } catch (err) {
-      document.getElementById('loadingText').textContent = 'Failed to load questions. Check your connection.';
+      document.getElementById('loadingText').textContent = 'Failed to load questions. Check connection.';
       console.error(err);
     }
   }
 
-  loadQuestions();
-
   function renderQuestion() {
+    if (!questions.length) return;
+    
     const q = questions[currentIndex];
     const total = questions.length;
 
     document.getElementById('qNumber').textContent = `Question ${currentIndex + 1} of ${total}`;
     document.getElementById('qText').textContent = q.question || q.text || 'Question text not available';
 
-    const opts = document.getElementById('optionsContainer');
-    opts.innerHTML = '';
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = '';
     const letters = ['A','B','C','D','E'];
-    const options = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
-
-    options.forEach((opt, i) => {
-      if (!opt) return;
-      const letter = letters[i];
+    
+    letters.forEach((letter, i) => {
+      const text = q[`option${letter}`];
+      if (!text) return;
+      
       const div = document.createElement('div');
-      div.className = 'option' + (userAnswers[currentIndex] === letter ? ' selected' : '');
-      div.onclick = () => selectAnswer(letter);
-      div.innerHTML = `<div class="option-letter">${letter}</div><div class="option-text">${opt}</div>`;
-      opts.appendChild(div);
+      div.className = `option ${userAnswers[currentIndex] === letter ? 'selected' : ''}`;
+      div.onclick = () => { 
+        userAnswers[currentIndex] = letter; 
+        saveQuizState(); 
+        renderQuestion(); 
+      };
+      div.innerHTML = `<div class="option-letter">${letter}</div><div class="option-text">${text}</div>`;
+      container.appendChild(div);
     });
 
     const answered = Object.keys(userAnswers).length;
-    document.getElementById('progressBar').style.width = `${(answered / total) * 100}%`;
+    document.getElementById('progressBar').style.width = total > 0 ? `${(answered / total) * 100}%` : '0%';
     document.getElementById('progressLabel').textContent = `${answered} / ${total} answered`;
-
+    document.getElementById('answeredCount').textContent = answered;
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('remainingCount').textContent = total - answered;
+    
     document.getElementById('prevBtn').disabled = currentIndex === 0;
     const isLast = currentIndex === total - 1;
-    document.getElementById('nextBtn').style.display = (!isLast) ? 'flex' : 'none';
+    document.getElementById('nextBtn').style.display = isLast ? 'none' : 'flex';
     document.getElementById('submitBtn').style.display = isLast ? 'flex' : 'none';
-
+    
     updateQGrid();
   }
 
-  function selectAnswer(letter) {
-    userAnswers[currentIndex] = letter;
+  function navigate(dir) {
+    if (!questions.length) return;
+    currentIndex = Math.max(0, Math.min(questions.length - 1, currentIndex + dir));
+    saveQuizState();
     renderQuestion();
   }
 
-  function navigate(dir) {
-    currentIndex = Math.max(0, Math.min(questions.length - 1, currentIndex + dir));
-    renderQuestion();
+  function openRestartModal() {
+    if (confirm('Are you sure you want to restart? All your answers will be lost!')) {
+      retryQuiz();
+    }
   }
 
   function buildQGrid() {
@@ -370,7 +585,10 @@
       dot.className = 'q-dot';
       dot.id = `qdot-${i}`;
       dot.textContent = i + 1;
-      dot.onclick = () => { currentIndex = i; renderQuestion(); };
+      dot.onclick = () => { 
+        currentIndex = i; 
+        renderQuestion(); 
+      };
       grid.appendChild(dot);
     });
   }
@@ -386,28 +604,44 @@
   }
 
   function openSubmitModal() {
-    const answered = Object.keys(userAnswers).length;
-    document.getElementById('modalAnswered').textContent = answered;
-    document.getElementById('modalUnanswered').textContent = questions.length - answered;
+    document.getElementById('modalAnswered').textContent = Object.keys(userAnswers).length;
+    document.getElementById('modalUnanswered').textContent = questions.length - Object.keys(userAnswers).length;
     document.getElementById('submitModal').classList.add('open');
   }
-  function closeSubmitModal() { document.getElementById('submitModal').classList.remove('open'); }
-  document.getElementById('submitModal').addEventListener('click', e => { if (e.target === document.getElementById('submitModal')) closeSubmitModal(); });
+  
+  function closeSubmitModal() { 
+    document.getElementById('submitModal').classList.remove('open'); 
+  }
+
+  document.getElementById('submitModal').addEventListener('click', e => { 
+    if (e.target === document.getElementById('submitModal')) closeSubmitModal(); 
+  });
 
   function submitQuiz() {
     closeSubmitModal();
+    clearQuizState();
+    
     let correct = 0, wrong = 0, skipped = 0;
-    const reviewData = [];
+    currentReviewData = [];
 
     questions.forEach((q, i) => {
       const userAns = userAnswers[i] || null;
       const correctAns = q.answer || q.correctAnswer;
       let status = 'skipped';
+      
       if (userAns) {
-        if (userAns === correctAns) { correct++; status = 'correct'; }
-        else { wrong++; status = 'wrong'; }
-      } else { skipped++; }
-      reviewData.push({
+        if (userAns === correctAns) { 
+          correct++; 
+          status = 'correct'; 
+        } else { 
+          wrong++; 
+          status = 'wrong'; 
+        }
+      } else { 
+        skipped++; 
+      }
+      
+      currentReviewData.push({
         question: q.question || q.text,
         optionA: q.optionA, optionB: q.optionB,
         optionC: q.optionC, optionD: q.optionD,
@@ -420,8 +654,12 @@
     });
 
     const total = questions.length;
-    const percentage = Math.round((correct / total) * 100);
+    const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
 
+    // Save to history
+    saveHistory(percentage);
+
+    // Update UI
     let color, grade;
     if (percentage === 100) { color='#A855F7'; grade='Perfect'; }
     else if (percentage >= 90) { color='#22C55E'; grade='Excellent'; }
@@ -436,6 +674,7 @@
     fill.style.stroke = color;
     document.getElementById('rRingGrade').textContent = grade;
     document.getElementById('rRingGrade').style.fill = color;
+    
     setTimeout(() => {
       fill.style.strokeDashoffset = circumference - (percentage / 100) * circumference;
       document.getElementById('rRingText').textContent = percentage + '%';
@@ -446,35 +685,36 @@
     document.getElementById('rSkipped').textContent = skipped;
 
     showScreen('resultsScreen');
-    renderReview('all', reviewData);
+    renderReview('all');
   }
 
   function retryQuiz() {
-    currentIndex = 0;
     userAnswers = {};
+    currentIndex = 0;
+    clearQuizState();
     showScreen('cbtScreen');
     renderQuestion();
-    updateQGrid();
   }
 
-  let currentReviewData = [];
-  function renderReview(filter, data) {
-    if (data) currentReviewData = data;
+  function renderReview(filter) {
     const container = document.getElementById('reviewCards');
-    container.innerHTML = '';
+    
+    if (!currentReviewData || currentReviewData.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">No review data available.</div>';
+      return;
+    }
+    
     const filtered = filter === 'all' ? currentReviewData : currentReviewData.filter(q => q.status === filter);
 
     if (filtered.length === 0) {
-      container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:20px;font-size:0.85rem;">No questions in this category.</div>`;
+      container.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:20px;">No ${filter} questions.</div>`;
       return;
     }
 
-    filtered.forEach(q => {
-      const globalIndex = currentReviewData.indexOf(q);
-      const statusIcon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭️';
+    container.innerHTML = filtered.map((q, index) => {
       const letters = ['A','B','C','D','E'];
       const opts = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
-
+      
       let optionsHTML = '';
       opts.forEach((opt, oi) => {
         if (!opt) return;
@@ -495,11 +735,10 @@
       const skippedNote = q.status === 'skipped'
         ? `<div style="font-size:0.75rem;color:#F59E0B;margin-bottom:8px;">⏭️ Not answered.</div>` : '';
 
-      container.innerHTML += `
+      return `
         <div class="review-card ${q.status}">
           <div class="review-card-header">
-            <span>${statusIcon}</span>
-            <span class="review-q-num">Question ${globalIndex + 1}</span>
+            <span class="review-q-num">Question ${questions.indexOf(q) + 1}</span>
           </div>
           <div class="review-card-body">
             <div class="review-q-text">${q.question || 'Question not available'}</div>
@@ -507,8 +746,9 @@
             <div class="review-options">${optionsHTML}</div>
             ${explanationHTML}
           </div>
-        </div>`;
-    });
+        </div>
+      `;
+    }).join('');
   }
 
   function filterReview(filter, btn) {
@@ -520,43 +760,11 @@
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-  }
-</script>
-  <style>
-  /* This completely disables text selection and highlighting on the whole page */
-  body {
-    -webkit-user-select: none; /* Safari/Chrome/iOS */
-    -moz-user-select: none;    /* Firefox */
-    -ms-user-select: none;     /* IE/Edge */
-    user-select: none;         /* Standard */
-  }
-  
-  /* Allow users to type in input boxes if you have any */
-  input, textarea {
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-  }
-</style>
-
-<script>
-  // 1. Prevent Right-Click Menu
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
-
-  // 2. Prevent the actual "Copy" action (just in case)
-  document.addEventListener('copy', function(e) {
-    e.preventDefault();
-  });
-
-  // 3. Prevent Keyboard Shortcuts (Ctrl+C, Ctrl+A, Ctrl+P, Ctrl+U) and Mac equivalents
-  document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'a' || e.key === 'A' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')) {
-      e.preventDefault();
+    
+    if (id === 'resultsScreen') {
+      displayHistory();
     }
-  });
+  }
 </script>
 
 </body>
