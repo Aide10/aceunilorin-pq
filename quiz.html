@@ -358,7 +358,9 @@
   // AUTH LOGIC - Only show content after auth
   auth.onAuthStateChanged(user => { 
     if (!user) {
-      window.location.href = 'auth.html';
+      // Not logged in — redirect to auth, preserving the year so they come back to the right page
+      const returnUrl = encodeURIComponent(window.location.href);
+      window.location.href = 'auth.html?next=' + returnUrl;
     } else {
       document.querySelector('.content').style.display = 'block';
       loadQuestions();
