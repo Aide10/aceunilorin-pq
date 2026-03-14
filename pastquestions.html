@@ -522,5 +522,42 @@
       if (e.target === this) closeModal();
     });
   </script>
+  <style>
+  /* This completely disables text selection and highlighting on the whole page */
+  body {
+    -webkit-user-select: none; /* Safari/Chrome/iOS */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* IE/Edge */
+    user-select: none;         /* Standard */
+  }
+  
+  /* Allow users to type in input boxes if you have any */
+  input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+</style>
+
+<script>
+  // 1. Prevent Right-Click Menu
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  // 2. Prevent the actual "Copy" action (just in case)
+  document.addEventListener('copy', function(e) {
+    e.preventDefault();
+  });
+
+  // 3. Prevent Keyboard Shortcuts (Ctrl+C, Ctrl+A, Ctrl+P, Ctrl+U) and Mac equivalents
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'a' || e.key === 'A' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')) {
+      e.preventDefault();
+    }
+  });
+</script>
+
 </body>
 </html>
