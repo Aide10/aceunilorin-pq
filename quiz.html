@@ -256,6 +256,7 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  db.enablePersistence({synchronizeTabs: true}).catch(err => console.error("Cache error:", err));
 
   function toggleTheme() {
     const html = document.documentElement;
