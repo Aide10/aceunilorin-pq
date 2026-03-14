@@ -167,6 +167,7 @@
   <script>
     firebase.initializeApp({apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"});
     const auth=firebase.auth(), db=firebase.firestore();
+    db.enablePersistence({synchronizeTabs: true}).catch(err => console.error("Cache error:", err));
 
     // ── THEME ──
     const th=localStorage.getItem('theme')||'dark';
