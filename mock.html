@@ -421,16 +421,36 @@
       }
       updateLoadingOverlay(`Loaded ${yearPools.length} year(s) of questions...`);
 
-      // Step 2: Flatten all pools, shuffle everything, pick up to TARGET
+      // Step 2: Flatten, de-prioritise recently seen, shuffle, pick up to TARGET
       if (yearPools.length > 0) {
-        // Merge all questions from all loaded years
         const allPooled = yearPools.flat();
-        // Full Fisher-Yates shuffle for true randomness
-        for (let i = allPooled.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [allPooled[i], allPooled[j]] = [allPooled[j], allPooled[i]];
-        }
-        allQuestions = allPooled.slice(0, TARGET);
+
+        // Load recently seen questions (stored from last 2 mocks)
+        const recentRaw = localStorage.getItem('recentMockQs');
+        const recentSeen = recentRaw ? new Set(JSON.parse(recentRaw)) : new Set();
+
+        // Split into unseen and seen pools
+        const unseen = allPooled.filter(q => !recentSeen.has(`${q.year}-${q.number}`));
+        const seen = allPooled.filter(q => recentSeen.has(`${q.year}-${q.number}`));
+
+        // Fisher-Yates shuffle both pools independently
+        const shuffle = arr => {
+          for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+          }
+          return arr;
+        };
+        shuffle(unseen);
+        shuffle(seen);
+
+        // Unseen questions come first, seen fill up remainder if needed
+        allQuestions = [...unseen, ...seen].slice(0, TARGET);
+
+        // Save these as recently seen (keep last 100 — roughly 2 mocks)
+        const newRecent = allQuestions.map(q => `${q.year}-${q.number}`);
+        const updatedRecent = [...Array.from(recentSeen), ...newRecent].slice(-100);
+        localStorage.setItem('recentMockQs', JSON.stringify(updatedRecent));
       }
 
       // If full mock, also mix in study questions to fill up to TARGET
