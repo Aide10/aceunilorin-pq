@@ -434,66 +434,24 @@
 
   // ── PAYSTACK PAYMENT ──
   function initPayment() {
-    if (!currentUser) {
-      toast('Please log in first', 'err');
-      return;
-    }
-
-    const btn = document.getElementById('payBtn');
-    const spinner = document.getElementById('paySpinner');
-    const btnText = document.getElementById('payBtnText');
-
-    btn.disabled = true;
-    spinner.style.display = 'block';
-    btnText.textContent = 'Opening payment...';
-
-    const handler = PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: currentUser.email,
-      amount: PRICE_KOBO,
-      currency: 'NGN',
-      ref: 'ACE-' + currentUser.uid.substring(0, 8) + '-' + Date.now(),
-      metadata: {
-        uid: currentUser.uid,
-        email: currentUser.email,
-        custom_fields: [
-          { display_name: 'Product', variable_name: 'product', value: 'AceUnilorin PQ Premium' }
-        ]
-      },
-      callback: async function(response) {
-        // Payment successful — update Firestore
-        btnText.textContent = 'Activating access...';
-        try {
-          await db.collection('users').doc(currentUser.uid).update({
-            isPremium: true,
-            premiumActivatedAt: new Date().toISOString(),
-            paystackRef: response.reference
-          });
-          toast('🎉 Premium activated! Redirecting...', 'ok');
-          setTimeout(() => {
-            window.location.href = 'pastquestions.html';
-          }, 2000);
-        } catch (e) {
-          // Payment went through but Firestore update failed
-          toast('Payment successful! Contact us at acecards10@gmail.com to activate.', 'info');
-          console.error('Firestore update failed:', e);
-          btn.disabled = false;
-          spinner.style.display = 'none';
-          btnText.textContent = '🚀 Unlock Premium Now';
-        }
-      },
-      onClose: function() {
-        // User closed payment popup without paying
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        btnText.textContent = '🚀 Unlock Premium Now';
-        toast('Payment cancelled', 'info');
-      }
-    });
-
-    handler.openIframe();
+  if (!currentUser) {
+    toast('Please log in first', 'err');
+    return;
   }
-
+  
+  // Save user info then redirect to Paystack page
+  db.collection('pending_payments').doc(currentUser.uid).set({
+    uid: currentUser.uid,
+    email: currentUser.email,
+    createdAt: new Date().toISOString()
+  }).then(() => {
+    window.location.href = 'https://paystack.shop/pay/aceunilorin-pq';
+  }).catch(() => {
+    // Still redirect even if Firestore save fails
+    window.location.href = 'https://paystack.shop/pay/aceunilorin-pq';
+  });
+  }
+    
   // ── FAQ TOGGLE ──
   function toggleFaq(el) {
     const answer = el.nextElementSibling;
