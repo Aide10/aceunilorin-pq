@@ -403,11 +403,19 @@
   document.documentElement.setAttribute('data-theme', saved);
   document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
 
-  // ── PAYSTACK CONFIG ──
-  // ⚠️ REPLACE with your actual Paystack public key
-  const PAYSTACK_PUBLIC_KEY = 'pk_live_27e66900912d34f8c0f0e623c3a2aaaa183c9ea7';
-  const PRICE_KOBO = 250000; // ₦2,500 in kobo (Paystack uses kobo)
-  const PRICE_DISPLAY = '2,500';
+  // // ── PAYSTACK CONFIG ──
+const IS_LIVE = false; // Change to true when ready to go live
+
+const PAYSTACK_PUBLIC_KEY = IS_LIVE
+  ? 'pk_live_27e66900912d34f8c0f0e623c3a2aaaa183c9ea7'
+  : 'pk_test_11c9311cfe9cc398c7364a409653b162aa9c7d03';
+
+const PAYSTACK_URL = IS_LIVE
+  ? 'https://paystack.shop/pay/aceunilorin-pq'
+  : 'https://paystack.shop/pay/aceunilorin-pq-test';
+
+const PRICE_KOBO = 250000;
+const PRICE_DISPLAY = '2,500';
 
   let currentUser = null;
 
