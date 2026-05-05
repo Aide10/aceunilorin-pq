@@ -412,25 +412,48 @@
   let currentUser = null;
 
   // ── AUTH CHECK ──
-  auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      window.location.href = 'auth.html';
-      return;
-    }
-    currentUser = user;
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    window.location.href = 'auth.html';
+    return;
+  }
+  currentUser = user;
 
+  // Check if returning from Paystack payment
+  const urlParams = new URLSearchParams(window.location.search);
+  const reference = urlParams.get('reference') || urlParams.get('trxref');
+
+  if (reference) {
+    // Activate premium
     try {
-      const doc = await db.collection('users').doc(user.uid).get();
-      const isPremium = doc.exists && doc.data().isPremium === true;
-
-      if (isPremium) {
-        document.getElementById('alreadyPremium').classList.add('show');
-        document.getElementById('priceCard').style.display = 'none';
-      }
+      await db.collection('users').doc(user.uid).set({
+        isPremium: true,
+        premiumActivatedAt: new Date().toISOString(),
+        paystackRef: reference
+      }, { merge: true });
+      toast('🎉 Premium activated! Welcome!', 'ok');
+      document.getElementById('alreadyPremium').classList.add('show');
+      document.getElementById('priceCard').style.display = 'none';
+      // Clean URL
+      window.history.replaceState({}, '', 'upgrade.html');
     } catch (e) {
-      console.error('Error checking premium status:', e);
+      toast('Payment received! Contact us to activate.', 'info');
     }
-  });
+    return;
+  }
+
+  try {
+    const doc = await db.collection('users').doc(user.uid).get();
+    const isPremium = doc.exists && doc.data().isPremium === true;
+
+    if (isPremium) {
+      document.getElementById('alreadyPremium').classList.add('show');
+      document.getElementById('priceCard').style.display = 'none';
+    }
+  } catch (e) {
+    console.error('Error checking premium status:', e);
+  }
+});
 
   // ── PAYSTACK PAYMENT ──
   function initPayment() {
