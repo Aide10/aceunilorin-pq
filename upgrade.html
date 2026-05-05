@@ -476,12 +476,10 @@ auth.onAuthStateChanged(async (user) => {
     email: currentUser.email,
     createdAt: new Date().toISOString()
   }).then(() => {
-    window.location.href = 'https://paystack.shop/pay/aceunilorin-pq';
+    window.location.href = PAYSTACK_URL;
   }).catch(() => {
-    // Still redirect even if Firestore save fails
-    window.location.href = 'https://paystack.shop/pay/aceunilorin-pq';
+    window.location.href = PAYSTACK_URL;
   });
-  }
     
   // ── FAQ TOGGLE ──
   function toggleFaq(el) {
