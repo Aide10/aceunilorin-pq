@@ -623,8 +623,8 @@
 
     // Prev/Next/Submit buttons
     document.getElementById('prevBtn').disabled = currentIndex === 0;
-    document.getElementById('nextBtn').style.display = currentIndex < total - 1 ? 'flex' : 'none';
-    document.getElementById('submitBtn').style.display = currentIndex === total - 1 ? 'flex' : 'none';
+document.getElementById('nextBtn').style.display = currentIndex < total - 1 ? 'flex' : 'none';
+document.getElementById('submitBtn').style.display = 'flex'; // Always visible
 
     // Update grid
     updateQGrid();
