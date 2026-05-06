@@ -606,9 +606,18 @@
   }
 
   function openSubmitModal() {
-    document.getElementById('modalAnswered').textContent = Object.keys(userAnswers).length;
-    document.getElementById('modalUnanswered').textContent = questions.length - Object.keys(userAnswers).length;
-    document.getElementById('submitModal').classList.add('open');
+  const answered = Object.keys(userAnswers).length;
+  const total = questions.length;
+  
+  document.getElementById('modalAnswered').textContent = answered;
+  document.getElementById('modalUnanswered').textContent = total - answered;
+  
+  if (answered < total * 0.5) {
+    alert(`⚠️ You've only answered ${answered} of ${total} questions. Are you sure you want to submit?`);
+  }
+  
+  document.getElementById('submitModal').classList.add('open');
+  }
   }
   
   function closeSubmitModal() { 
