@@ -667,7 +667,17 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
 
   // ── SUBMIT ──
   function openSubmitModal() {
-    const answered = Object.keys(userAnswers).length;
+  const answered = Object.keys(userAnswers).length;
+  const total = questions.length;
+
+  // Warn if less than 50% answered
+  if (answered < total * 0.5) {
+    toast(`⚠️ Only ${answered} of ${total} answered. Are you sure?`, 'info');
+    setTimeout(() => {
+      document.getElementById('submitModal').classList.add('open');
+    }, 1500);
+    return;
+  }
     const unanswered = questions.length - answered;
     const mins = Math.floor(secondsLeft / 60);
     const secs = secondsLeft % 60;
