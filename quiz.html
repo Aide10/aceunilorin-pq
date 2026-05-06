@@ -561,7 +561,7 @@
     document.getElementById('prevBtn').disabled = currentIndex === 0;
     const isLast = currentIndex === total - 1;
     document.getElementById('nextBtn').style.display = isLast ? 'none' : 'flex';
-    document.getElementById('submitBtn').style.display = isLast ? 'flex' : 'none';
+    document.getElementById('submitBtn').style.display = 'flex'; // Always visible
     
     updateQGrid();
   }
