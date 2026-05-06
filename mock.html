@@ -790,6 +790,21 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
+  // ── TOAST ──
+let toastTimer;
+function toast(msg, type = 'info') {
+  let t = document.getElementById('mockToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'mockToast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1E293B;border-radius:12px;padding:10px 20px;font-size:0.82rem;font-weight:700;z-index:999;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,0.4);border:1px solid #3B82F6;color:#3B82F6;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 4000);
+}
 </script>
 </body>
 </html>
