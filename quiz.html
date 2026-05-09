@@ -492,19 +492,26 @@
       document.getElementById('loadingText').textContent = `Loading ${year} questions...`;
       
       const docRef = db.collection('pastquestions').doc(String(year));
-      const docSnap = await docRef.get();
+const docSnap = await docRef.get();
 
-      if (!docSnap.exists) {
-        document.getElementById('loadingText').textContent = `No questions found for ${year} yet.`;
-        return;
-      }
+if (!docSnap.exists) {
+  document.getElementById('loadingText').textContent = `No questions found for ${year} yet.`;
+  return;
+}
 
-      questions = docSnap.data().questions || [];
+// Handle both array format and subcollection format
+if (docSnap.data().questions && docSnap.data().questions.length > 0) {
+  questions = docSnap.data().questions;
+} else {
+  const subSnap = await docRef.collection('questions').limit(300).get();
+  questions = [];
+  subSnap.forEach(d => questions.push({...d.data(), id: d.id}));
+}
 
-      if (questions.length === 0) {
-        document.getElementById('loadingText').textContent = `No questions available.`;
-        return;
-      }
+if (questions.length === 0) {
+  document.getElementById('loadingText').textContent = `No questions available.`;
+  return;
+}
 
       loadQuizState();
 
