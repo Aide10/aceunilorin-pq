@@ -148,7 +148,44 @@ textarea.ta:focus{border-color:var(--primary);}
 .empty p{font-size:.8rem;line-height:1.5;}
 .loading{text-align:center;padding:26px;color:var(--muted);font-size:.8rem;}
 .lspin{width:24px;height:24px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 9px;}
+// ── MIGRATION: Subcollection → Array ──
+async function migratePQYear(year) {
+  toast('Migrating ' + year + '...', 'info');
+  try {
+    const docRef = db.collection('pastquestions').doc(String(year));
+    const docSnap = await docRef.get();
+    
+    // Check if subcollection exists
+    const subSnap = await docRef.collection('questions').limit(300).get();
+    if (subSnap.empty) {
+      toast(year + ' — no subcollection found', 'info');
+      return;
+    }
 
+    // Get existing array questions if any
+    let existingQs = [];
+    if (docSnap.exists && docSnap.data().questions) {
+      existingQs = docSnap.data().questions;
+    }
+
+    // Get subcollection questions
+    const subQs = [];
+    subSnap.forEach(d => subQs.push({...d.data(), id: d.id}));
+
+    // Merge and save as array
+    const allQs = [...existingQs, ...subQs];
+    await docRef.set({ questions: allQs, updatedAt: new Date().toISOString() }, { merge: true });
+
+    // Delete subcollection documents
+    const batch = db.batch();
+    subSnap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+
+    toast('✅ Migrated ' + subQs.length + ' questions for ' + year, 'ok');
+  } catch(e) {
+    toast('Migration failed: ' + e.message, 'err');
+  }
+  }
 /* TOAST */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 16px;font-size:.8rem;font-weight:600;z-index:500;transition:transform .3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.3);}
 .toast.show{transform:translateX(-50%) translateY(0);}
