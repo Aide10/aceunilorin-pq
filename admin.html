@@ -183,8 +183,8 @@ async function migratePQYear(year) {
 
     alert('✅ Migrated ' + subQs.length + ' questions for ' + year);
   } catch(e) {
-    toast('Migration failed: ' + e.message, 'err');
-  }
+  alert('Migration failed: ' + e.message);
+}
   }
 /* TOAST */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 16px;font-size:.8rem;font-weight:600;z-index:500;transition:transform .3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.3);}
