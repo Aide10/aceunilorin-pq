@@ -181,7 +181,7 @@ async function migratePQYear(year) {
     subSnap.docs.forEach(d => batch.delete(d.ref));
     await batch.commit();
 
-    toast('✅ Migrated ' + subQs.length + ' questions for ' + year, 'ok');
+    alert('✅ Migrated ' + subQs.length + ' questions for ' + year);
   } catch(e) {
     toast('Migration failed: ' + e.message, 'err');
   }
