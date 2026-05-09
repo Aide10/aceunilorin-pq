@@ -452,53 +452,14 @@ let initialized = false;
 // FIX 3: Proper auth state handling with initialization guard
 // ═══════════════════════════════════════════
 auth.onAuthStateChanged(async (u) => {
-  if (!u) {
-    showAuth();
-    isAdmin = false;
-    initialized = false;
-    return;
-  }
-
-  try {
-    // Force token refresh to get latest claims
-    const token = await u.getIdTokenResult(true);
-    
-    // FIXED: Use custom claims instead of hardcoded UID
-    if (!token.claims.admin) {
-      await auth.signOut();
-      setMsg('Access denied. Admin privileges required.', 'err');
-      return;
-    }
-    
-    isAdmin = true;
-    showPanel();
-    
-    // FIXED: Only initialize once
-    if (!initialized) {
-      initialized = true;
-      buildYears();
-      loadNotes('english');
-      loadSQ('english');
-    }
-  } catch (e) {
-    console.error('Auth check failed:', e);
-    await auth.signOut();
-  }
+auth.onAuthStateChanged(u => {
+  const ok = u && u.uid === AUID;
+  document.getElementById('authWrap').style.display = ok ? 'none' : 'flex';
+  document.getElementById('panel').style.display = ok ? 'block' : 'none';
+  document.getElementById('mnav').style.display = ok ? 'block' : 'none';
+  if (u && u.uid !== AUID) auth.signOut();
+  if (ok) { buildYears(); loadNotes('english'); loadSQ('english'); }
 });
-
-function showAuth() {
-  document.getElementById('authWrap').style.display = 'flex';
-  document.getElementById('panel').style.display = 'none';
-  const mnav = document.getElementById('mnav');
-  if (mnav) mnav.style.display = 'none';
-}
-
-function showPanel() {
-  document.getElementById('authWrap').style.display = 'none';
-  document.getElementById('panel').style.display = 'block';
-  const mnav = document.getElementById('mnav');
-  if (mnav) mnav.style.display = window.innerWidth <= 700 ? 'block' : 'none';
-}
 
 // ── AUTH ──
 async function doLogin() {
