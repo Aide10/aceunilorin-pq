@@ -150,7 +150,7 @@ textarea.ta:focus{border-color:var(--primary);}
 .lspin{width:24px;height:24px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 9px;}
 // ── MIGRATION: Subcollection → Array ──
 async function migratePQYear(year) {
-  alert('Starting migration for ' + year);
+  alert('Starting migration...');
   try {
     const docRef = db.collection('pastquestions').doc(String(year));
     const docSnap = await docRef.get();
