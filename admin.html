@@ -216,10 +216,11 @@ textarea.ta:focus{border-color:var(--primary);}
       <div class="slabel">Site</div>
       <button class="sitem" onclick="window.open('https://aide10.github.io/aceunilorin-pq','_blank')"><span>🌐</span>View Live</button>
       <div class="slabel">Maintenance</div>
-<button class="sitem" onclick="alert('clicked');migratePQYear(2025)"><span>🔄</span>Migrate 2025</button>
+      <button class="sitem" onclick="showMigrationUI()"><span>🔄</span>Migrate PQ Data</button>
     </div>
     <div class="main">
 
+      <!-- [ALL SECTION HTML REMAINS EXACTLY THE SAME AS ORIGINAL UNTIL SCRIPTS] -->
       <div class="sec active" id="sec-study">
         <div class="stitle">📒 Study Content Upload</div>
         <div class="ssub">Upload notes and quiz questions for each subject</div>
@@ -403,517 +404,1247 @@ textarea.ta:focus{border-color:var(--primary);}
   </div>
 </div>
 
+<!-- Migration Modal -->
+<div class="overlay" id="migrateModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="mi2">🔄</div>
+    <h3>Migrate Past Questions</h3>
+    <p style="margin-bottom:16px;">Convert subcollection structure to array format for a specific year. <br/><b style="color:var(--danger);">⚠️ This deletes the subcollection after migration.</b></p>
+    <label class="flabel" style="text-align:left;">Year to migrate</label>
+    <select id="migrateYearSelect" style="width:100%;padding:10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;color:var(--text);font-family:inherit;font-size:.85rem;margin-bottom:16px;outline:none;"></select>
+    <div class="mbrow">
+      <button class="mbtn grey" onclick="closeMigrateModal()">Cancel</button>
+      <button class="mbtn red" onclick="confirmMigrate()">Migrate Now</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-firebase.initializeApp({apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"});
-const auth=firebase.auth(), db=firebase.firestore();
-const AUID='KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+// ═══════════════════════════════════════════
+// FIXED: Firebase config (API key is meant to be public, 
+// but must be protected by proper Security Rules)
+// ═══════════════════════════════════════════
+firebase.initializeApp({
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ═══════════════════════════════════════════
+// FIX 1: REMOVED hardcoded admin UID. Using Custom Claims.
+// ═══════════════════════════════════════════
+
+let isAdmin = false;
+let initialized = false;
+
+// ═══════════════════════════════════════════
+// FIX 3: Proper auth state handling with initialization guard
+// ═══════════════════════════════════════════
+auth.onAuthStateChanged(async (u) => {
+  if (!u) {
+    showAuth();
+    isAdmin = false;
+    initialized = false;
+    return;
+  }
+
+  try {
+    // Force token refresh to get latest claims
+    const token = await u.getIdTokenResult(true);
+    
+    // FIXED: Use custom claims instead of hardcoded UID
+    if (!token.claims.admin) {
+      await auth.signOut();
+      setMsg('Access denied. Admin privileges required.', 'err');
+      return;
+    }
+    
+    isAdmin = true;
+    showPanel();
+    
+    // FIXED: Only initialize once
+    if (!initialized) {
+      initialized = true;
+      buildYears();
+      loadNotes('english');
+      loadSQ('english');
+    }
+  } catch (e) {
+    console.error('Auth check failed:', e);
+    await auth.signOut();
+  }
+});
+
+function showAuth() {
+  document.getElementById('authWrap').style.display = 'flex';
+  document.getElementById('panel').style.display = 'none';
+  const mnav = document.getElementById('mnav');
+  if (mnav) mnav.style.display = 'none';
+}
+
+function showPanel() {
+  document.getElementById('authWrap').style.display = 'none';
+  document.getElementById('panel').style.display = 'block';
+  const mnav = document.getElementById('mnav');
+  if (mnav) mnav.style.display = window.innerWidth <= 700 ? 'block' : 'none';
+}
 
 // ── AUTH ──
-async function doLogin(){
-  const email=document.getElementById('aEmail').value.trim();
-  const pass=document.getElementById('aPass').value;
-  if(!email||!pass){setMsg('Enter email and password','err');return;}
-  const btn=document.getElementById('loginBtn');
-  btn.disabled=true; btn.textContent='Signing in...';
-  setMsg('','');
-  try{
-    const c=await auth.signInWithEmailAndPassword(email,pass);
-    if(c.user.uid!==AUID){await auth.signOut();setMsg('Access denied.','err');}
-  }catch(e){setMsg(e.message,'err');}
-  btn.disabled=false; btn.textContent='Sign In →';
+async function doLogin() {
+  const email = document.getElementById('aEmail').value.trim();
+  const pass = document.getElementById('aPass').value;
+  
+  if (!email || !pass) {
+    setMsg('Enter email and password', 'err');
+    return;
+  }
+  
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+  setMsg('', '');
+  
+  try {
+    const c = await auth.signInWithEmailAndPassword(email, pass);
+    // Admin check now happens in onAuthStateChanged via custom claims
+    // No need to manually check UID here
+  } catch (e) {
+    setMsg(e.message, 'err');
+  }
+  
+  btn.disabled = false;
+  btn.textContent = 'Sign In →';
 }
-function setMsg(t,type){
-  const m=document.getElementById('aMsg');
-  m.textContent=t;
-  m.className='amsg'+(type?' '+type:'');
+
+function setMsg(t, type) {
+  const m = document.getElementById('aMsg');
+  m.textContent = t;
+  m.className = 'amsg' + (type ? ' ' + type : '');
 }
-async function doLogout(){await auth.signOut();}
 
-document.getElementById('aPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-document.getElementById('aEmail').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+async function doLogout() {
+  await auth.signOut();
+}
 
-auth.onAuthStateChanged(u=>{
-  const ok=u&&u.uid===AUID;
-  document.getElementById('authWrap').style.display=ok?'none':'flex';
-  document.getElementById('panel').style.display=ok?'block':'none';
-  document.getElementById('mnav').style.display=ok?'block':'none';
-  if(u&&u.uid!==AUID) auth.signOut();
-  if(ok){buildYears();loadNotes('english');loadSQ('english');}
+// ── ENTER KEY HANDLERS ──
+document.getElementById('aPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('aEmail').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
 });
 
 // ── NAV ──
-function goTo(name,el){
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.sitem,.mni').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+name).classList.add('active');
-  document.querySelectorAll('.sitem,.mni').forEach(b=>{
-    if((b.getAttribute('onclick')||'').includes("'"+name+"'")) b.classList.add('active');
+function goTo(name, el) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sitem,.mni').forEach(s => s.classList.remove('active'));
+  
+  const sec = document.getElementById('sec-' + name);
+  if (sec) sec.classList.add('active');
+  
+  document.querySelectorAll('.sitem,.mni').forEach(b => {
+    const onclick = b.getAttribute('onclick') || '';
+    if (onclick.includes("'" + name + "'")) b.classList.add('active');
   });
 }
 
 // ── YEARS ──
-const FREE=[2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
-const PREM=[2021,2022,2023,2024,2025];
-const NONE=[2016,2020];
-let selYear=null, mPQYear=null;
+const FREE = [2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2017, 2018, 2019];
+const PREM = [2021, 2022, 2023, 2024, 2025];
+const NONE = [2016, 2020];
+let selYear = null;
+let mPQYear = null;
 
-function buildYears(){
-  ['pq-ygrid','mpq-ygrid'].forEach(gid=>{
-    const g=document.getElementById(gid), isM=gid==='mpq-ygrid';
-    g.innerHTML='';
-    [...FREE,...PREM].sort((a,b)=>a-b).forEach(y=>{
-      const b=document.createElement('button');
-      b.className='ybtn'; b.textContent=y;
-      b.onclick=isM?()=>{mPQYear=y;document.querySelectorAll('#mpq-ygrid .ybtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');loadPQ(y);}:()=>{selYear=y;document.querySelectorAll('#pq-ygrid .ybtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');chkPQ();};
+function buildYears() {
+  ['pq-ygrid', 'mpq-ygrid'].forEach(gid => {
+    const g = document.getElementById(gid);
+    if (!g) return;
+    
+    const isM = gid === 'mpq-ygrid';
+    g.innerHTML = '';
+    
+    [...FREE, ...PREM].sort((a, b) => a - b).forEach(y => {
+      const b = document.createElement('button');
+      b.className = 'ybtn';
+      b.textContent = y;
+      
+      if (isM) {
+        b.onclick = () => {
+          mPQYear = y;
+          document.querySelectorAll('#mpq-ygrid .ybtn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          loadPQ(y);
+        };
+      } else {
+        b.onclick = () => {
+          selYear = y;
+          document.querySelectorAll('#pq-ygrid .ybtn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          chkPQ();
+        };
+      }
+      
       g.appendChild(b);
     });
-    NONE.forEach(y=>{const b=document.createElement('button');b.className='ybtn off';b.textContent=y+'*';b.title='No exam';g.appendChild(b);});
+    
+    NONE.forEach(y => {
+      const b = document.createElement('button');
+      b.className = 'ybtn off';
+      b.textContent = y + '*';
+      b.title = 'No exam';
+      g.appendChild(b);
+    });
   });
 }
 
 // ── STATE ──
-let studySub='english', studyDest='both', studyM='pdf', studyFile=null;
-let pqM='pdf', pqFile=null;
-let studyOut={notes:[],questions:[]}, pqOut=[];
+let studySub = 'english';
+let studyDest = 'both';
+let studyM = 'pdf';
+let studyFile = null;
+let pqM = 'pdf';
+let pqFile = null;
+let studyOut = { notes: [], questions: [] };
+let pqOut = [];
 
-function setDest(d,btn){studyDest=d;document.querySelectorAll('#destTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-function setSub(s,btn){studySub=s;document.querySelectorAll('#subTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-function chkPQ(){document.getElementById('pq-xbtn').disabled=!(selYear&&(pqM==='text'||pqFile));}
-
-function setM(ctx,m,btn){
-  const isS=ctx==='study';
-  if(isS){studyM=m;studyFile=null;}else{pqM=m;pqFile=null;}
-  const tabId=isS?'studyMTabs':'pqMTabs';
-  document.querySelectorAll('#'+tabId+' .itab').forEach(b=>b.classList.remove('active'));
+function setDest(d, btn) {
+  studyDest = d;
+  document.querySelectorAll('#destTabs .tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  ['pdf','img','file','text'].forEach(t=>{
-    const el=document.getElementById(ctx+'-'+t+'-wrap');
-    if(el) el.style.display=t===m?'block':'none';
+}
+
+function setSub(s, btn) {
+  studySub = s;
+  document.querySelectorAll('#subTabs .tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function chkPQ() {
+  const btn = document.getElementById('pq-xbtn');
+  if (btn) btn.disabled = !(selYear && (pqM === 'text' || pqFile));
+}
+
+function setM(ctx, m, btn) {
+  const isS = ctx === 'study';
+  
+  if (isS) {
+    studyM = m;
+    studyFile = null;
+  } else {
+    pqM = m;
+    pqFile = null;
+  }
+  
+  const tabId = isS ? 'studyMTabs' : 'pqMTabs';
+  document.querySelectorAll('#' + tabId + ' .itab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  ['pdf', 'img', 'file', 'text'].forEach(t => {
+    const el = document.getElementById(ctx + '-' + t + '-wrap');
+    if (el) el.style.display = t === m ? 'block' : 'none';
   });
-  if(isS) document.getElementById('study-xbtn').disabled=(m!=='text');
-  else chkPQ();
-  document.getElementById(ctx+'-prog').classList.remove('on');
-  document.getElementById(ctx+'-pv').classList.remove('on');
+  
+  if (isS) {
+    const xbtn = document.getElementById('study-xbtn');
+    if (xbtn) xbtn.disabled = (m !== 'text');
+  } else {
+    chkPQ();
+  }
+  
+  const prog = document.getElementById(ctx + '-prog');
+  const pv = document.getElementById(ctx + '-pv');
+  if (prog) prog.classList.remove('on');
+  if (pv) pv.classList.remove('on');
 }
 
 // ── FILE ──
-function onDrop(e,ctx,type){
+function onDrop(e, ctx, type) {
   e.preventDefault();
-  document.getElementById(ctx+'-'+type+'-zone').classList.remove('over');
-  const f=e.dataTransfer.files[0];
-  if(f) handleFile(f,ctx,type);
+  const zone = document.getElementById(ctx + '-' + type + '-zone');
+  if (zone) zone.classList.remove('over');
+  
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f, ctx, type);
 }
-function onPick(e,ctx,type){const f=e.target.files[0];if(f) handleFile(f,ctx,type);}
-function handleFile(file,ctx,type){
-  if(file.size>20*1024*1024){toast('File too large. Max 20MB','err');return;}
-  if(ctx==='study') studyFile=file; else pqFile=file;
-  document.getElementById(ctx+'-'+type+'-zone').style.display='none';
-  document.getElementById(ctx+'-'+type+'-nm').textContent=file.name;
-  document.getElementById(ctx+'-'+type+'-sz').textContent=(file.size/1024/1024).toFixed(2)+' MB';
-  document.getElementById(ctx+'-'+type+'-sel').classList.add('show');
-  if(type==='img'){
-    const r=new FileReader();
-    r.onload=ev=>{document.getElementById(ctx+'-img-tag').src=ev.target.result;document.getElementById(ctx+'-img-prev').classList.add('show');}
+
+function onPick(e, ctx, type) {
+  const f = e.target.files[0];
+  if (f) handleFile(f, ctx, type);
+}
+
+function handleFile(file, ctx, type) {
+  if (file.size > 20 * 1024 * 1024) {
+    toast('File too large. Max 20MB', 'err');
+    return;
+  }
+  
+  if (ctx === 'study') {
+    studyFile = file;
+  } else {
+    pqFile = file;
+  }
+  
+  const zone = document.getElementById(ctx + '-' + type + '-zone');
+  const nm = document.getElementById(ctx + '-' + type + '-nm');
+  const sz = document.getElementById(ctx + '-' + type + '-sz');
+  const sel = document.getElementById(ctx + '-' + type + '-sel');
+  
+  if (zone) zone.style.display = 'none';
+  if (nm) nm.textContent = file.name;
+  if (sz) sz.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+  if (sel) sel.classList.add('show');
+  
+  if (type === 'img') {
+    const r = new FileReader();
+    r.onload = ev => {
+      const tag = document.getElementById(ctx + '-img-tag');
+      const prev = document.getElementById(ctx + '-img-prev');
+      if (tag) tag.src = ev.target.result;
+      if (prev) prev.classList.add('show');
+    };
     r.readAsDataURL(file);
   }
-  if(ctx==='study') document.getElementById('study-xbtn').disabled=false;
-  else chkPQ();
+  
+  if (ctx === 'study') {
+    const xbtn = document.getElementById('study-xbtn');
+    if (xbtn) xbtn.disabled = false;
+  } else {
+    chkPQ();
+  }
 }
-function clearF(ctx){
-  if(ctx==='study'){studyFile=null;document.getElementById('study-xbtn').disabled=true;}
-  else{pqFile=null;chkPQ();}
-  ['pdf','img','file'].forEach(t=>{
-    const z=document.getElementById(ctx+'-'+t+'-zone');
-    const s=document.getElementById(ctx+'-'+t+'-sel');
-    const p=document.getElementById(ctx+'-img-prev');
-    if(z) z.style.display='';
-    if(s) s.classList.remove('show');
-    if(p) p.classList.remove('show');
-    const inp=document.getElementById(ctx+'-'+t+'-inp');
-    if(inp) inp.value='';
+
+function clearF(ctx) {
+  if (ctx === 'study') {
+    studyFile = null;
+    const xbtn = document.getElementById('study-xbtn');
+    if (xbtn) xbtn.disabled = true;
+  } else {
+    pqFile = null;
+    chkPQ();
+  }
+  
+  ['pdf', 'img', 'file'].forEach(t => {
+    const zone = document.getElementById(ctx + '-' + t + '-zone');
+    const sel = document.getElementById(ctx + '-' + t + '-sel');
+    const prev = document.getElementById(ctx + '-img-prev');
+    const inp = document.getElementById(ctx + '-' + t + '-inp');
+    
+    if (zone) zone.style.display = '';
+    if (sel) sel.classList.remove('show');
+    if (prev) prev.classList.remove('show');
+    if (inp) inp.value = '';
   });
-  document.getElementById(ctx+'-prog').classList.remove('on');
-  document.getElementById(ctx+'-pv').classList.remove('on');
+  
+  const prog = document.getElementById(ctx + '-prog');
+  const pv = document.getElementById(ctx + '-pv');
+  if (prog) prog.classList.remove('on');
+  if (pv) pv.classList.remove('on');
 }
 
 // ── UTILS ──
-function toB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file);});}
-function loadLib(src){return new Promise((res,rej)=>{if(document.querySelector('script[src="'+src+'"]')){res();return;}const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Failed to load '+src));document.head.appendChild(s);});}
-async function extractText(file){
-  const ext=file.name.split('.').pop().toLowerCase();
-  if(ext==='txt'){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Failed to read TXT'));r.readAsText(file);});}
-  if(ext==='docx'||ext==='doc'){await loadLib('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');const ab=await file.arrayBuffer();const r=await mammoth.extractRawText({arrayBuffer:ab});return r.value||'';}
-  if(ext==='pptx'||ext==='ppt'){await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');const zip=await JSZip.loadAsync(file);let txt='';const slides=Object.keys(zip.files).filter(f=>/ppt\/slides\/slide[0-9]+\.xml$/.test(f)).sort();for(const s of slides){const xml=await zip.files[s].async('string');const m=xml.match(/<a:t[^>]*>([^<]+)<\/a:t>/g)||[];txt+=m.map(x=>x.replace(/<[^>]+>/g,'')).join(' ')+'\n\n';}return txt.trim()||'(No text)';}
-  if(ext==='epub'){await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');const zip=await JSZip.loadAsync(file);let txt='';const fs=Object.keys(zip.files).filter(f=>(f.endsWith('.html')||f.endsWith('.xhtml'))&&!f.includes('toc')&&!f.includes('nav')).sort();for(const f of fs.slice(0,30)){const html=await zip.files[f].async('string');txt+=html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()+'\n\n';}return txt.substring(0,50000)||'(No text)';}
-  throw new Error('Unsupported file type: .'+ext);
+// FIXED: Added safe file extension detection
+function getFileExt(file) {
+  if (!file || !file.name) return '';
+  const parts = file.name.split('.');
+  return parts.length > 1 ? parts.pop().toLowerCase() : '';
+}
+
+function toB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+function loadLib(src) {
+  return new Promise((res, rej) => {
+    if (document.querySelector('script[src="' + src + '"]')) {
+      res();
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = res;
+    s.onerror = () => rej(new Error('Failed to load ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+async function extractText(file) {
+  const ext = getFileExt(file);
+  if (!ext) throw new Error('File has no extension. Cannot determine type.');
+  
+  if (ext === 'txt') {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = e => res(e.target.result);
+      r.onerror = () => rej(new Error('Failed to read TXT'));
+      r.readAsText(file);
+    });
+  }
+  
+  if (ext === 'docx' || ext === 'doc') {
+    await loadLib('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+    const ab = await file.arrayBuffer();
+    const r = await mammoth.extractRawText({ arrayBuffer: ab });
+    return r.value || '';
+  }
+  
+  if (ext === 'pptx' || ext === 'ppt') {
+    await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+    const zip = await JSZip.loadAsync(file);
+    let txt = '';
+    const slides = Object.keys(zip.files)
+      .filter(f => /ppt\/slides\/slide[0-9]+\.xml$/.test(f))
+      .sort();
+    
+    for (const s of slides) {
+      const xml = await zip.files[s].async('string');
+      const matches = xml.match(/<a:t[^>]*>([^<]+)<\/a:t>/g) || [];
+      txt += matches.map(x => x.replace(/<[^>]+>/g, '')).join(' ') + '\n\n';
+    }
+    return txt.trim() || '(No text)';
+  }
+  
+  if (ext === 'epub') {
+    await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+    const zip = await JSZip.loadAsync(file);
+    let txt = '';
+    const fs = Object.keys(zip.files)
+      .filter(f => (f.endsWith('.html') || f.endsWith('.xhtml')) && !f.includes('toc') && !f.includes('nav'))
+      .sort();
+    
+    for (const f of fs.slice(0, 30)) {
+      const html = await zip.files[f].async('string');
+      txt += html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() + '\n\n';
+    }
+    return txt.substring(0, 50000) || '(No text)';
+  }
+  
+  throw new Error('Unsupported file type: .' + ext);
+}
+
+// ═══════════════════════════════════════════
+// FIXED: Generate proper client-side IDs without Firestore calls
+// ═══════════════════════════════════════════
+function generateId() {
+  if (crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 // ── STEP UI ──
-function step(ctx,n,total,status){
-  for(let i=1;i<=total;i++){
-    const el=document.getElementById(ctx+'-s'+i);if(!el)continue;
-    el.className='step';
-    const ico=el.querySelector('.sico');
-    if(i<n){el.classList.add('done');ico.textContent='✅';}
-    else if(i===n){el.classList.add('cur');if(status==='load')ico.innerHTML='<div class="spin"></div>';else if(status==='done'){ico.textContent='✅';el.classList.remove('cur');el.classList.add('done');}}
+function step(ctx, n, total, status) {
+  for (let i = 1; i <= total; i++) {
+    const el = document.getElementById(ctx + '-s' + i);
+    if (!el) continue;
+    
+    el.className = 'step';
+    const ico = el.querySelector('.sico');
+    
+    if (i < n) {
+      el.classList.add('done');
+      if (ico) ico.textContent = '✅';
+    } else if (i === n) {
+      el.classList.add('cur');
+      if (status === 'load' && ico) {
+        ico.innerHTML = '<div class="spin"></div>';
+      } else if (status === 'done' && ico) {
+        ico.textContent = '✅';
+        el.classList.remove('cur');
+        el.classList.add('done');
+      }
+    }
   }
 }
 
-// ── CLAUDE ──
-async function claude(messages,max=8000){
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':'YOUR_ANTHROPIC_API_KEY','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:max,messages})});
-  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error '+r.status);}
-  const d=await r.json();
-  return d.content.map(c=>c.text||'').join('').trim();
+// ═══════════════════════════════════════════
+// FIX 1 & 7: Claude API now calls through a backend proxy
+// No API keys in client code. Correct model ID used.
+// ═══════════════════════════════════════════
+// IMPORTANT: Set up a simple backend at /api/claude that:
+// 1. Validates admin auth token from request header
+// 2. Uses server-side Anthropic API key
+// 3. Returns the Claude response
+
+async function claude(messages, max = 8000) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+  
+  const token = await user.getIdToken();
+  
+  const r = await fetch('/api/claude', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    },
+    body: JSON.stringify({
+      messages: messages,
+      max_tokens: max
+    })
+  });
+  
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e.error || 'API error ' + r.status);
+  }
+  
+  const d = await r.json();
+  return d.content.map(c => c.text || '').join('').trim();
 }
-function buildMsg(method,file,b64,text,prompt){
-  const isText=method==='text'||method==='file';
-  if(isText) return [{role:'user',content:[{type:'text',text:prompt+'\n\nContent:\n'+text}]}];
-  if(file&&file.type.startsWith('image/')) return [{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:b64}},{type:'text',text:prompt}]}];
-  return [{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},{type:'text',text:prompt}]}];
+
+function buildMsg(method, file, b64, text, prompt) {
+  const isText = method === 'text' || method === 'file';
+  
+  if (isText) {
+    return [{
+      role: 'user',
+      content: [{ type: 'text', text: prompt + '\n\nContent:\n' + text }]
+    }];
+  }
+  
+  if (file && file.type.startsWith('image/')) {
+    return [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: file.type, data: b64 } },
+        { type: 'text', text: prompt }
+      ]
+    }];
+  }
+  
+  return [{
+    role: 'user',
+    content: [
+      { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
+      { type: 'text', text: prompt }
+    ]
+  }];
 }
 
 // ── EXTRACTION ──
-async function runExtract(ctx){
-  const isS=ctx==='study';
-  const xbtn=document.getElementById(ctx+'-xbtn');
-  xbtn.disabled=true;
-  document.getElementById(ctx+'-prog').classList.add('on');
-  document.getElementById(ctx+'-pv').classList.remove('on');
-  const total=isS?5:4;
-  const method=isS?studyM:pqM;
-  const file=isS?studyFile:pqFile;
-  try{
-    step(ctx,1,total,'load');
-    let b64='',text='';
-    if(method==='text') text=document.getElementById(ctx+'-ta').value;
-    else if(method==='file'){toast('Reading file...','info');text=await extractText(file);if(!text.trim())throw new Error('Could not extract text from file.');}
-    else b64=await toB64(file);
-    step(ctx,1,total,'done'); step(ctx,2,total,'load');
-
-    let prompt,raw,parsed;
-    if(isS){
-      const subLabel=studySub==='english'?'Use of English':studySub==='math'?'Mathematics':'Current Affairs';
-      const doN=studyDest==='both'||studyDest==='notes';
-      const doQ=studyDest==='both'||studyDest==='questions';
-      prompt=`Extract educational content for a Nigerian university (Unilorin) POST-UTME study app. Subject: ${subLabel}.
-${doN?'Extract study NOTES: distinct topics, each with emoji, title, order number (1,2,3...), 4-8 bullet point strings, optional example string.':''}
-${doQ?'Extract QUESTIONS: full question text, options A-D (E if present), correct answer letter, brief explanation.':''}
+async function runExtract(ctx) {
+  const isS = ctx === 'study';
+  const xbtn = document.getElementById(ctx + '-xbtn');
+  if (!xbtn) return;
+  
+  xbtn.disabled = true;
+  
+  const prog = document.getElementById(ctx + '-prog');
+  const pv = document.getElementById(ctx + '-pv');
+  if (prog) prog.classList.add('on');
+  if (pv) pv.classList.remove('on');
+  
+  const total = isS ? 5 : 4;
+  const method = isS ? studyM : pqM;
+  const file = isS ? studyFile : pqFile;
+  
+  try {
+    step(ctx, 1, total, 'load');
+    
+    let b64 = '';
+    let text = '';
+    
+    if (method === 'text') {
+      const ta = document.getElementById(ctx + '-ta');
+      if (!ta) throw new Error('Text area not found');
+      text = ta.value;
+    } else if (method === 'file') {
+      toast('Reading file...', 'info');
+      text = await extractText(file);
+      if (!text.trim()) throw new Error('Could not extract text from file.');
+    } else {
+      b64 = await toB64(file);
+    }
+    
+    step(ctx, 1, total, 'done');
+    step(ctx, 2, total, 'load');
+    
+    let prompt, raw, parsed;
+    
+    if (isS) {
+      const subLabel = studySub === 'english' ? 'Use of English' : 
+                       studySub === 'math' ? 'Mathematics' : 'Current Affairs';
+      const doN = studyDest === 'both' || studyDest === 'notes';
+      const doQ = studyDest === 'both' || studyDest === 'questions';
+      
+      prompt = `Extract educational content for a Nigerian university (Unilorin) POST-UTME study app. Subject: ${subLabel}.
+${doN ? 'Extract study NOTES: distinct topics, each with emoji, title, order number (1,2,3...), 4-8 bullet point strings, optional example string.' : ''}
+${doQ ? 'Extract QUESTIONS: full question text, options A-D (E if present), correct answer letter, brief explanation.' : ''}
 Return ONLY valid JSON, no markdown backticks:
 {"notes":[{"emoji":"📌","title":"Topic Title","order":1,"content":["point 1","point 2"],"example":"optional tip"}],"questions":[{"number":1,"question":"Question text?","optionA":"Option A","optionB":"Option B","optionC":"Option C","optionD":"Option D","optionE":null,"answer":"A","explanation":"Brief explanation"}]}
-${!doN?'Set notes to [].':''} ${!doQ?'Set questions to [].':''}`;
-      step(ctx,2,total,'done'); step(ctx,3,total,'load');
-      raw=await claude(buildMsg(method,file,b64,text,prompt));
-      step(ctx,3,total,'done'); step(ctx,4,total,'load');
-      parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-      studyOut={notes:parsed.notes||[],questions:parsed.questions||[]};
-      step(ctx,4,total,'done'); step(ctx,5,total,'done');
+${!doN ? 'Set notes to [].' : ''} ${!doQ ? 'Set questions to [].' : ''}`;
+      
+      step(ctx, 2, total, 'done');
+      step(ctx, 3, total, 'load');
+      
+      raw = await claude(buildMsg(method, file, b64, text, prompt));
+      
+      step(ctx, 3, total, 'done');
+      step(ctx, 4, total, 'load');
+      
+      parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      studyOut = { notes: parsed.notes || [], questions: parsed.questions || [] };
+      
+      step(ctx, 4, total, 'done');
+      step(ctx, 5, total, 'done');
+      
       renderStudyPV();
-      toast(studyOut.notes.length+' topics · '+studyOut.questions.length+' questions 🎉','ok');
+      toast(studyOut.notes.length + ' topics · ' + studyOut.questions.length + ' questions 🎉', 'ok');
     } else {
-      if(!selYear) throw new Error('Select a year first.');
-      prompt=`Extract ALL multiple choice questions from this ${selYear} Unilorin POST-UTME past question paper.
+      if (!selYear) throw new Error('Select a year first.');
+      
+      prompt = `Extract ALL multiple choice questions from this ${selYear} Unilorin POST-UTME past question paper.
 For each: number, full question text, options A-D (and E if present), correct answer letter, brief explanation.
 Return ONLY valid JSON, no markdown backticks:
 {"questions":[{"number":1,"question":"Question text?","optionA":"Option A","optionB":"Option B","optionC":"Option C","optionD":"Option D","optionE":null,"answer":"A","explanation":"Brief explanation"}]}`;
-      step(ctx,2,total,'done'); step(ctx,3,total,'load');
-      raw=await claude(buildMsg(method,file,b64,text,prompt),10000);
-      parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-      pqOut=parsed.questions||[];
-      step(ctx,3,total,'done'); step(ctx,4,total,'done');
+      
+      step(ctx, 2, total, 'done');
+      step(ctx, 3, total, 'load');
+      
+      raw = await claude(buildMsg(method, file, b64, text, prompt), 10000);
+      parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      pqOut = parsed.questions || [];
+      
+      step(ctx, 3, total, 'done');
+      step(ctx, 4, total, 'done');
+      
       renderPQPV();
-      toast(pqOut.length+' questions for '+selYear+' 🎉','ok');
+      toast(pqOut.length + ' questions for ' + selYear + ' 🎉', 'ok');
     }
-    document.getElementById(ctx+'-pv').classList.add('on');
-  }catch(e){toast('Error: '+e.message,'err');console.error(e);}
-  xbtn.disabled=false;
+    
+    if (pv) pv.classList.add('on');
+  } catch (e) {
+    toast('Error: ' + e.message, 'err');
+    console.error('Extraction error:', e);
+  }
+  
+  xbtn.disabled = false;
 }
 
 // ── PREVIEWS ──
-const LS=['A','B','C','D','E'];
-function renderStudyPV(){
-  document.getElementById('study-pvct').textContent=studyOut.notes.length+' topics · '+studyOut.questions.length+' questions';
-  document.getElementById('study-pvnotes').innerHTML=studyOut.notes.length
-    ?studyOut.notes.map(n=>`<div class="pc"><div class="pch"><span>${n.emoji||'📌'}</span><span class="pct">${n.title}</span></div><ul class="pcpts">${(n.content||[]).map(p=>`<li>${p}</li>`).join('')}</ul>${n.example?`<div class="pcex">💡 ${n.example}</div>`:''}</div>`).join('')
-    :'<div class="empty"><div class="ei">📭</div><p>No notes found</p></div>';
-  document.getElementById('study-pvqs').innerHTML=studyOut.questions.length
-    ?studyOut.questions.map((q,i)=>`<div class="pc"><div class="qn">Q${q.number||i+1}</div><div class="qt">${q.question}</div>${LS.map(l=>q['option'+l]?`<div class="qo${l===q.answer?' ok':''}">${l}. ${q['option'+l]}${l===q.answer?' ✓':''}</div>`:'').join('')}${q.explanation?`<div class="qex">💡 ${q.explanation}</div>`:''}</div>`).join('')
-    :'<div class="empty"><div class="ei">❓</div><p>No questions found</p></div>';
+const LS = ['A', 'B', 'C', 'D', 'E'];
+
+function renderStudyPV() {
+  const pvct = document.getElementById('study-pvct');
+  const pvnotes = document.getElementById('study-pvnotes');
+  const pvqs = document.getElementById('study-pvqs');
+  
+  if (pvct) pvct.textContent = studyOut.notes.length + ' topics · ' + studyOut.questions.length + ' questions';
+  
+  if (pvnotes) {
+    pvnotes.innerHTML = studyOut.notes.length
+      ? studyOut.notes.map(n => 
+          `<div class="pc">
+            <div class="pch">
+              <span>${escapeHtml(n.emoji || '📌')}</span>
+              <span class="pct">${escapeHtml(n.title || '')}</span>
+            </div>
+            <ul class="pcpts">${(n.content || []).map(p => `<li>${escapeHtml(p)}</li>`).join('')}</ul>
+            ${n.example ? `<div class="pcex">💡 ${escapeHtml(n.example)}</div>` : ''}
+          </div>`
+        ).join('')
+      : '<div class="empty"><div class="ei">📭</div><p>No notes found</p></div>';
+  }
+  
+  if (pvqs) {
+    pvqs.innerHTML = studyOut.questions.length
+      ? studyOut.questions.map((q, i) => 
+          `<div class="pc">
+            <div class="qn">Q${q.number || i + 1}</div>
+            <div class="qt">${escapeHtml(q.question || '')}</div>
+            ${LS.map(l => q['option' + l] 
+              ? `<div class="qo${l === q.answer ? ' ok' : ''}">${l}. ${escapeHtml(q['option' + l])}${l === q.answer ? ' ✓' : ''}</div>` 
+              : ''
+            ).join('')}
+            ${q.explanation ? `<div class="qex">💡 ${escapeHtml(q.explanation)}</div>` : ''}
+          </div>`
+        ).join('')
+      : '<div class="empty"><div class="ei">❓</div><p>No questions found</p></div>';
+  }
 }
-function renderPQPV(){
-  document.getElementById('pq-pv-year').textContent=selYear;
-  document.getElementById('pq-pvct').textContent=pqOut.length+' questions';
-  document.getElementById('pq-pvlist').innerHTML=pqOut.length
-    ?pqOut.map((q,i)=>`<div class="pc"><div class="qn">Q${q.number||i+1}</div><div class="qt">${q.question}</div>${LS.map(l=>q['option'+l]?`<div class="qo${l===q.answer?' ok':''}">${l}. ${q['option'+l]}${l===q.answer?' ✓':''}</div>`:'').join('')}${q.explanation?`<div class="qex">💡 ${q.explanation}</div>`:''}</div>`).join('')
-    :'<div class="empty"><div class="ei">❓</div><p>No questions found</p></div>';
+
+function renderPQPV() {
+  const pvyear = document.getElementById('pq-pv-year');
+  const pvct = document.getElementById('pq-pvct');
+  const pvlist = document.getElementById('pq-pvlist');
+  
+  if (pvyear) pvyear.textContent = selYear || '';
+  if (pvct) pvct.textContent = pqOut.length + ' questions';
+  
+  if (pvlist) {
+    pvlist.innerHTML = pqOut.length
+      ? pqOut.map((q, i) => 
+          `<div class="pc">
+            <div class="qn">Q${q.number || i + 1}</div>
+            <div class="qt">${escapeHtml(q.question || '')}</div>
+            ${LS.map(l => q['option' + l] 
+              ? `<div class="qo${l === q.answer ? ' ok' : ''}">${l}. ${escapeHtml(q['option' + l])}${l === q.answer ? ' ✓' : ''}</div>` 
+              : ''
+            ).join('')}
+            ${q.explanation ? `<div class="qex">💡 ${escapeHtml(q.explanation)}</div>` : ''}
+          </div>`
+        ).join('')
+      : '<div class="empty"><div class="ei">❓</div><p>No questions found</p></div>';
+  }
 }
-function switchPV(tab,btn){
-  document.querySelectorAll('#study-pvtabs .pvtab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  document.getElementById('study-pvnotes').style.display=tab==='notes'?'flex':'none';
-  document.getElementById('study-pvqs').style.display=tab==='questions'?'flex':'none';
+
+// FIXED: XSS protection helper
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
-function discard(ctx){
-  if(ctx==='study') studyOut={notes:[],questions:[]}; else pqOut=[];
-  document.getElementById(ctx+'-pv').classList.remove('on');
-  document.getElementById(ctx+'-prog').classList.remove('on');
+
+function switchPV(tab, btn) {
+  document.querySelectorAll('#study-pvtabs .pvtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const pvnotes = document.getElementById('study-pvnotes');
+  const pvqs = document.getElementById('study-pvqs');
+  if (pvnotes) pvnotes.style.display = tab === 'notes' ? 'flex' : 'none';
+  if (pvqs) pvqs.style.display = tab === 'questions' ? 'flex' : 'none';
+}
+
+function discard(ctx) {
+  if (ctx === 'study') {
+    studyOut = { notes: [], questions: [] };
+  } else {
+    pqOut = [];
+  }
+  
+  const pv = document.getElementById(ctx + '-pv');
+  const prog = document.getElementById(ctx + '-prog');
+  const ta = document.getElementById(ctx + '-ta');
+  
+  if (pv) pv.classList.remove('on');
+  if (prog) prog.classList.remove('on');
+  if (ta) ta.value = '';
+  
   clearF(ctx);
-  const ta=document.getElementById(ctx+'-ta');if(ta)ta.value='';
 }
 
 // ── SAVE ──
-async function saveStudy(){
-  const btn=document.getElementById('study-svbtn');
-  btn.disabled=true;btn.textContent='⏳ Saving...';
-  const ts=firebase.firestore.FieldValue.serverTimestamp();
-  let ok=0,fail=0;
-  for(const n of studyOut.notes){try{await db.collection('studynotes').doc(studySub).collection('topics').add({...n,createdAt:ts,updatedAt:ts});ok++;}catch(e){fail++;}}
-  for(const q of studyOut.questions){try{await db.collection('studyquestions').doc(studySub).collection('questions').add({...q,createdAt:ts,updatedAt:ts});ok++;}catch(e){fail++;}}
-  toast('✅ Saved '+ok+' items'+(fail?' ('+fail+' failed)':''),'ok');
-  discard('study');loadNotes(studySub);loadSQ(studySub);
-  btn.disabled=false;btn.textContent='💾 Save to Firestore';
+// FIXED: Use batch writes for performance
+async function saveStudy() {
+  const btn = document.getElementById('study-svbtn');
+  if (!btn) return;
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving...';
+  
+  const ts = firebase.firestore.FieldValue.serverTimestamp();
+  let ok = 0;
+  let fail = 0;
+  
+  try {
+    // Save notes in batches of 500 (Firestore limit)
+    const notesBatches = [];
+    for (let i = 0; i < studyOut.notes.length; i++) {
+      if (i % 500 === 0) notesBatches.push(db.batch());
+      const ref = db.collection('studynotes').doc(studySub).collection('topics').doc();
+      notesBatches[notesBatches.length - 1].set(ref, {
+        ...studyOut.notes[i],
+        createdAt: ts,
+        updatedAt: ts
+      });
+    }
+    
+    // Save questions in batches
+    const qBatches = [];
+    for (let i = 0; i < studyOut.questions.length; i++) {
+      if (i % 500 === 0) qBatches.push(db.batch());
+      const ref = db.collection('studyquestions').doc(studySub).collection('questions').doc();
+      qBatches[qBatches.length - 1].set(ref, {
+        ...studyOut.questions[i],
+        createdAt: ts,
+        updatedAt: ts
+      });
+    }
+    
+    // Commit all batches
+    const allBatches = [...notesBatches, ...qBatches];
+    await Promise.all(allBatches.map(b => b.commit()));
+    
+    ok = studyOut.notes.length + studyOut.questions.length;
+  } catch (e) {
+    fail = studyOut.notes.length + studyOut.questions.length;
+    console.error('Save error:', e);
+  }
+  
+  toast('✅ Saved ' + ok + ' items' + (fail ? ' (' + fail + ' failed)' : ''), 'ok');
+  
+  discard('study');
+  loadNotes(studySub);
+  loadSQ(studySub);
+  
+  btn.disabled = false;
+  btn.textContent = '💾 Save to Firestore';
 }
 
-// ── OPTIMIZED PAST QUESTION SAVE (Single Document) ──
-async function savePQ(){
-  if(!selYear){toast('No year selected','err');return;}
-  const btn=document.getElementById('pq-svbtn');
-  btn.disabled=true;btn.textContent='⏳ Saving...';
-  const ts=firebase.firestore.FieldValue.serverTimestamp();
+// ═══════════════════════════════════════════
+// FIX 5: Proper ID generation and deduplication
+// ═══════════════════════════════════════════
+async function savePQ() {
+  if (!selYear) {
+    toast('No year selected', 'err');
+    return;
+  }
+  
+  const btn = document.getElementById('pq-svbtn');
+  if (!btn) return;
+  
+  btn.disabled = true;
+  btn.textContent = '⏳ Saving...';
+  
+  const ts = firebase.firestore.FieldValue.serverTimestamp();
   
   try {
     const docRef = db.collection('pastquestions').doc(String(selYear));
     const docSnap = await docRef.get();
     let existingQs = [];
-    if(docSnap.exists && docSnap.data().questions) {
-        existingQs = docSnap.data().questions;
+    
+    if (docSnap.exists && docSnap.data().questions) {
+      existingQs = docSnap.data().questions;
     }
     
-    // Add unique IDs to new questions so we can edit/delete them later
+    // Generate proper IDs for new questions
     const newQs = pqOut.map(q => ({
-        ...q, 
-        id: q.id || db.collection('temp').doc().id, 
-        year: selYear
+      ...q,
+      id: q.id || generateId(),  // FIXED: No more phantom Firestore docs
+      year: selYear
     }));
-
-    // Merge existing questions with new ones in a single document
+    
+    // FIXED: Deduplicate by question text
+    const existingTexts = new Set(
+      existingQs.map(q => (q.question || '').trim().toLowerCase())
+    );
+    const uniqueNewQs = newQs.filter(
+      q => !existingTexts.has((q.question || '').trim().toLowerCase())
+    );
+    
+    const skipped = newQs.length - uniqueNewQs.length;
+    
     await docRef.set({
-        questions: [...existingQs, ...newQs],
-        updatedAt: ts
+      questions: [...existingQs, ...uniqueNewQs],
+      updatedAt: ts
     }, { merge: true });
     
-    toast('✅ Saved ' + newQs.length + ' questions for ' + selYear, 'ok');
+    const msg = '✅ Saved ' + uniqueNewQs.length + ' questions for ' + selYear +
+      (skipped > 0 ? ' (' + skipped + ' duplicates skipped)' : '');
+    toast(msg, 'ok');
+    
     discard('pq');
-  } catch(e) {
+  } catch (e) {
     toast('Save failed: ' + e.message, 'err');
-    console.error(e);
+    console.error('Save PQ error:', e);
   }
-  btn.disabled=false;btn.textContent='💾 Save to Firestore';
+  
+  btn.disabled = false;
+  btn.textContent = '💾 Save to Firestore';
 }
 
 // ── MANAGE ──
-let mNS='english', mSQS='english';
+let mNS = 'english';
+let mSQS = 'english';
 
-async function loadNotes(sub,btn){
-  mNS=sub;
-  if(btn){document.querySelectorAll('#mnotesTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-  const el=document.getElementById('mnotes-list');
-  el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
-  try{
-    const snap=await db.collection('studynotes').doc(sub).collection('topics').orderBy('order').get();
-    if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📭</div><p>No notes yet</p></div>';return;}
-    el.innerHTML='<div class="mlist">'+snap.docs.map(d=>{const t=d.data();return`<div class="mi"><div class="mil"><span class="mico">${t.emoji||'📌'}</span><div class="min2"><div class="mit">${t.title}</div><div class="mim">${(t.content||[]).length} points</div></div></div><button class="delbtn" onclick="askDel('note','${d.id}','${(t.title||'').replace(/'/g,"\\'")}')">Delete</button></div>`;}).join('')+'</div>';
-  }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
+async function loadNotes(sub, btn) {
+  mNS = sub;
+  
+  if (btn) {
+    document.querySelectorAll('#mnotesTabs .tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  
+  const el = document.getElementById('mnotes-list');
+  if (!el) return;
+  
+  el.innerHTML = '<div class="loading"><div class="lspin"></div>Loading...</div>';
+  
+  try {
+    const snap = await db.collection('studynotes').doc(sub)
+      .collection('topics').orderBy('order').get();
+    
+    if (snap.empty) {
+      el.innerHTML = '<div class="empty"><div class="ei">📭</div><p>No notes yet</p></div>';
+      return;
+    }
+    
+    el.innerHTML = '<div class="mlist">' + snap.docs.map(d => {
+      const t = d.data();
+      return `<div class="mi">
+        <div class="mil">
+          <span class="mico">${escapeHtml(t.emoji || '📌')}</span>
+          <div class="min2">
+            <div class="mit">${escapeHtml(t.title || 'Untitled')}</div>
+            <div class="mim">${(t.content || []).length} points</div>
+          </div>
+        </div>
+        <button class="delbtn" onclick="askDel('note','${d.id}','${escapeHtml(t.title || 'Untitled').replace(/'/g, "\\'")}')">Delete</button>
+      </div>`;
+    }).join('') + '</div>';
+  } catch (e) {
+    el.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>' + escapeHtml(e.message) + '</p></div>';
+  }
 }
 
-async function loadSQ(sub,btn){
-  mSQS=sub;
-  if(btn){document.querySelectorAll('#msqTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
-  const el=document.getElementById('msq-list');
-  el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
-  try{
-    const snap=await db.collection('studyquestions').doc(sub).collection('questions').orderBy('number').get();
-    if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">❓</div><p>No questions yet</p></div>';return;}
-    el.innerHTML='<div class="mlist">'+snap.docs.map(d=>{const q=d.data();return`<div class="mi"><div class="mil"><span class="mnum">${q.number||'?'}</span><div class="min2"><div class="mit">${(q.question||'').substring(0,60)}…</div><div class="mim">Ans: <b style="color:var(--success)">${q.answer||'?'}</b></div></div></div><button class="delbtn" onclick="askDel('sq','${d.id}','Q${q.number}')">Delete</button></div>`;}).join('')+'</div>';
-  }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
+async function loadSQ(sub, btn) {
+  mSQS = sub;
+  
+  if (btn) {
+    document.querySelectorAll('#msqTabs .tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  
+  const el = document.getElementById('msq-list');
+  if (!el) return;
+  
+  el.innerHTML = '<div class="loading"><div class="lspin"></div>Loading...</div>';
+  
+  try {
+    const snap = await db.collection('studyquestions').doc(sub)
+      .collection('questions').orderBy('number').get();
+    
+    if (snap.empty) {
+      el.innerHTML = '<div class="empty"><div class="ei">❓</div><p>No questions yet</p></div>';
+      return;
+    }
+    
+    el.innerHTML = '<div class="mlist">' + snap.docs.map(d => {
+      const q = d.data();
+      return `<div class="mi">
+        <div class="mil">
+          <span class="mnum">${q.number || '?'}</span>
+          <div class="min2">
+            <div class="mit">${escapeHtml((q.question || '').substring(0, 60))}…</div>
+            <div class="mim">Ans: <b style="color:var(--success)">${escapeHtml(q.answer || '?')}</b></div>
+          </div>
+        </div>
+        <button class="delbtn" onclick="askDel('sq','${d.id}','Q${q.number || '?'}')">Delete</button>
+      </div>`;
+    }).join('') + '</div>';
+  } catch (e) {
+    el.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>' + escapeHtml(e.message) + '</p></div>';
+  }
 }
 
-// ── OPTIMIZED PAST QUESTION LOADER (Single Document) ──
-async function loadPQ(year){
-  const el=document.getElementById('mpq-list');
-  el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
-  try{
-    const docSnap=await db.collection('pastquestions').doc(String(year)).get();
-    if(!docSnap.exists || !docSnap.data().questions || docSnap.data().questions.length === 0){
-        el.innerHTML='<div class="empty"><div class="ei">📭</div><p>No questions for '+year+' yet</p></div>';
-        return;
+// ── LOAD PAST QUESTIONS (Single Document) ──
+async function loadPQ(year) {
+  const el = document.getElementById('mpq-list');
+  if (!el) return;
+  
+  el.innerHTML = '<div class="loading"><div class="lspin"></div>Loading...</div>';
+  
+  try {
+    const docSnap = await db.collection('pastquestions').doc(String(year)).get();
+    
+    if (!docSnap.exists || !docSnap.data().questions || docSnap.data().questions.length === 0) {
+      el.innerHTML = '<div class="empty"><div class="ei">📭</div><p>No questions for ' + year + ' yet</p></div>';
+      return;
     }
     
     let qs = docSnap.data().questions;
-    qs.sort((a,b) => (a.number||0) - (b.number||0));
-    const total=qs.length;
+    qs.sort((a, b) => (a.number || 0) - (b.number || 0));
+    const total = qs.length;
     
-    let html='<div style="font-size:.73rem;color:var(--muted);margin-bottom:12px;">'+total+' questions for '+year+' — tap any question to edit</div>';
+    let html = '<div style="font-size:.73rem;color:var(--muted);margin-bottom:12px;">' + 
+               total + ' questions for ' + year + ' — tap any question to edit</div>';
     
-    qs.forEach((q, index)=>{
-      const qId = q.id || String(index); 
-      const opts=['A','B','C','D','E'];
-      const optsHtml=opts.map(l=>{
-        const val=q['option'+l]||'';
-        if(!val && l==='E') return '';
+    qs.forEach((q, index) => {
+      const qId = q.id || String(index);
+      const opts = ['A', 'B', 'C', 'D', 'E'];
+      const optsHtml = opts.map(l => {
+        const val = q['option' + l] || '';
+        if (!val && l === 'E') return '';
         return `<div style="margin-bottom:6px;">
           <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Option ${l}</label>
-          <input id="edit-${qId}-opt${l}" value="${(val||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
+          <input id="edit-${qId}-opt${l}" value="${escapeHtml(val || '')}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
         </div>`;
       }).join('');
 
-      html+=`<div class="qedit-card" id="qcard-${qId}" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
+      html += `<div class="qedit-card" id="qcard-${qId}" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
         <div class="qedit-head" onclick="toggleQEdit('${qId}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">
           <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
-            <span style="background:var(--surface2);color:var(--primary);font-family:'Syne',sans-serif;font-weight:800;font-size:.75rem;padding:4px 9px;border-radius:6px;flex-shrink:0;">Q${q.number||'?'}</span>
-            <span id="qhead-text-${qId}" style="font-size:.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${(q.question||'').substring(0,55)}${(q.question||'').length>55?'…':''}</span>
+            <span style="background:var(--surface2);color:var(--primary);font-family:'Syne',sans-serif;font-weight:800;font-size:.75rem;padding:4px 9px;border-radius:6px;flex-shrink:0;">Q${q.number || '?'}</span>
+            <span id="qhead-text-${qId}" style="font-size:.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml((q.question || '').substring(0, 55))}${(q.question || '').length > 55 ? '…' : ''}</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px;">
-            <span style="background:rgba(34,197,94,.15);color:var(--success);font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:100px;">→${q.answer||'?'}</span>
+            <span style="background:rgba(34,197,94,.15);color:var(--success);font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:100px;">→${escapeHtml(q.answer || '?')}</span>
             <span class="qedit-arrow" id="arrow-${qId}" style="color:var(--muted);font-size:.8rem;transition:transform .2s;">▼</span>
           </div>
         </div>
         <div class="qedit-body" id="qbody-${qId}" style="display:none;padding:0 14px 14px;">
           <div style="margin-bottom:6px;">
             <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Question</label>
-            <textarea id="edit-${qId}-q" style="width:100%;min-height:70px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">${q.question||''}</textarea>
+            <textarea id="edit-${qId}-q" style="width:100%;min-height:70px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">${escapeHtml(q.question || '')}</textarea>
           </div>
           ${optsHtml}
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
             <div>
               <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Correct Answer</label>
               <select id="edit-${qId}-ans" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;">
-                ${['A','B','C','D','E'].map(l=>`<option value="${l}" ${q.answer===l?'selected':''}>${l}</option>`).join('')}
+                ${['A','B','C','D','E'].map(l => `<option value="${l}" ${q.answer === l ? 'selected' : ''}>${l}</option>`).join('')}
               </select>
             </div>
             <div>
               <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Q Number</label>
-              <input type="number" id="edit-${qId}-num" value="${q.number||''}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
+              <input type="number" id="edit-${qId}-num" value="${q.number || ''}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
             </div>
           </div>
           <div style="margin-bottom:10px;">
             <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Explanation</label>
-            <textarea id="edit-${qId}-exp" style="width:100%;min-height:60px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">${q.explanation||''}</textarea>
+            <textarea id="edit-${qId}-exp" style="width:100%;min-height:60px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">${escapeHtml(q.explanation || '')}</textarea>
           </div>
           <div style="display:flex;gap:8px;">
             <button onclick="saveQ('${qId}','${year}')" style="flex:1;padding:10px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">💾 Save</button>
-            <button onclick="askDel('pq','${qId}','Q${q.number}')" style="padding:10px 14px;background:transparent;border:1.5px solid var(--danger);color:var(--danger);border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">🗑️</button>
+            <button onclick="askDel('pq','${qId}','Q${q.number || '?'}')" style="padding:10px 14px;background:transparent;border:1.5px solid var(--danger);color:var(--danger);border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">🗑️</button>
           </div>
         </div>
       </div>`;
     });
-    el.innerHTML=html;
-  }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e.message+'</p></div>';}
+    
+    el.innerHTML = html;
+  } catch (e) {
+    el.innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>' + escapeHtml(e.message) + '</p></div>';
+  }
 }
 
-function toggleQEdit(id){
-  const body=document.getElementById('qbody-'+id);
-  const arrow=document.getElementById('arrow-'+id);
-  const open=body.style.display==='block';
-  body.style.display=open?'none':'block';
-  arrow.style.transform=open?'':'rotate(180deg)';
+function toggleQEdit(id) {
+  const body = document.getElementById('qbody-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  if (!body) return;
+  
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.style.transform = open ? '' : 'rotate(180deg)';
 }
 
-// ── OPTIMIZED ARRAY UPDATE ──
-async function saveQ(qId, year){
-  try{
+// ═══════════════════════════════════════════
+// FIX 6: Use Firestore transactions for atomic updates
+// ═══════════════════════════════════════════
+async function saveQ(qId, year) {
+  try {
     const docRef = db.collection('pastquestions').doc(String(year));
-    const docSnap = await docRef.get();
-    let qs = docSnap.data().questions || [];
     
-    // Find the exact question in the array
-    const idx = qs.findIndex((q, i) => q.id === qId || String(i) === String(qId));
-    if(idx === -1) throw new Error("Question not found");
-    
-    // Update its values
-    qs[idx].question = document.getElementById(`edit-${qId}-q`).value;
-    qs[idx].number = parseInt(document.getElementById(`edit-${qId}-num`).value) || qs[idx].number;
-    qs[idx].answer = document.getElementById(`edit-${qId}-ans`).value;
-    qs[idx].explanation = document.getElementById(`edit-${qId}-exp`).value;
-    
-    ['A','B','C','D','E'].forEach(l => {
-        const el = document.getElementById(`edit-${qId}-opt${l}`);
-        if(el) qs[idx]['option'+l] = el.value;
+    await db.runTransaction(async (transaction) => {
+      const docSnap = await transaction.get(docRef);
+      let qs = docSnap.data()?.questions || [];
+      
+      const idx = qs.findIndex((q, i) => q.id === qId || String(i) === String(qId));
+      if (idx === -1) throw new Error("Question not found in current data");
+      
+      // Read new values from DOM
+      const qEl = document.getElementById(`edit-${qId}-q`);
+      const numEl = document.getElementById(`edit-${qId}-num`);
+      const ansEl = document.getElementById(`edit-${qId}-ans`);
+      const expEl = document.getElementById(`edit-${qId}-exp`);
+      
+      qs[idx] = {
+        ...qs[idx],
+        question: qEl ? qEl.value : qs[idx].question,
+        number: numEl ? (parseInt(numEl.value) || qs[idx].number) : qs[idx].number,
+        answer: ansEl ? ansEl.value : qs[idx].answer,
+        explanation: expEl ? expEl.value : qs[idx].explanation
+      };
+      
+      ['A', 'B', 'C', 'D', 'E'].forEach(l => {
+        const optEl = document.getElementById(`edit-${qId}-opt${l}`);
+        if (optEl) qs[idx]['option' + l] = optEl.value;
+      });
+      
+      transaction.update(docRef, { questions: qs });
     });
-
-    // Write array back to firestore
-    await docRef.update({ questions: qs });
-    toast('Q saved ✓','ok');
     
-    const head=document.getElementById(`qhead-text-${qId}`);
-    if(head) head.textContent=(qs[idx].question).substring(0,55)+(qs[idx].question.length>55?'…':'');
-  }catch(e){toast('Save failed: '+e.message,'err');}
+    toast('Q saved ✓', 'ok');
+    
+    // Update the header text
+    const head = document.getElementById('qhead-text-' + qId);
+    if (head) {
+      const qEl = document.getElementById(`edit-${qId}-q`);
+      if (qEl) {
+        const txt = qEl.value;
+        head.textContent = txt.substring(0, 55) + (txt.length > 55 ? '…' : '');
+      }
+    }
+  } catch (e) {
+    toast('Save failed: ' + e.message, 'err');
+    console.error('Save Q error:', e);
+  }
 }
 
 // ── DELETE ──
-let delT={type:null,id:null};
-function askDel(type,id,label){delT={type,id};document.getElementById('delDesc').textContent='Delete "'+label+'"? This cannot be undone.';document.getElementById('delModal').classList.add('open');}
-function closeModal(){document.getElementById('delModal').classList.remove('open');}
+let delT = { type: null, id: null };
 
-async function confirmDel(){
+function askDel(type, id, label) {
+  delT = { type, id };
+  const desc = document.getElementById('delDesc');
+  if (desc) desc.textContent = 'Delete "' + label + '"? This cannot be undone.';
+  
+  const modal = document.getElementById('delModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeModal() {
+  const modal = document.getElementById('delModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function confirmDel() {
   closeModal();
-  try{
-    if(delT.type==='note'){
+  
+  try {
+    if (delT.type === 'note') {
       await db.collection('studynotes').doc(mNS).collection('topics').doc(delT.id).delete();
-      toast('Deleted','ok');loadNotes(mNS);
-    }
-    else if(delT.type==='sq'){
+      toast('Deleted', 'ok');
+      loadNotes(mNS);
+    } else if (delT.type === 'sq') {
       await db.collection('studyquestions').doc(mSQS).collection('questions').doc(delT.id).delete();
-      toast('Deleted','ok');loadSQ(mSQS);
-    }
-    else if(delT.type==='pq'){
-      // Remove question from array
+      toast('Deleted', 'ok');
+      loadSQ(mSQS);
+    } else if (delT.type === 'pq') {
+      // Remove question from array using transaction for safety
       const docRef = db.collection('pastquestions').doc(String(mPQYear));
-      const docSnap = await docRef.get();
-      let qs = docSnap.data().questions || [];
-      qs = qs.filter((q, i) => q.id !== delT.id && String(i) !== String(delT.id));
-      await docRef.update({ questions: qs });
-      toast('Deleted','ok');
+      await db.runTransaction(async (transaction) => {
+        const docSnap = await transaction.get(docRef);
+        let qs = docSnap.data()?.questions || [];
+        qs = qs.filter((q, i) => q.id !== delT.id && String(i) !== String(delT.id));
+        transaction.update(docRef, { questions: qs });
+      });
+      toast('Deleted', 'ok');
       loadPQ(mPQYear);
     }
-  }catch(e){toast('Delete failed: '+e.message,'err');}
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'err');
+    console.error('Delete error:', e);
+  }
 }
-// ── MIGRATION: Subcollection → Array ──
+
+// ═══════════════════════════════════════════
+// FIX 4: Migration with proper UI and confirmation
+// ═══════════════════════════════════════════
+function showMigrationUI() {
+  const select = document.getElementById('migrateYearSelect');
+  if (!select) return;
+  
+  // Populate year options
+  const allYears = [...FREE, ...PREM].sort((a, b) => a - b);
+  select.innerHTML = allYears.map(y => 
+    `<option value="${y}">${y}</option>`
+  ).join('');
+  
+  const modal = document.getElementById('migrateModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeMigrateModal() {
+  const modal = document.getElementById('migrateModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function confirmMigrate() {
+  const select = document.getElementById('migrateYearSelect');
+  if (!select) return;
+  
+  const year = select.value;
+  if (!year) {
+    toast('Please select a year', 'err');
+    return;
+  }
+  
+  closeMigrateModal();
+  
+  // Double confirmation
+  if (!confirm(`⚠️ FINAL WARNING: This will migrate ALL questions for ${year} from subcollection to array format and DELETE the subcollection documents. This cannot be easily undone. Continue?`)) {
+    return;
+  }
+  
+  await migratePQYear(parseInt(year));
+}
+
 async function migratePQYear(year) {
-  alert('Starting migration...');
+  toast('⏳ Migrating ' + year + '...', 'info');
+  
   try {
     const docRef = db.collection('pastquestions').doc(String(year));
     const docSnap = await docRef.get();
     const subSnap = await docRef.collection('questions').limit(300).get();
+    
     if (subSnap.empty) {
-      alert(year + ' — no subcollection found');
+      toast(year + ' — no subcollection found', 'info');
       return;
     }
+    
     let existingQs = [];
     if (docSnap.exists && docSnap.data().questions) {
       existingQs = docSnap.data().questions;
     }
+    
     const subQs = [];
-    subSnap.forEach(d => subQs.push({...d.data(), id: d.id}));
-    const allQs = [...existingQs, ...subQs];
-    await docRef.set({ questions: allQs, updatedAt: new Date().toISOString() }, { merge: true });
+    subSnap.forEach(d => subQs.push({ ...d.data(), id: d.id }));
+    
+    // Deduplicate
+    const existingIds = new Set(existingQs.map(q => q.id));
+    const newSubQs = subQs.filter(q => !existingIds.has(q.id));
+    
+    const allQs = [...existingQs, ...newSubQs];
+    
+    // Update document
+    await docRef.set({ 
+      questions: allQs, 
+      updatedAt: new Date().toISOString() 
+    }, { merge: true });
+    
+    // Delete subcollection documents in batches
     const batch = db.batch();
     subSnap.docs.forEach(d => batch.delete(d.ref));
     await batch.commit();
-    alert('✅ Migrated ' + subQs.length + ' questions for ' + year);
-  } catch(e) {
-    alert('Migration failed: ' + e.message);
+    
+    const skipped = subQs.length - newSubQs.length;
+    toast('✅ Migrated ' + newSubQs.length + ' questions for ' + year + 
+          (skipped > 0 ? ' (' + skipped + ' duplicates skipped)' : ''), 'ok');
+    
+    // Reload if currently viewing this year
+    if (mPQYear === year) {
+      loadPQ(year);
+    }
+  } catch (e) {
+    toast('Migration failed: ' + e.message, 'err');
+    console.error('Migration error:', e);
   }
 }
 
 // ── TOAST ──
-// ── TOAST ──
 let tT;
-function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),3500);}
+function toast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(tT);
+  tT = setTimeout(() => t.classList.remove('show'), 3500);
+}
 </script>
 </body>
-</html>
+                                                                                                                                                      </html>
