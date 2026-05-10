@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password — AceUnilorin PQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root[data-theme="dark"] {
+      --bg:#0F172A; --surface:#1E293B; --surface2:#253147;
+      --primary:#3B82F6; --primary-glow:rgba(59,130,246,0.18);
+      --text:#F1F5F9; --text-muted:#94A3B8;
+      --border:rgba(255,255,255,0.07); --input-bg:#253147;
+      --input-border:rgba(255,255,255,0.1);
+      --card-shadow:0 8px 40px rgba(0,0,0,0.4);
+      --error:#EF4444; --success:#22C55E;
+    }
+    :root[data-theme="light"] {
+      --bg:#F0F4FF; --surface:#FFFFFF; --surface2:#E8EFFF;
+      --primary:#2563EB; --primary-glow:rgba(37,99,235,0.12);
+      --text:#1E293B; --text-muted:#64748B;
+      --border:rgba(0,0,0,0.07); --input-bg:#F8FAFC;
+      --input-border:rgba(0,0,0,0.1);
+      --card-shadow:0 8px 40px rgba(37,99,235,0.1);
+      --error:#EF4444; --success:#22C55E;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:background 0.3s,color 0.3s;}
+    .blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:0.15;pointer-events:none;z-index:0;}
+    .blob-1{width:400px;height:400px;background:#3B82F6;top:-100px;right:-80px;}
+    .blob-2{width:300px;height:300px;background:#6366F1;bottom:0;left:-60px;}
+    .theme-toggle{position:fixed;top:16px;right:16px;z-index:100;background:var(--surface);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;box-shadow:var(--card-shadow);}
+    .theme-toggle:hover{transform:scale(1.1);}
+    .auth-card{position:relative;z-index:1;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:36px 32px;width:100%;max-width:420px;box-shadow:var(--card-shadow);animation:fadeUp 0.5s ease both;}
+    .auth-logo{text-align:center;margin-bottom:28px;}
+    .auth-logo a{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--primary);text-decoration:none;letter-spacing:-0.5px;}
+    .auth-logo a span{color:var(--text);}
+    .auth-logo p{font-size:0.82rem;color:var(--text-muted);margin-top:4px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+    .form-label{font-size:0.82rem;font-weight:600;color:var(--text-muted);}
+    .input-wrap input{width:100%;padding:13px 14px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+    .input-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
+    .btn-submit{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;margin-top:4px;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
+    .btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+    .back-link{display:block;text-align:center;margin-top:20px;font-size:0.85rem;color:var(--text-muted);text-decoration:none;}
+    .back-link:hover{color:var(--primary);}
+    .success-box{display:none;text-align:center;padding:24px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:16px;margin-bottom:20px;}
+    .success-box.show{display:block;}
+    .success-box .icon{font-size:2.5rem;margin-bottom:12px;}
+    .success-box h3{font-family:'Syne',sans-serif;font-weight:800;color:var(--success);margin-bottom:8px;}
+    .success-box p{font-size:0.85rem;color:var(--text-muted);line-height:1.6;}
+    .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+    .error-msg{font-size:0.78rem;color:var(--error);display:none;margin-top:4px;}
+    .error-msg.show{display:block;}
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <a href="index.html">Ace<span>Unilorin</span> PQ</a>
+      <p>Reset your password</p>
+    </div>
+
+    <div class="success-box" id="successBox">
+      <div class="icon">📧</div>
+      <h3>Check your email!</h3>
+      <p>A password reset link has been sent to your email address. Check your inbox and follow the instructions.</p>
+    </div>
+
+    <div id="resetForm">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div class="input-wrap">
+          <input type="email" id="resetEmail" placeholder="you@email.com" autocomplete="email"/>
+        </div>
+        <span class="error-msg" id="resetEmailErr">Please enter a valid email address.</span>
+      </div>
+
+      <button class="btn-submit" id="resetBtn" onclick="handleReset()">
+        <div class="spinner" id="resetSpinner"></div>
+        <span id="resetBtnText">Send Reset Link →</span>
+      </button>
+    </div>
+
+    <a href="auth.html" class="back-link">← Back to Login</a>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+      authDomain: "aceunilorin-pq.firebaseapp.com",
+      projectId: "aceunilorin-pq",
+      storageBucket: "aceunilorin-pq.firebasestorage.app",
+      messagingSenderId: "152163357125",
+      appId: "1:152163357125:web:23dc8652f9789197623bac"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+
+    async function handleReset() {
+      const email = document.getElementById('resetEmail').value.trim();
+      const errEl = document.getElementById('resetEmailErr');
+      errEl.classList.remove('show');
+
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        errEl.classList.add('show');
+        return;
+      }
+
+      const btn = document.getElementById('resetBtn');
+      const spinner = document.getElementById('resetSpinner');
+      const btnText = document.getElementById('resetBtnText');
+
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      btnText.style.display = 'none';
+
+      try {
+        await auth.sendPasswordResetEmail(email);
+        document.getElementById('resetForm').style.display = 'none';
+        document.getElementById('successBox').classList.add('show');
+      } catch (err) {
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.style.display = 'inline';
+        if (err.code === 'auth/user-not-found') {
+          errEl.textContent = 'No account found with this email.';
+        } else {
+          errEl.textContent = 'Something went wrong. Try again.';
+        }
+        errEl.classList.add('show');
+      }
+    }
+
+    document.getElementById('resetEmail').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleReset();
+    });
+  </script>
+</body>
+                                                                                        </html>
