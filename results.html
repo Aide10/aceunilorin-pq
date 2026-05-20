@@ -94,6 +94,15 @@
     .explanation-box { background:var(--primary-glow); border:1px solid rgba(59,130,246,0.2); border-radius:10px; padding:12px 14px; font-size:0.82rem; line-height:1.6; color:var(--text); }
     .explanation-box strong { color:var(--primary); font-weight:700; }
     .no-explanation { font-size:0.78rem; color:var(--text-muted); font-style:italic; }
+    
+    /* Watermark canvas styling */
+    .watermarked-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    
     @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
@@ -163,6 +172,106 @@
   </div>
 
   <script>
+    // ========== WATERMARK FUNCTION ==========
+    function createWatermarkedText(originalText, watermarkText = 'AceUnilorin PQ', options = {}) {
+      const {
+        fontSize = 13,
+        fontFamily = '"DM Sans", sans-serif',
+        textColor = '#000000',
+        watermarkOpacity = 0.08,
+        width = 500,
+        backgroundColor = 'transparent'
+      } = options;
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      ctx.font = `${fontSize}px ${fontFamily}`;
+      const textWidth = ctx.measureText(originalText).width;
+      const lines = Math.max(1, Math.ceil(textWidth / (width - 40)));
+      const lineHeight = fontSize * 1.5;
+      const height = Math.max(60, lines * lineHeight + 30);
+      
+      canvas.width = width;
+      canvas.height = height;
+      canvas.style.width = '100%';
+      canvas.style.height = 'auto';
+      canvas.style.borderRadius = '8px';
+      
+      if (backgroundColor !== 'transparent') {
+        ctx.fillStyle = backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+      } else {
+        ctx.clearRect(0, 0, width, height);
+      }
+      
+      ctx.font = `${fontSize}px ${fontFamily}`;
+      ctx.fillStyle = textColor;
+      ctx.globalAlpha = 1;
+      
+      const words = originalText.split(' ');
+      let line = '';
+      let y = fontSize + 8;
+      let lineCount = 0;
+      
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        
+        if (testWidth > width - 40 && line.length > 0) {
+          ctx.fillText(line, 15, y);
+          line = words[i] + ' ';
+          y += lineHeight;
+          lineCount++;
+          if (lineCount >= 4) break;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line.length > 0 && lineCount < 4) {
+        ctx.fillText(line, 15, y);
+      }
+      
+      ctx.globalAlpha = watermarkOpacity;
+      ctx.font = `bold ${fontSize + 6}px "Syne", sans-serif`;
+      ctx.fillStyle = '#3B82F6';
+      
+      for (let x = 10; x < width; x += 100) {
+        for (let yPos = 25; yPos < height; yPos += 55) {
+          ctx.save();
+          ctx.translate(x, yPos);
+          ctx.rotate(-25 * Math.PI / 180);
+          ctx.fillText(watermarkText, 0, 0);
+          ctx.restore();
+        }
+      }
+      
+      return canvas;
+    }
+    
+    function addCanvasWatermarkToText(element, text) {
+      if (!element || !text) return;
+      
+      const computedStyle = getComputedStyle(element);
+      const fontSize = parseInt(computedStyle.fontSize) || 14;
+      const textColor = computedStyle.color || '#000000';
+      
+      const canvas = createWatermarkedText(text, 'AceUnilorin PQ', {
+        fontSize: fontSize,
+        fontFamily: '"DM Sans", sans-serif',
+        textColor: textColor,
+        watermarkOpacity: 0.1,
+        width: element.offsetWidth || 480,
+        backgroundColor: 'transparent'
+      });
+      
+      element.innerHTML = '';
+      element.appendChild(canvas);
+      element.style.padding = '0';
+    }
+
+    // Theme toggle
     function toggleTheme() {
       const html = document.documentElement;
       const isDark = html.getAttribute('data-theme') === 'dark';
@@ -222,8 +331,8 @@
         return;
       }
 
-      filtered.forEach(q => {
-        const globalIndex = reviewData.indexOf(q);
+      filtered.forEach((q, idx) => {
+        const globalIndex = reviewData.findIndex(r => r.question === q.question && r.correctAnswer === q.correctAnswer);
         const statusIcon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭️';
         const letters = ['A','B','C','D','E'];
         const opts = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
@@ -241,26 +350,42 @@
           optionsHTML += `<div class="${cls}"><div class="review-option-letter">${letter}</div><span>${opt}${suffix}</span></div>`;
         });
 
-        const explanationHTML = q.explanation
-          ? `<div class="explanation-box"><strong>💡 Explanation:</strong> ${q.explanation}</div>`
-          : `<div class="no-explanation">No explanation available for this question.</div>`;
+        let explanationHTML = '';
+        if (q.explanation && q.explanation.trim()) {
+          const explanationDiv = document.createElement('div');
+          explanationDiv.className = 'explanation-box';
+          explanationDiv.innerHTML = `<strong>💡 Explanation:</strong> ${q.explanation}`;
+          addCanvasWatermarkToText(explanationDiv, `Explanation: ${q.explanation.substring(0, 200)}`);
+          explanationHTML = explanationDiv.outerHTML;
+        } else {
+          explanationHTML = '<div class="no-explanation">No explanation available for this question.</div>';
+        }
 
         const skippedNote = q.status === 'skipped'
           ? `<div style="font-size:0.78rem;color:#F59E0B;margin-bottom:10px;">⏭️ You did not answer this question.</div>` : '';
 
-        container.innerHTML += `
-          <div class="review-card ${q.status}">
-            <div class="review-card-header">
-              <span>${statusIcon}</span>
-              <span class="review-q-num">Question ${globalIndex + 1}</span>
-            </div>
-            <div class="review-card-body">
-              <div class="review-q-text">${q.question || 'Question not available'}</div>
-              ${skippedNote}
-              <div class="review-options">${optionsHTML}</div>
-              ${explanationHTML}
-            </div>
-          </div>`;
+        // Create question text element with watermark
+        const questionTextDiv = document.createElement('div');
+        questionTextDiv.className = 'review-q-text';
+        questionTextDiv.textContent = q.question || 'Question not available';
+        addCanvasWatermarkToText(questionTextDiv, q.question || 'Question not available');
+        const watermarkedQuestionHTML = questionTextDiv.outerHTML;
+
+        const card = document.createElement('div');
+        card.className = `review-card ${q.status}`;
+        card.innerHTML = `
+          <div class="review-card-header">
+            <span>${statusIcon}</span>
+            <span class="review-q-num">Question ${(globalIndex !== -1 ? globalIndex : idx) + 1}</span>
+          </div>
+          <div class="review-card-body">
+            ${watermarkedQuestionHTML}
+            ${skippedNote}
+            <div class="review-options">${optionsHTML}</div>
+            ${explanationHTML}
+          </div>
+        `;
+        container.appendChild(card);
       });
     }
 
