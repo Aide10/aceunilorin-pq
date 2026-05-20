@@ -11,12 +11,14 @@
       --primary: #3B82F6; --primary-glow: rgba(59,130,246,0.18);
       --text: #F1F5F9; --text-muted: #94A3B8;
       --border: rgba(255,255,255,0.07); --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
+      --watermark-color: #60A5FA;
     }
     :root[data-theme="light"] {
       --bg: #F0F4FF; --surface: #FFFFFF; --surface2: #E8EFFF;
       --primary: #2563EB; --primary-glow: rgba(37,99,235,0.12);
       --text: #1E293B; --text-muted: #64748B;
       --border: rgba(0,0,0,0.07); --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
+      --watermark-color: #2563EB;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -95,12 +97,12 @@
     .explanation-box strong { color:var(--primary); font-weight:700; }
     .no-explanation { font-size:0.78rem; color:var(--text-muted); font-style:italic; }
     
-    /* Watermark canvas styling */
     .watermarked-canvas {
       display: block;
       width: 100%;
       height: auto;
       border-radius: 8px;
+      background: transparent;
     }
     
     @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -116,7 +118,6 @@
   <div class="content">
     <div class="page-title">Mock Result</div>
 
-    <!-- SCORE CARD -->
     <div class="result-card">
       <div class="card-label">Mock Screening Score</div>
       <div class="progress-ring-wrap">
@@ -131,7 +132,6 @@
       <div id="timeUpBadge"></div>
     </div>
 
-    <!-- ADMISSION STATUS -->
     <div class="result-card">
       <div class="card-label">Admission Status</div>
       <span class="card-icon">🎓</span>
@@ -139,7 +139,6 @@
       <div class="status-badge">Awaiting Result</div>
     </div>
 
-    <!-- BREAKDOWN -->
     <div class="breakdown-card">
       <div class="breakdown-title">Score Breakdown</div>
       <div class="breakdown-row"><span class="breakdown-key">Total Questions</span><span class="breakdown-val" id="bTotal">50</span></div>
@@ -150,14 +149,12 @@
       <div class="breakdown-row"><span class="breakdown-key">Time Taken</span><span class="breakdown-val" id="bTime">—</span></div>
     </div>
 
-    <!-- ACTIONS -->
     <div class="action-btns">
       <a href="mock.html" class="btn btn-primary">🔁 Try Another Mock</a>
       <a href="pastquestions.html" class="btn btn-outline">📝 Practice Past Questions</a>
       <a href="dashboard.html" class="btn btn-outline">🏠 Back to Dashboard</a>
     </div>
 
-    <!-- REVIEW -->
     <div class="review-section">
       <div class="review-header">📋 Question Review</div>
       <div class="review-filter">
@@ -172,13 +169,19 @@
   </div>
 
   <script>
-    // ========== WATERMARK FUNCTION ==========
+    // ========== THEME-AWARE WATERMARK FUNCTION ==========
+    function getWatermarkColor() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      return isDark ? '#60A5FA' : '#2563EB';
+    }
+
     function createWatermarkedText(originalText, watermarkText = 'AceUnilorin PQ', options = {}) {
       const {
-        fontSize = 13,
+        fontSize = 14,
         fontFamily = '"DM Sans", sans-serif',
         textColor = '#000000',
-        watermarkOpacity = 0.08,
+        watermarkOpacity = 0.12,
         width = 500,
         backgroundColor = 'transparent'
       } = options;
@@ -197,6 +200,7 @@
       canvas.style.width = '100%';
       canvas.style.height = 'auto';
       canvas.style.borderRadius = '8px';
+      canvas.style.backgroundColor = 'transparent';
       
       if (backgroundColor !== 'transparent') {
         ctx.fillStyle = backgroundColor;
@@ -211,7 +215,7 @@
       
       const words = originalText.split(' ');
       let line = '';
-      let y = fontSize + 8;
+      let y = fontSize + 10;
       let lineCount = 0;
       
       for (let i = 0; i < words.length; i++) {
@@ -224,24 +228,24 @@
           line = words[i] + ' ';
           y += lineHeight;
           lineCount++;
-          if (lineCount >= 4) break;
+          if (lineCount >= 5) break;
         } else {
           line = testLine;
         }
       }
-      if (line.length > 0 && lineCount < 4) {
+      if (line.length > 0 && lineCount < 5) {
         ctx.fillText(line, 15, y);
       }
       
       ctx.globalAlpha = watermarkOpacity;
       ctx.font = `bold ${fontSize + 6}px "Syne", sans-serif`;
-      ctx.fillStyle = '#3B82F6';
+      ctx.fillStyle = getWatermarkColor();
       
-      for (let x = 10; x < width; x += 100) {
-        for (let yPos = 25; yPos < height; yPos += 55) {
+      for (let x = 15; x < width; x += 100) {
+        for (let yPos = 25; yPos < height; yPos += 60) {
           ctx.save();
           ctx.translate(x, yPos);
-          ctx.rotate(-25 * Math.PI / 180);
+          ctx.rotate(-20 * Math.PI / 180);
           ctx.fillText(watermarkText, 0, 0);
           ctx.restore();
         }
@@ -261,7 +265,7 @@
         fontSize: fontSize,
         fontFamily: '"DM Sans", sans-serif',
         textColor: textColor,
-        watermarkOpacity: 0.1,
+        watermarkOpacity: 0.12,
         width: element.offsetWidth || 480,
         backgroundColor: 'transparent'
       });
@@ -269,16 +273,27 @@
       element.innerHTML = '';
       element.appendChild(canvas);
       element.style.padding = '0';
+      element.style.backgroundColor = 'transparent';
     }
 
-    // Theme toggle
+    function reapplyWatermarks() {
+      const reviewCards = document.querySelectorAll('.review-q-text, .explanation-box');
+      reviewCards.forEach(card => {
+        if (card.textContent && card.textContent.trim()) {
+          addCanvasWatermarkToText(card, card.textContent);
+        }
+      });
+    }
+
     function toggleTheme() {
       const html = document.documentElement;
       const isDark = html.getAttribute('data-theme') === 'dark';
       html.setAttribute('data-theme', isDark ? 'light' : 'dark');
       document.querySelector('.top-icon').textContent = isDark ? '🌙' : '☀️';
       localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      setTimeout(() => reapplyWatermarks(), 50);
     }
+    
     const saved = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', saved);
     document.querySelector('.top-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
@@ -364,7 +379,6 @@
         const skippedNote = q.status === 'skipped'
           ? `<div style="font-size:0.78rem;color:#F59E0B;margin-bottom:10px;">⏭️ You did not answer this question.</div>` : '';
 
-        // Create question text element with watermark
         const questionTextDiv = document.createElement('div');
         questionTextDiv.className = 'review-q-text';
         questionTextDiv.textContent = q.question || 'Question not available';
@@ -398,4 +412,4 @@
     renderReview('all');
   </script>
 </body>
-</html>
+  </html>
