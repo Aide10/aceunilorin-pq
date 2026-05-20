@@ -166,10 +166,21 @@
     .review-option-letter { width:22px; height:22px; border-radius:5px; background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:0.68rem; font-weight:800; flex-shrink:0; }
     .review-option.correct-ans .review-option-letter { background:#22C55E; color:#fff; }
     .review-option.user-wrong .review-option-letter { background:#EF4444; color:#fff; }
-    .explanation-box { background:var(--primary-glow); border:1px solid rgba(59,130,246,0.2); border-radius:9px; padding:11px 13px; font-size:0.8rem; line-height:1.6; }
+    .explanation-box { background:var(--primary-glow); border:1px solid rgba(59,130,246,0.2); border-radius:9px; padding:11px 13px; font-size:0.8rem; line-height:1.6; position: relative; }
     .explanation-box strong { color:var(--primary); font-weight:700; }
     .no-explanation { font-size:0.75rem; color:var(--text-muted); font-style:italic; }
     .offline-toast { position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 300px; margin: 0 auto; padding: 12px; border-radius: 100px; color: white; text-align: center; font-weight: 600; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: opacity 0.3s; }
+    
+    /* Watermark canvas styling */
+    .watermarked-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+    .explanation-watermarked {
+      position: relative;
+    }
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
   </style>
 </head>
@@ -244,10 +255,8 @@
       <div class="progress-history" id="progressHistory">
         <div class="history-title">📈 Your Journey with <span id="historyYear">2006</span></div>
         <div class="history-grid" id="historyGrid">
-          <!-- Will be filled by JavaScript -->
         </div>
         <div class="history-stats" id="historyStats">
-          <!-- Will be filled by JavaScript -->
         </div>
       </div>
 
@@ -312,6 +321,130 @@
   const db = firebase.firestore();
   db.enablePersistence({synchronizeTabs: true}).catch(err => console.error("Cache error:", err));
 
+  // ========== WATERMARK FUNCTION ==========
+  // Creates a canvas with text and watermark overlay
+  function createWatermarkedText(originalText, watermarkText = 'AceUnilorin PQ', options = {}) {
+    const {
+      fontSize = 14,
+      fontFamily = '"DM Sans", sans-serif',
+      textColor = '#000000',
+      watermarkOpacity = 0.08,
+      width = 500,
+      backgroundColor = 'transparent'
+    } = options;
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Estimate required height based on text length
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    const textWidth = ctx.measureText(originalText).width;
+    const lines = Math.max(1, Math.ceil(textWidth / (width - 40)));
+    const lineHeight = fontSize * 1.5;
+    const height = Math.max(80, lines * lineHeight + 40);
+    
+    canvas.width = width;
+    canvas.height = height;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+    canvas.style.borderRadius = '8px';
+    
+    // Clear and set background
+    if (backgroundColor !== 'transparent') {
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, width, height);
+    } else {
+      ctx.clearRect(0, 0, width, height);
+    }
+    
+    // Draw the original text (wrapped)
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    ctx.fillStyle = textColor;
+    ctx.globalAlpha = 1;
+    
+    // Simple word wrapping
+    const words = originalText.split(' ');
+    let line = '';
+    let y = fontSize + 10;
+    let lineCount = 0;
+    
+    for (let i = 0; i < words.length; i++) {
+      const testLine = line + words[i] + ' ';
+      const metrics = ctx.measureText(testLine);
+      const testWidth = metrics.width;
+      
+      if (testWidth > width - 40 && line.length > 0) {
+        ctx.fillText(line, 15, y);
+        line = words[i] + ' ';
+        y += lineHeight;
+        lineCount++;
+        if (lineCount >= 5) break;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line.length > 0 && lineCount < 5) {
+      ctx.fillText(line, 15, y);
+    }
+    
+    // Draw watermark pattern (tiled, rotated)
+    ctx.globalAlpha = watermarkOpacity;
+    ctx.font = `bold ${fontSize + 6}px "Syne", sans-serif`;
+    ctx.fillStyle = '#3B82F6';
+    
+    for (let x = 10; x < width; x += 100) {
+      for (let yPos = 30; yPos < height; yPos += 60) {
+        ctx.save();
+        ctx.translate(x, yPos);
+        ctx.rotate(-25 * Math.PI / 180);
+        ctx.fillText(watermarkText, 0, 0);
+        ctx.restore();
+      }
+    }
+    
+    return canvas;
+  }
+  
+  // Apply watermark to any element containing text
+  function applyWatermarkToElement(element, text, options = {}) {
+    if (!element || !text) return element;
+    
+    const canvas = createWatermarkedText(text, 'AceUnilorin PQ', options);
+    canvas.className = 'watermarked-canvas';
+    
+    // Clear element and add canvas
+    element.innerHTML = '';
+    element.appendChild(canvas);
+    element.style.padding = '0';
+    element.style.background = 'transparent';
+    
+    return element;
+  }
+  
+  // Simple watermark overlay for existing text (preserves original content visually)
+  function addCanvasWatermarkToText(element, text) {
+    if (!element || !text) return;
+    
+    // Get computed styles
+    const computedStyle = getComputedStyle(element);
+    const fontSize = parseInt(computedStyle.fontSize) || 16;
+    const textColor = computedStyle.color || '#000000';
+    
+    const canvas = createWatermarkedText(text, 'AceUnilorin PQ', {
+      fontSize: fontSize,
+      fontFamily: '"DM Sans", sans-serif',
+      textColor: textColor,
+      watermarkOpacity: 0.1,
+      width: element.offsetWidth || 500,
+      backgroundColor: 'transparent'
+    });
+    
+    element.innerHTML = '';
+    element.appendChild(canvas);
+    element.style.padding = '0';
+  }
+
   // Security: No Right Click/Copy
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('copy', e => e.preventDefault());
@@ -358,7 +491,6 @@
   // AUTH LOGIC - Only show content after auth
   auth.onAuthStateChanged(user => { 
     if (!user) {
-      // Not logged in — redirect to auth, preserving the year so they come back to the right page
       const returnUrl = encodeURIComponent(window.location.href);
       window.location.href = 'auth.html?next=' + returnUrl;
     } else {
@@ -387,7 +519,7 @@
     if (indicator) {
       indicator.textContent = '💾 Saved just now';
       setTimeout(() => {
-        indicator.textContent = '💾 Saved';
+        if (indicator) indicator.textContent = '💾 Saved';
       }, 3000);
     }
   }
@@ -440,13 +572,10 @@
       return;
     }
     
-    // Calculate stats
     const scores = history.map(h => h.score);
     const best = Math.max(...scores);
-    const latest = scores[scores.length - 1];
     const average = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
     
-    // Determine trend
     let trend = '';
     if (history.length >= 2) {
       const lastTwo = history.slice(-2).map(h => h.score);
@@ -455,7 +584,6 @@
       else trend = '➡️ Consistent';
     }
     
-    // Show newest first
     grid.innerHTML = history.slice().reverse().map((h, index) => {
       const isLatest = index === 0;
       return `
@@ -492,26 +620,25 @@
       document.getElementById('loadingText').textContent = `Loading ${year} questions...`;
       
       const docRef = db.collection('pastquestions').doc(String(year));
-const docSnap = await docRef.get();
+      const docSnap = await docRef.get();
 
-if (!docSnap.exists) {
-  document.getElementById('loadingText').textContent = `No questions found for ${year} yet.`;
-  return;
-}
+      if (!docSnap.exists) {
+        document.getElementById('loadingText').textContent = `No questions found for ${year} yet.`;
+        return;
+      }
 
-// Handle both array format and subcollection format
-if (docSnap.data().questions && docSnap.data().questions.length > 0) {
-  questions = docSnap.data().questions;
-} else {
-  const subSnap = await docRef.collection('questions').limit(300).get();
-  questions = [];
-  subSnap.forEach(d => questions.push({...d.data(), id: d.id}));
-}
+      if (docSnap.data().questions && docSnap.data().questions.length > 0) {
+        questions = docSnap.data().questions;
+      } else {
+        const subSnap = await docRef.collection('questions').limit(300).get();
+        questions = [];
+        subSnap.forEach(d => questions.push({...d.data(), id: d.id}));
+      }
 
-if (questions.length === 0) {
-  document.getElementById('loadingText').textContent = `No questions available.`;
-  return;
-}
+      if (questions.length === 0) {
+        document.getElementById('loadingText').textContent = `No questions available.`;
+        return;
+      }
 
       loadQuizState();
 
@@ -530,6 +657,7 @@ if (questions.length === 0) {
     }
   }
 
+  // UPDATED renderQuestion WITH WATERMARK
   function renderQuestion() {
     if (!questions.length) return;
     
@@ -537,7 +665,11 @@ if (questions.length === 0) {
     const total = questions.length;
 
     document.getElementById('qNumber').textContent = `Question ${currentIndex + 1} of ${total}`;
-    document.getElementById('qText').textContent = q.question || q.text || 'Question text not available';
+    const qTextElement = document.getElementById('qText');
+    const questionText = q.question || q.text || 'Question text not available';
+    qTextElement.textContent = questionText;
+    // Apply watermark to question text
+    addCanvasWatermarkToText(qTextElement, questionText);
 
     const container = document.getElementById('optionsContainer');
     container.innerHTML = '';
@@ -554,12 +686,26 @@ if (questions.length === 0) {
         saveQuizState(); 
         renderQuestion(); 
       };
-      div.innerHTML = `<div class="option-letter">${letter}</div><div class="option-text">${text}</div>`;
+      
+      // Create option letter div
+      const letterDiv = document.createElement('div');
+      letterDiv.className = 'option-letter';
+      letterDiv.textContent = letter;
+      
+      // Create option text div with watermark
+      const textDiv = document.createElement('div');
+      textDiv.className = 'option-text';
+      textDiv.textContent = text;
+      addCanvasWatermarkToText(textDiv, text);
+      
+      div.appendChild(letterDiv);
+      div.appendChild(textDiv);
       container.appendChild(div);
     });
 
     const answered = Object.keys(userAnswers).length;
-    document.getElementById('progressBar').style.width = total > 0 ? `${(answered / total) * 100}%` : '0%';
+    const progressPercent = total > 0 ? (answered / total) * 100 : 0;
+    document.getElementById('progressBar').style.width = `${progressPercent}%`;
     document.getElementById('progressLabel').textContent = `${answered} / ${total} answered`;
     document.getElementById('answeredCount').textContent = answered;
     document.getElementById('totalCount').textContent = total;
@@ -568,7 +714,7 @@ if (questions.length === 0) {
     document.getElementById('prevBtn').disabled = currentIndex === 0;
     const isLast = currentIndex === total - 1;
     document.getElementById('nextBtn').style.display = isLast ? 'none' : 'flex';
-    document.getElementById('submitBtn').style.display = 'flex'; // Always visible
+    document.getElementById('submitBtn').style.display = 'flex';
     
     updateQGrid();
   }
@@ -613,17 +759,17 @@ if (questions.length === 0) {
   }
 
   function openSubmitModal() {
-  const answered = Object.keys(userAnswers).length;
-  const total = questions.length;
-  
-  document.getElementById('modalAnswered').textContent = answered;
-  document.getElementById('modalUnanswered').textContent = total - answered;
-  
-  if (answered < total * 0.5) {
-    alert(`⚠️ You've only answered ${answered} of ${total} questions. Are you sure you want to submit?`);
-  }
-  
-  document.getElementById('submitModal').classList.add('open');
+    const answered = Object.keys(userAnswers).length;
+    const total = questions.length;
+    
+    document.getElementById('modalAnswered').textContent = answered;
+    document.getElementById('modalUnanswered').textContent = total - answered;
+    
+    if (answered < total * 0.5) {
+      alert(`⚠️ You've only answered ${answered} of ${total} questions. Are you sure you want to submit?`);
+    }
+    
+    document.getElementById('submitModal').classList.add('open');
   }
   
   function closeSubmitModal() { 
@@ -673,10 +819,8 @@ if (questions.length === 0) {
     const total = questions.length;
     const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-    // Save to history
     saveHistory(percentage);
 
-    // Update UI
     let color, grade;
     if (percentage === 100) { color='#A855F7'; grade='Perfect'; }
     else if (percentage >= 90) { color='#22C55E'; grade='Excellent'; }
@@ -713,6 +857,7 @@ if (questions.length === 0) {
     renderQuestion();
   }
 
+  // UPDATED renderReview WITH WATERMARK on explanations
   function renderReview(filter) {
     const container = document.getElementById('reviewCards');
     
@@ -728,7 +873,7 @@ if (questions.length === 0) {
       return;
     }
 
-    container.innerHTML = filtered.map((q, index) => {
+    container.innerHTML = filtered.map((q, idx) => {
       const letters = ['A','B','C','D','E'];
       const opts = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
       
@@ -745,20 +890,33 @@ if (questions.length === 0) {
         optionsHTML += `<div class="${cls}"><div class="review-option-letter">${letter}</div><span>${opt}${suffix}</span></div>`;
       });
 
-      const explanationHTML = q.explanation
-        ? `<div class="explanation-box"><strong>💡 Explanation:</strong> ${q.explanation}</div>`
-        : `<div class="no-explanation">No explanation available.</div>`;
+      let explanationHTML = '';
+      if (q.explanation && q.explanation.trim()) {
+        const explanationDiv = document.createElement('div');
+        explanationDiv.className = 'explanation-box';
+        explanationDiv.innerHTML = `<strong>💡 Explanation:</strong> ${q.explanation}`;
+        // Apply watermark to explanation
+        const explanationText = q.explanation;
+        addCanvasWatermarkToText(explanationDiv, `Explanation: ${explanationText.substring(0, 200)}`);
+        explanationHTML = explanationDiv.outerHTML;
+      } else {
+        explanationHTML = '<div class="no-explanation">No explanation available.</div>';
+      }
 
       const skippedNote = q.status === 'skipped'
         ? `<div style="font-size:0.75rem;color:#F59E0B;margin-bottom:8px;">⏭️ Not answered.</div>` : '';
 
+      // Find original index for question number
+      const originalIndex = currentReviewData.findIndex(d => d.question === q.question);
+      const qNum = originalIndex !== -1 ? originalIndex + 1 : idx + 1;
+
       return `
         <div class="review-card ${q.status}">
           <div class="review-card-header">
-            <span class="review-q-num">Question ${questions.indexOf(q) + 1}</span>
+            <span class="review-q-num">Question ${qNum}</span>
           </div>
           <div class="review-card-body">
-            <div class="review-q-text">${q.question || 'Question not available'}</div>
+            <div class="review-q-text">${(q.question || 'Question not available').substring(0, 300)}</div>
             ${skippedNote}
             <div class="review-options">${optionsHTML}</div>
             ${explanationHTML}
