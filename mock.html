@@ -11,12 +11,14 @@
       --primary: #3B82F6; --primary-glow: rgba(59,130,246,0.18);
       --text: #F1F5F9; --text-muted: #94A3B8;
       --border: rgba(255,255,255,0.07); --card-shadow: 0 4px 32px rgba(0,0,0,0.4);
+      --watermark-color: #3B82F6;
     }
     :root[data-theme="light"] {
       --bg: #F0F4FF; --surface: #FFFFFF; --surface2: #E8EFFF;
       --primary: #2563EB; --primary-glow: rgba(37,99,235,0.12);
       --text: #1E293B; --text-muted: #64748B;
       --border: rgba(0,0,0,0.07); --card-shadow: 0 4px 32px rgba(37,99,235,0.08);
+      --watermark-color: #2563EB;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -46,28 +48,14 @@
 
     .content { max-width: 600px; margin: 0 auto; padding: 28px 20px; position: relative; z-index: 1; }
 
-    /* Screens */
     .screen { display: none; }
     .screen.active { display: block; }
 
-    /* Lobby */
     .page-header { margin-bottom: 28px; }
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); font-size: 0.88rem; text-decoration: none; margin-bottom: 16px; }
     .back-link:hover { color: var(--primary); }
     .page-header h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
     .page-header p { color: var(--text-muted); font-size: 0.92rem; }
-
-    .mock-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
-    .mock-type-card {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: 18px; padding: 24px 18px; text-align: center;
-      cursor: pointer; transition: all 0.2s; box-shadow: var(--card-shadow);
-    }
-    .mock-type-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-    .mock-type-card.selected { border-color: var(--primary); background: var(--primary-glow); }
-    .mock-type-icon { font-size: 2rem; margin-bottom: 12px; }
-    .mock-type-card h3 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 800; margin-bottom: 6px; }
-    .mock-type-card p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
 
     .info-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -90,7 +78,6 @@
     .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); margin-top: 10px; }
     .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* CBT header */
     .cbt-header {
       position: sticky; top: 57px; z-index: 90;
       background: var(--bg); padding: 14px 20px;
@@ -132,10 +119,6 @@
     }
     .option:hover { border-color: var(--primary); background: var(--primary-glow); }
     .option.selected { border-color: var(--primary); background: var(--primary-glow); }
-    .option.correct { border-color: #22C55E; background: rgba(34,197,94,0.1); pointer-events: none; }
-    .option.wrong { border-color: #EF4444; background: rgba(239,68,68,0.1); pointer-events: none; }
-    .option.disabled { pointer-events: none; opacity: 0.6; }
-
     .option-letter {
       width: 32px; height: 32px; border-radius: 8px;
       background: var(--surface2); display: flex; align-items: center; justify-content: center;
@@ -143,8 +126,6 @@
       flex-shrink: 0; transition: all 0.2s;
     }
     .option.selected .option-letter { background: var(--primary); color: #fff; }
-    .option.correct .option-letter { background: #22C55E; color: #fff; }
-    .option.wrong .option-letter { background: #EF4444; color: #fff; }
     .option-text { font-size: 0.92rem; line-height: 1.4; }
 
     .nav-btns {
@@ -176,7 +157,6 @@
     .q-dot.answered { background: var(--primary); color: #fff; border-color: var(--primary); }
     .q-dot.current { border-color: var(--primary); color: var(--primary); }
 
-    /* Modal */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 200;
       background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
@@ -202,15 +182,12 @@
     .btn-confirm:hover { transform: translateY(-2px); }
     .btn-cancel-modal { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); padding: 11px; border-radius: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; }
 
-    /* Watermark canvas */
     .watermarked-canvas {
       display: block;
       width: 100%;
       height: auto;
       border-radius: 8px;
-    }
-    .explanation-watermarked {
-      position: relative;
+      background: transparent;
     }
 
     @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
@@ -227,7 +204,6 @@
   <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
 </nav>
 
-<!-- SCREEN 1: LOBBY -->
 <div class="screen active" id="lobbyScreen">
   <div class="content">
     <div class="page-header">
@@ -245,18 +221,9 @@
     </div>
 
     <div class="info-card">
-      <div class="info-item">
-        <div class="info-val">50</div>
-        <div class="info-label">Questions</div>
-      </div>
-      <div class="info-item">
-        <div class="info-val">25</div>
-        <div class="info-label">Minutes</div>
-      </div>
-      <div class="info-item">
-        <div class="info-val">2</div>
-        <div class="info-label">Marks/Question</div>
-      </div>
+      <div class="info-item"><div class="info-val">50</div><div class="info-label">Questions</div></div>
+      <div class="info-item"><div class="info-val">25</div><div class="info-label">Minutes</div></div>
+      <div class="info-item"><div class="info-val">2</div><div class="info-label">Marks/Question</div></div>
     </div>
 
     <button class="btn btn-primary" onclick="startMock()">🚀 Start Mock Exam</button>
@@ -264,17 +231,11 @@
   </div>
 </div>
 
-<!-- SCREEN 2: CBT -->
 <div class="screen" id="cbtScreen">
   <div class="cbt-header">
-    <div class="timer-wrap">
-      <span class="timer-icon">⏱️</span>
-      <span class="timer" id="timerDisplay">25:00</span>
-    </div>
+    <div class="timer-wrap"><span class="timer-icon">⏱️</span><span class="timer" id="timerDisplay">25:00</span></div>
     <div class="progress-wrap">
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
-      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
       <div class="progress-label" id="progressLabel">0 / 50 answered</div>
     </div>
   </div>
@@ -297,25 +258,15 @@
   </div>
 </div>
 
-<!-- CONFIRM SUBMIT MODAL -->
 <div class="modal-overlay" id="submitModal">
   <div class="modal">
     <div class="modal-icon">📋</div>
     <h2>Submit Mock?</h2>
     <p>Are you sure you want to submit your answers?</p>
     <div class="modal-stats">
-      <div class="modal-stat">
-        <div class="modal-stat-val" id="modalAnswered">0</div>
-        <div class="modal-stat-label">Answered</div>
-      </div>
-      <div class="modal-stat">
-        <div class="modal-stat-val" id="modalUnanswered">50</div>
-        <div class="modal-stat-label">Unanswered</div>
-      </div>
-      <div class="modal-stat">
-        <div class="modal-stat-val" id="modalTimeLeft">—</div>
-        <div class="modal-stat-label">Time Left</div>
-      </div>
+      <div class="modal-stat"><div class="modal-stat-val" id="modalAnswered">0</div><div class="modal-stat-label">Answered</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" id="modalUnanswered">50</div><div class="modal-stat-label">Unanswered</div></div>
+      <div class="modal-stat"><div class="modal-stat-val" id="modalTimeLeft">—</div><div class="modal-stat-label">Time Left</div></div>
     </div>
     <div class="modal-btns">
       <button class="btn-confirm" onclick="submitMock()">✅ Yes, Submit</button>
@@ -329,14 +280,20 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // ========== WATERMARK FUNCTION ==========
+  // ========== THEME-AWARE WATERMARK FUNCTION ==========
+  function getWatermarkColor() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    return isDark ? '#60A5FA' : '#2563EB'; // Lighter blue for dark mode, standard blue for light mode
+  }
+
   function createWatermarkedText(originalText, watermarkText = 'AceUnilorin PQ', options = {}) {
     const {
-      fontSize = 14,
+      fontSize = 16,
       fontFamily = '"DM Sans", sans-serif',
       textColor = '#000000',
-      watermarkOpacity = 0.08,
-      width = 500,
+      watermarkOpacity = 0.12,
+      width = 550,
       backgroundColor = 'transparent'
     } = options;
     
@@ -347,13 +304,14 @@
     const textWidth = ctx.measureText(originalText).width;
     const lines = Math.max(1, Math.ceil(textWidth / (width - 40)));
     const lineHeight = fontSize * 1.5;
-    const height = Math.max(80, lines * lineHeight + 40);
+    const height = Math.max(60, lines * lineHeight + 30);
     
     canvas.width = width;
     canvas.height = height;
     canvas.style.width = '100%';
     canvas.style.height = 'auto';
     canvas.style.borderRadius = '8px';
+    canvas.style.backgroundColor = 'transparent';
     
     if (backgroundColor !== 'transparent') {
       ctx.fillStyle = backgroundColor;
@@ -381,24 +339,24 @@
         line = words[i] + ' ';
         y += lineHeight;
         lineCount++;
-        if (lineCount >= 5) break;
+        if (lineCount >= 6) break;
       } else {
         line = testLine;
       }
     }
-    if (line.length > 0 && lineCount < 5) {
+    if (line.length > 0 && lineCount < 6) {
       ctx.fillText(line, 15, y);
     }
     
     ctx.globalAlpha = watermarkOpacity;
-    ctx.font = `bold ${fontSize + 6}px "Syne", sans-serif`;
-    ctx.fillStyle = '#3B82F6';
+    ctx.font = `bold ${fontSize + 4}px "Syne", sans-serif`;
+    ctx.fillStyle = getWatermarkColor();
     
-    for (let x = 10; x < width; x += 100) {
-      for (let yPos = 30; yPos < height; yPos += 60) {
+    for (let x = 20; x < width; x += 100) {
+      for (let yPos = 25; yPos < height; yPos += 60) {
         ctx.save();
         ctx.translate(x, yPos);
-        ctx.rotate(-25 * Math.PI / 180);
+        ctx.rotate(-20 * Math.PI / 180);
         ctx.fillText(watermarkText, 0, 0);
         ctx.restore();
       }
@@ -411,14 +369,14 @@
     if (!element || !text) return;
     
     const computedStyle = getComputedStyle(element);
-    const fontSize = parseInt(computedStyle.fontSize) || 16;
+    const fontSize = parseInt(computedStyle.fontSize) || 15;
     const textColor = computedStyle.color || '#000000';
     
     const canvas = createWatermarkedText(text, 'AceUnilorin PQ', {
       fontSize: fontSize,
       fontFamily: '"DM Sans", sans-serif',
       textColor: textColor,
-      watermarkOpacity: 0.1,
+      watermarkOpacity: 0.12,
       width: element.offsetWidth || 500,
       backgroundColor: 'transparent'
     });
@@ -426,9 +384,27 @@
     element.innerHTML = '';
     element.appendChild(canvas);
     element.style.padding = '0';
+    element.style.backgroundColor = 'transparent';
   }
 
-  // Firebase Config
+  // Re-apply watermarks when theme changes
+  function reapplyWatermarks() {
+    // Re-watermark current question text if visible
+    const qTextElement = document.getElementById('qText');
+    if (qTextElement && qTextElement.textContent && qTextElement.textContent !== 'Loading question...') {
+      const text = qTextElement.textContent;
+      addCanvasWatermarkToText(qTextElement, text);
+    }
+    
+    // Re-watermark all option texts
+    const optionTexts = document.querySelectorAll('.option-text');
+    optionTexts.forEach(opt => {
+      if (opt.textContent) {
+        addCanvasWatermarkToText(opt, opt.textContent);
+      }
+    });
+  }
+
   const firebaseConfig = {
     apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
     authDomain: "aceunilorin-pq.firebaseapp.com",
@@ -443,25 +419,25 @@
   const db = firebase.firestore();
   db.enablePersistence({synchronizeTabs: true}).catch(err => console.log(err));
 
-  // Theme
   function toggleTheme() {
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
     document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    
+    // Re-apply watermarks with new theme colors
+    setTimeout(() => reapplyWatermarks(), 50);
   }
+  
   const saved = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
 
-  // Auth check
   auth.onAuthStateChanged(user => {
     if (!user) window.location.href = 'auth.html';
   });
 
-  // State
-  let mockType = 'pq';
   let questions = [];
   let currentIndex = 0;
   let userAnswers = {};
@@ -469,31 +445,17 @@
   let secondsLeft = 25 * 60;
   let mockStartTime = null;
 
-  // Loading overlay
   function showLoadingOverlay(msg) {
     let el = document.getElementById('loadingOverlay');
     if (!el) {
       el = document.createElement('div');
       el.id = 'loadingOverlay';
       el.style.cssText = `position:fixed;inset:0;z-index:300;background:rgba(15,23,42,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;`;
-      el.innerHTML = `
-        <div style="width:44px;height:44px;border:4px solid #253147;border-top-color:#3B82F6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-        <div id="loadingOverlayText" style="color:#94A3B8;font-size:0.92rem;font-family:'DM Sans',sans-serif;"></div>
-        <div style="width:200px;background:#253147;border-radius:100px;height:6px;overflow:hidden;">
-          <div id="loadingOverlayBar" style="height:100%;background:#3B82F6;border-radius:100px;width:0%;transition:width 0.4s;"></div>
-        </div>`;
+      el.innerHTML = `<div style="width:44px;height:44px;border:4px solid #253147;border-top-color:#3B82F6;border-radius:50%;animation:spin 0.8s linear infinite;"></div><div id="loadingOverlayText" style="color:#94A3B8;font-size:0.92rem;font-family:'DM Sans',sans-serif;"></div><div style="width:200px;background:#253147;border-radius:100px;height:6px;overflow:hidden;"><div id="loadingOverlayBar" style="height:100%;background:#3B82F6;border-radius:100px;width:0%;transition:width 0.4s;"></div></div>`;
       document.body.appendChild(el);
     }
     el.style.display = 'flex';
     document.getElementById('loadingOverlayText').textContent = msg;
-  }
-
-  function updateLoadingOverlay(msg) {
-    const textEl = document.getElementById('loadingOverlayText');
-    const barEl = document.getElementById('loadingOverlayBar');
-    if (textEl) textEl.textContent = msg;
-    const match = msg.match(/(\d+)\/(\d+)/);
-    if (match && barEl) barEl.style.width = `${Math.round((+match[1] / +match[2]) * 100)}%`;
   }
 
   function hideLoadingOverlay() {
@@ -509,19 +471,16 @@
     try {
       const freeYears = [2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
       const premiumYears = [2021,2022,2023,2024,2025];
-
       const user = auth.currentUser;
       let isPremium = false;
       if (user) {
         const doc = await db.collection('users').doc(user.uid).get();
         isPremium = doc.exists && doc.data().isPremium;
       }
-
       let yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
       const TARGET = 50;
       let allQuestions = [];
 
-      updateLoadingOverlay('Loading questions...');
       const fetchResults = await Promise.allSettled(
         yearsToUse.map(year =>
           db.collection('pastquestions').doc(String(year))
@@ -538,26 +497,16 @@
           if (qs.length > 0) yearPools.push(qs);
         }
       }
-      updateLoadingOverlay(`Loaded ${yearPools.length} year(s) of questions...`);
 
       if (yearPools.length > 0) {
         const allPooled = yearPools.flat();
         const recentRaw = localStorage.getItem('recentMockQs');
         const recentSeen = recentRaw ? new Set(JSON.parse(recentRaw)) : new Set();
-
         const unseen = allPooled.filter(q => !recentSeen.has(`${q.year}-${q.number}`));
         const seen = allPooled.filter(q => recentSeen.has(`${q.year}-${q.number}`));
-
-        const shuffle = arr => {
-          for (let i = arr.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-          }
-          return arr;
-        };
+        const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
         shuffle(unseen);
         shuffle(seen);
-
         allQuestions = [...unseen, ...seen].slice(0, TARGET);
         const newRecent = allQuestions.map(q => `${q.year}-${q.number}`);
         const updatedRecent = [...Array.from(recentSeen), ...newRecent].slice(-100);
@@ -565,12 +514,7 @@
       }
 
       hideLoadingOverlay();
-
-      if (allQuestions.length === 0) {
-        alert('No questions could be loaded. Please check your connection and try again.');
-        btn.disabled = false;
-        return;
-      }
+      if (allQuestions.length === 0) { alert('No questions could be loaded.'); btn.disabled = false; return; }
 
       allQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, TARGET);
       questions = allQuestions;
@@ -583,10 +527,8 @@
       renderQuestion();
       buildQGrid();
       startTimer();
-
     } catch (err) {
       hideLoadingOverlay();
-      console.error(err);
       alert('Failed to start mock: ' + err.message);
       btn.disabled = false;
     }
@@ -597,10 +539,7 @@
     timerInterval = setInterval(() => {
       secondsLeft--;
       updateTimerDisplay();
-      if (secondsLeft <= 0) {
-        clearInterval(timerInterval);
-        submitMock(true);
-      }
+      if (secondsLeft <= 0) { clearInterval(timerInterval); submitMock(true); }
     }, 1000);
   }
 
@@ -615,11 +554,9 @@
     if (secondsLeft <= 60) el.classList.remove('warning'), el.classList.add('danger');
   }
 
-  // WATERMARKED RENDER FUNCTION
   function renderQuestion() {
     const q = questions[currentIndex];
     const total = questions.length;
-
     const yearTag = q.year ? ` <span style="font-size:.65rem;background:rgba(59,130,246,.15);color:#3B82F6;padding:2px 8px;border-radius:100px;border:1px solid rgba(59,130,246,.25);font-weight:700;vertical-align:middle;">${q.year}</span>` : '';
     document.getElementById('qNumber').innerHTML = `Question ${currentIndex + 1} of ${total}${yearTag}`;
     
@@ -632,27 +569,14 @@
     opts.innerHTML = '';
     const letters = ['A','B','C','D','E'];
     const rawOptions = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
-
-    let optObjs = rawOptions
-      .map((text, i) => ({ text, origLetter: letters[i] }))
-      .filter(o => o.text);
-
+    let optObjs = rawOptions.map((text, i) => ({ text, origLetter: letters[i] })).filter(o => o.text);
     if (!q._shuffled) {
-      for (let i = optObjs.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [optObjs[i], optObjs[j]] = [optObjs[j], optObjs[i]];
-      }
+      for (let i = optObjs.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [optObjs[i], optObjs[j]] = [optObjs[j], optObjs[i]]; }
       q._shuffled = optObjs;
-    } else {
-      optObjs = q._shuffled;
-    }
-
+    } else { optObjs = q._shuffled; }
     const correctOrigLetter = q.answer;
     let displayCorrectLetter = 'A';
-    optObjs.forEach((opt, i) => {
-      const displayLetter = letters[i];
-      if (opt.origLetter === correctOrigLetter) displayCorrectLetter = displayLetter;
-    });
+    optObjs.forEach((opt, i) => { const displayLetter = letters[i]; if (opt.origLetter === correctOrigLetter) displayCorrectLetter = displayLetter; });
     q._displayAnswer = displayCorrectLetter;
 
     optObjs.forEach((opt, i) => {
@@ -660,148 +584,64 @@
       const div = document.createElement('div');
       div.className = 'option' + (userAnswers[currentIndex] === displayLetter ? ' selected' : '');
       div.onclick = () => selectAnswer(displayLetter);
-      
-      const letterDiv = document.createElement('div');
-      letterDiv.className = 'option-letter';
-      letterDiv.textContent = displayLetter;
-      
-      const textDiv = document.createElement('div');
-      textDiv.className = 'option-text';
-      textDiv.textContent = opt.text;
+      const letterDiv = document.createElement('div'); letterDiv.className = 'option-letter'; letterDiv.textContent = displayLetter;
+      const textDiv = document.createElement('div'); textDiv.className = 'option-text'; textDiv.textContent = opt.text;
       addCanvasWatermarkToText(textDiv, opt.text);
-      
-      div.appendChild(letterDiv);
-      div.appendChild(textDiv);
+      div.appendChild(letterDiv); div.appendChild(textDiv);
       opts.appendChild(div);
     });
 
     const answered = Object.keys(userAnswers).length;
     document.getElementById('progressBar').style.width = `${(answered / total) * 100}%`;
     document.getElementById('progressLabel').textContent = `${answered} / ${total} answered`;
-
     document.getElementById('prevBtn').disabled = currentIndex === 0;
     document.getElementById('nextBtn').style.display = currentIndex < total - 1 ? 'flex' : 'none';
     document.getElementById('submitBtn').style.display = 'flex';
-
     updateQGrid();
   }
 
-  function selectAnswer(letter) {
-    userAnswers[currentIndex] = letter;
-    renderQuestion();
-    updateQGrid();
-  }
-
-  function navigate(dir) {
-    currentIndex = Math.max(0, Math.min(questions.length - 1, currentIndex + dir));
-    renderQuestion();
-  }
-
+  function selectAnswer(letter) { userAnswers[currentIndex] = letter; renderQuestion(); updateQGrid(); }
+  function navigate(dir) { currentIndex = Math.max(0, Math.min(questions.length - 1, currentIndex + dir)); renderQuestion(); }
   function buildQGrid() {
-    const grid = document.getElementById('qGrid');
-    grid.innerHTML = '';
-    questions.forEach((_, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'q-dot';
-      dot.textContent = i + 1;
-      dot.id = `qdot-${i}`;
-      dot.onclick = () => { currentIndex = i; renderQuestion(); };
-      grid.appendChild(dot);
-    });
+    const grid = document.getElementById('qGrid'); grid.innerHTML = '';
+    questions.forEach((_, i) => { const dot = document.createElement('div'); dot.className = 'q-dot'; dot.textContent = i + 1; dot.id = `qdot-${i}`; dot.onclick = () => { currentIndex = i; renderQuestion(); }; grid.appendChild(dot); });
   }
-
-  function updateQGrid() {
-    questions.forEach((_, i) => {
-      const dot = document.getElementById(`qdot-${i}`);
-      if (!dot) return;
-      dot.className = 'q-dot';
-      if (userAnswers[i]) dot.classList.add('answered');
-      if (i === currentIndex) dot.classList.add('current');
-    });
-  }
-
+  function updateQGrid() { questions.forEach((_, i) => { const dot = document.getElementById(`qdot-${i}`); if (!dot) return; dot.className = 'q-dot'; if (userAnswers[i]) dot.classList.add('answered'); if (i === currentIndex) dot.classList.add('current'); }); }
   function openSubmitModal() {
     const answered = Object.keys(userAnswers).length;
     const total = questions.length;
-
-    if (answered < total * 0.5) {
-      toast(`⚠️ Only ${answered} of ${total} answered. Are you sure?`, 'info');
-      setTimeout(() => {
-        document.getElementById('submitModal').classList.add('open');
-      }, 1500);
-      return;
-    }
+    if (answered < total * 0.5) { toast(`⚠️ Only ${answered} of ${total} answered. Are you sure?`, 'info'); setTimeout(() => { document.getElementById('submitModal').classList.add('open'); }, 1500); return; }
     const unanswered = questions.length - answered;
-    const mins = Math.floor(secondsLeft / 60);
-    const secs = secondsLeft % 60;
+    const mins = Math.floor(secondsLeft / 60); const secs = secondsLeft % 60;
     document.getElementById('modalAnswered').textContent = answered;
     document.getElementById('modalUnanswered').textContent = unanswered;
     document.getElementById('modalTimeLeft').textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     document.getElementById('submitModal').classList.add('open');
   }
-
-  function closeSubmitModal() {
-    document.getElementById('submitModal').classList.remove('open');
-  }
-
+  function closeSubmitModal() { document.getElementById('submitModal').classList.remove('open'); }
   function submitMock(timeUp = false) {
     clearInterval(timerInterval);
     closeSubmitModal();
     document.querySelector('#lobbyScreen .btn-primary').disabled = false;
-
     let correct = 0, wrong = 0, skipped = 0;
     const reviewData = [];
-
     questions.forEach((q, i) => {
       const userAns = userAnswers[i] || null;
       const correctAns = q._displayAnswer || q.answer || q.correctAnswer;
       let status = 'skipped';
-      if (userAns) {
-        if (userAns === correctAns) { correct++; status = 'correct'; }
-        else { wrong++; status = 'wrong'; }
-      } else { skipped++; }
-
+      if (userAns) { if (userAns === correctAns) { correct++; status = 'correct'; } else { wrong++; status = 'wrong'; } } else { skipped++; }
       const letters = ['A','B','C','D','E'];
       let rOptA = q.optionA, rOptB = q.optionB, rOptC = q.optionC, rOptD = q.optionD, rOptE = q.optionE || null;
-      if (q._shuffled) {
-        q._shuffled.forEach((o, idx) => {
-          if (idx === 0) rOptA = o.text;
-          if (idx === 1) rOptB = o.text;
-          if (idx === 2) rOptC = o.text;
-          if (idx === 3) rOptD = o.text;
-          if (idx === 4) rOptE = o.text;
-        });
-      }
-
-      reviewData.push({
-        question: q.question || q.text,
-        optionA: rOptA, optionB: rOptB,
-        optionC: rOptC, optionD: rOptD,
-        optionE: rOptE,
-        correctAnswer: correctAns,
-        userAnswer: userAns,
-        explanation: q.explanation || '',
-        status
-      });
+      if (q._shuffled) { q._shuffled.forEach((o, idx) => { if (idx === 0) rOptA = o.text; if (idx === 1) rOptB = o.text; if (idx === 2) rOptC = o.text; if (idx === 3) rOptD = o.text; if (idx === 4) rOptE = o.text; }); }
+      reviewData.push({ question: q.question || q.text, optionA: rOptA, optionB: rOptB, optionC: rOptC, optionD: rOptD, optionE: rOptE, correctAnswer: correctAns, userAnswer: userAns, explanation: q.explanation || '', status });
     });
-
-    const timeTaken = mockStartTime
-      ? formatTime(Math.floor((Date.now() - mockStartTime) / 1000))
-      : '25:00';
-
-    const result = { correct, wrong, skipped, timeTaken, timeUp, mockType, reviewData };
+    const timeTaken = mockStartTime ? formatTime(Math.floor((Date.now() - mockStartTime) / 1000)) : '25:00';
+    const result = { correct, wrong, skipped, timeTaken, timeUp, mockType: 'pq', reviewData };
     localStorage.setItem('mockResult', JSON.stringify(result));
-
     saveToLeaderboard(correct);
     window.location.href = 'results.html';
   }
-
-  function formatTime(totalSecs) {
-    const m = Math.floor(totalSecs / 60);
-    const s = totalSecs % 60;
-    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  }
-
+  function formatTime(totalSecs) { const m = Math.floor(totalSecs / 60); const s = totalSecs % 60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
   async function saveToLeaderboard(correct) {
     try {
       const user = auth.currentUser;
@@ -809,47 +649,21 @@
       const score = correct * 2;
       const userDoc = await db.collection('users').doc(user.uid).get();
       const username = userDoc.exists ? userDoc.data().username : 'unknown';
-
       const lbRef = db.collection('leaderboard').doc(user.uid);
       const lbDoc = await lbRef.get();
       const prevBest = lbDoc.exists ? (lbDoc.data().bestScore || 0) : 0;
       const mocksTaken = lbDoc.exists ? (lbDoc.data().mocksTaken || 0) + 1 : 1;
-
-      await lbRef.set({
-        username,
-        bestScore: Math.max(score, prevBest),
-        mocksTaken,
-        lastScore: score,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      await db.collection('userStats').doc(user.uid).set({
-        mocksTaken,
-        bestScore: Math.max(score, prevBest),
-        lastScore: score,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      await lbRef.set({ username, bestScore: Math.max(score, prevBest), mocksTaken, lastScore: score, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await db.collection('userStats').doc(user.uid).set({ mocksTaken, bestScore: Math.max(score, prevBest), lastScore: score, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     } catch (e) { console.error('Leaderboard save error:', e); }
   }
-
-  function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
+  function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
   let toastTimer;
   function toast(msg, type = 'info') {
     let t = document.getElementById('mockToast');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = 'mockToast';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1E293B;border-radius:12px;padding:10px 20px;font-size:0.82rem;font-weight:700;z-index:999;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,0.4);border:1px solid #3B82F6;color:#3B82F6;';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.style.transform = 'translateX(-50%) translateY(0)';
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 4000);
+    if (!t) { t = document.createElement('div'); t.id = 'mockToast'; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1E293B;border-radius:12px;padding:10px 20px;font-size:0.82rem;font-weight:700;z-index:999;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,0.4);border:1px solid #3B82F6;color:#3B82F6;'; document.body.appendChild(t); }
+    t.textContent = msg; t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 4000);
   }
 </script>
 </body>
