@@ -412,6 +412,8 @@
     const fakeSnap = { forEach: (fn) => (docSnap.data()?.questions || []).forEach(d => fn({data: () => d, id: d.id})) };
     return { year, snap: fakeSnap };
   })
+          )
+);
       for (const result of fetchResults) {
         if (result.status === 'fulfilled') {
           const { year, snap } = result.value;
