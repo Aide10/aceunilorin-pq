@@ -442,6 +442,7 @@ auth.onAuthStateChanged(async (user) => {
       toast('🎉 Premium activated! Welcome!', 'ok');
       document.getElementById('alreadyPremium').classList.add('show');
       document.getElementById('priceCard').style.display = 'none';
+      document.getElementById('whatsappReward').style.display = 'block';
       // Clean URL
       window.history.replaceState({}, '', 'upgrade.html');
     } catch (e) {
