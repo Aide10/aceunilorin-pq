@@ -509,7 +509,7 @@
         } else if (err.code === 'auth/too-many-requests') {
           showToast('Too many attempts. Please try again later.');
         } else {
-  showToast(err.code + ': ' + err.message);
+  showToast('Login failed. Check your connection.');
         }
       }
     }
