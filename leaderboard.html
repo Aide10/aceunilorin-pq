@@ -288,6 +288,17 @@
     function loadMore(){renderList(false);}
     function setFilter(mode,btn){filterMode=mode;document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');load();}
     function showSkel(){document.getElementById('lbList').innerHTML='<div class="skel"></div>'.repeat(6);document.getElementById('podiumWrap').style.display='none';document.getElementById('loadMoreBtn').style.display='none';}
+    async function forceRefresh(){
+  showSkel();
+  const field=filterMode==='score'?'bestScore':'mocksTaken';
+  const snap=await db.collection('leaderboard').orderBy(field,'desc').limit(100).get({source:'server'});
+  entries=snap.docs.map((d,i)=>({...d.data(),uid:d.id,rank:i+1}));
+  myEntry=entries.find(e=>e.uid===myUID)||null;
+  renderMyRank();
+  renderPodium();
+  loaded=0;
+  renderList(true);
+    }
   </script>
 </body>
 </html>
