@@ -522,4 +522,6 @@ auth.onAuthStateChanged(async (user) => {
 </style>
 <script>
   document.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEve
+  document.addEventListener('keydown', e => {
+  if (e.ctrlKey && ['u','s','a'].includes(e.key)) e.preventDefault();
+});
