@@ -347,6 +347,228 @@
       <div class="stat-label">To Start</div>
     </div>
   </div>
+<!-- ============================================
+     COPY SECTION — Paste this into index.html
+     BETWEEN the .stats section and the .section (features) section
+     i.e. after </div> that closes .stats and before <section class="section">
+     ============================================ -->
+
+<style>
+  /* COPY SECTION STYLES */
+  .copy-section {
+    position: relative; z-index: 1;
+    max-width: 720px;
+    margin: 0 auto 64px;
+    padding: 0 24px;
+  }
+
+  .copy-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px 36px;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .copy-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), #6366F1, var(--primary));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+
+  @keyframes shimmer { to { background-position: 200% 0; } }
+
+  .copy-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--primary);
+    margin-bottom: 16px;
+  }
+
+  .copy-headline {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .copy-body {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .copy-body strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .copy-results {
+    background: var(--surface2);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    border: 1px solid var(--border);
+  }
+
+  .copy-result-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .copy-result-item:last-child { border-bottom: none; }
+
+  .copy-result-item .medal { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .copy-result-item strong { color: var(--text); font-weight: 700; }
+
+  .copy-quote {
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    border-left: 3px solid var(--primary);
+    padding-left: 16px;
+    margin: 24px 0;
+    line-height: 1.7;
+  }
+
+  .copy-quote cite {
+    display: block;
+    margin-top: 8px;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--primary);
+  }
+
+  .copy-cta-wrap {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .copy-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--primary);
+    color: #fff;
+    padding: 15px 28px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px var(--primary-glow);
+  }
+
+  .copy-cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--primary-glow); }
+
+  .copy-cta-note {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .copy-price-highlight {
+    display: inline-block;
+    background: var(--primary-glow);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--primary);
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .copy-card { padding: 28px 20px; }
+    .copy-cta-btn { width: 100%; justify-content: center; }
+  }
+</style>
+
+<!-- COPY SECTION — Insert between stats and features -->
+<div class="copy-section">
+  <div class="copy-card">
+    <div class="copy-eyebrow">A word before you continue</div>
+    <h2 class="copy-headline">Listen. You don't want to write JAMB again.</h2>
+
+    <p class="copy-body">
+      Nobody does. And that fear — of going back to square one, of watching your mates move on without you,
+      of having to explain to the people who believe in you why it didn't work out — that fear is real. And it is valid.
+    </p>
+
+    <p class="copy-body">
+      But fear alone won't save you. <strong>Preparation will.</strong>
+    </p>
+
+    <p class="copy-body">
+      Since 2018, one resource has been behind some of the highest Unilorin POST-UTME scores you'll find anywhere.
+      Questions sourced directly from candidates walking out of the hall. Verified. Compiled. Refined over four editions
+      by someone who has sat this exact exam and scored <strong>88% — twice.</strong>
+    </p>
+
+    <p class="copy-body">The students who used this material?</p>
+
+    <div class="copy-results">
+      <div class="copy-result-item">
+        <span class="medal">🥇</span>
+        <span><strong>Qowiyu M.</strong> scored 92% in 2023. Today, he is studying Medicine at the University of Ilorin.</span>
+      </div>
+      <div class="copy-result-item">
+        <span class="medal">🥇</span>
+        <span><strong>Boluwatife A.</strong> scored 93% in 2024. Today, she is studying Medicine at the University of Ilorin.</span>
+      </div>
+      <div class="copy-result-item">
+        <span class="medal">🥇</span>
+        <span><strong>Hanifat M.</strong> scored 89% in 2025. Today, she is studying Medicine at the University of Ilorin.</span>
+      </div>
+    </div>
+
+    <p class="copy-body">
+      Three years. Three different students. The highest scores seen across every candidate and educational consultant
+      we have compared notes with — and nobody has come forward to show otherwise.
+    </p>
+
+    <p class="copy-body">
+      This year, that student could be you. Everything they had — the past questions, the explanations, the PDFs,
+      the community — is available to you today for just <span class="copy-price-highlight">₦2,500</span>.
+      Once. No renewal. No subscription. Forever.
+    </p>
+
+    <blockquote class="copy-quote">
+      "The margin between your dream course and missing it is often just 2 or 3 marks.
+      Don't leave those marks on the table."
+      <cite>— Ohijei Aide', Founder — AceUnilorin PQ</cite>
+    </blockquote>
+
+    <div class="copy-cta-wrap">
+      <a href="upgrade.html" class="copy-cta-btn">⭐ I'm Ready to Prepare Properly →</a>
+      <span class="copy-cta-note">🔐 Secured by Paystack · Pay once · Access forever</span>
+    </div>
+  </div>
+</div>
 
   <!-- FEATURES -->
   <section class="section">
