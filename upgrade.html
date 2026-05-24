@@ -249,6 +249,518 @@
     <h1>Unlock <span>All Premium</span> Years</h1>
     <p>Get full access to 5 years of premium past questions — 2021 to 2025 — with detailed explanations.</p>
   </div>
+  <!-- ============================================
+     UPGRADE PAGE COPY — Replace everything INSIDE
+     the existing .price-card div in upgrade.html
+     with this full copy section ABOVE the price card.
+     Paste this AFTER the .hero div and BEFORE the
+     .already-premium div in upgrade.html
+     ============================================ -->
+
+<style>
+  /* UPGRADE COPY STYLES */
+  .sales-copy {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sc-block {
+    margin-bottom: 28px;
+  }
+
+  .sc-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--primary);
+    margin-bottom: 10px;
+  }
+
+  .sc-headline {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .sc-body {
+    font-size: 0.93rem;
+    color: var(--text-muted);
+    line-height: 1.85;
+    margin-bottom: 14px;
+  }
+
+  .sc-body strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .sc-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+  }
+
+  .sc-subhead {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .sc-results {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .sc-result-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .sc-result-item:last-child { border-bottom: none; }
+  .sc-result-item .medal { font-size: 1.2rem; flex-shrink: 0; }
+  .sc-result-item strong { color: var(--text); font-weight: 700; display: block; margin-bottom: 2px; }
+
+  .sc-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 20px 0;
+  }
+
+  .sc-table-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 18px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  .sc-table-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    gap: 12px;
+  }
+
+  .sc-table-row:last-child { border-bottom: none; }
+
+  .sc-table-row.total-row {
+    background: var(--primary-glow);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  .sc-table-row.secret-row {
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  .sc-item-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  .sc-item-val {
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
+    font-size: 0.82rem;
+  }
+
+  .sc-total-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    color: var(--text);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  .sc-price-block {
+    background: linear-gradient(135deg, var(--primary), #6366F1);
+    border-radius: 20px;
+    padding: 32px 28px;
+    text-align: center;
+    margin: 28px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sc-price-block::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+  }
+
+  .sc-price-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 8px;
+  }
+
+  .sc-price-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -2px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .sc-price-was {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 16px;
+    text-decoration: line-through;
+  }
+
+  .sc-price-note {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+    position: relative;
+  }
+
+  .sc-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .sc-check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .sc-check-item .icon { flex-shrink: 0; font-size: 1rem; }
+
+  .sc-cross-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    opacity: 0.7;
+  }
+
+  .sc-warning {
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin: 20px 0;
+  }
+
+  .sc-warning strong { color: var(--text); font-weight: 700; }
+
+  .sc-closing {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.85;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+
+  .sc-closing strong { color: var(--text); font-style: normal; font-weight: 700; }
+
+  @media (max-width: 480px) {
+    .sc-price-amount { font-size: 2.4rem; }
+    .sc-table-row { padding: 12px 14px; font-size: 0.8rem; }
+  }
+</style>
+
+<!-- SALES COPY — Paste this AFTER hero div and BEFORE already-premium div in upgrade.html -->
+<div class="sales-copy">
+
+  <div class="sc-block">
+    <div class="sc-eyebrow">Before you scroll past this</div>
+    <h2 class="sc-headline">Listen. I need you to sit with something for a moment.</h2>
+    <p class="sc-body">
+      Imagine it is a few months from now. The POST-UTME results are out. You are scrolling through,
+      heart somewhere in your throat and your score is not what you needed.
+    </p>
+    <p class="sc-body">
+      Not because you are not smart. Not because you did not try. But because somewhere along the way,
+      you prepared with the wrong materials. You practiced questions that never appeared. You skipped the
+      English topics that Unilorin always tests. You walked into that hall thinking you were ready
+      and the exam reminded you that <strong>almost ready is the same as not ready.</strong>
+    </p>
+    <p class="sc-body">
+      And now you have to go back. Write JAMB again. Start over. Explain it to the people who were counting on you.
+    </p>
+    <p class="sc-body"><strong>I don't want that for you. That's why this page exists.</strong></p>
+  </div>
+
+  <div class="sc-divider"></div>
+
+  <div class="sc-block">
+    <div class="sc-subhead">First, let me tell you who built this.</div>
+    <p class="sc-body">
+      My name is <strong>Ohijei Aide'.</strong>
+    </p>
+    <p class="sc-body">
+      I sat Unilorin POST-UTME in 2012 and scored <strong>88%.</strong>
+      I sat it again years later aiming at a second degree, a different chapter of my life and scored <strong>88% again.</strong>
+    </p>
+    <p class="sc-body">
+      I am not telling you this to impress you. I am telling you this so you understand that when I say
+      I know this exam, I mean it in a way that very few people can.
+    </p>
+    <p class="sc-body">
+      I have been studying Unilorin POST-UTME since 2018. Not casually. Obsessively.
+      And what I found changed how I approached everything.
+    </p>
+    <p class="sc-body">
+      <strong>This exam has a pattern.</strong> A personality. Topics it cannot help but come back to.
+      Ways it phrases questions that trip unprepared candidates every single time.
+      Once you see it, truly see it, the exam becomes a different thing entirely.
+    </p>
+    <p class="sc-body">So I started collecting. Building. Refining. This is the <strong>4th edition.</strong> but first online</p>
+  </div>
+
+  <div class="sc-divider"></div>
+
+  <div class="sc-block">
+    <div class="sc-subhead">How these questions are different from every other booklet you have seen.</div>
+    <p class="sc-body">
+      Most past question booklets are assembled from memory after a long time lapse, rumour and recycled guesses.
+      <strong>Not this one.</strong>
+    </p>
+    <p class="sc-body">
+      The moment Unilorin POST-UTME candidates walk out of the examination hall we swing into action.
+      Fresh questions. Immediate collection. Verified across multiple sources.
+    </p>
+    <p class="sc-body">
+      Hundreds of students have contributed over the years some now Doctors, Nurses, Lawyers, Engineers,
+      Mathematicians and graduates across some of Nigeria's most competitive programmes.
+      Some of the questions in this material? <strong>The founder saw them himself.</strong>
+    </p>
+    <p class="sc-body">The result of all this obsessive work: <strong>98% accuracy. Nothing else comes close.</strong></p>
+  </div>
+
+  <div class="sc-divider"></div>
+
+  <div class="sc-block">
+    <div class="sc-subhead">Now look at what this material has produced.</div>
+    <p class="sc-body">
+      Since 2023, I began mentoring candidates directly: giving them the right materials,
+      the right strategy, the right mindset going into that hall. What happened next is the part that still gives me chills.
+    </p>
+
+    <div class="sc-results">
+      <div class="sc-result-item">
+        <span class="medal">🥇</span>
+        <div>
+          <strong>Qowiyu M. — 92% in 2023</strong>
+          Today studying Medicine at the University of Ilorin.
+        </div>
+      </div>
+      <div class="sc-result-item">
+        <span class="medal">🥇</span>
+        <div>
+          <strong>Boluwatife A. — 93% in 2024</strong>
+          Today studying Medicine at the University of Ilorin.
+        </div>
+      </div>
+      <div class="sc-result-item">
+        <span class="medal">🥇</span>
+        <div>
+          <strong>Hanifat M. — 89% in 2025</strong>
+          Today studying Medicine at the University of Ilorin.
+        </div>
+      </div>
+    </div>
+
+    <p class="sc-body">
+      Three years. Three students. The highest scores seen across every candidate and educational consultant
+      we have compared notes with and nobody has come forward to show otherwise.
+    </p>
+    <p class="sc-body">
+      They were not the most naturally gifted candidates in Nigeria. They were <strong>the most prepared.</strong>
+      And beyond these three, dozens of other students who went through this preparation have gone on to study
+      Medicine, Nursing, Law, Engineering, Mathematics, Accounting and many other competitive courses.
+      Some are already proud graduates today.
+    </p>
+    <p class="sc-body"><strong>Preparation this thorough does not fail. It compounds.</strong></p>
+  </div>
+
+  <div class="sc-divider"></div>
+
+  <div class="sc-block">
+    <div class="sc-subhead">Here is everything you are getting today.</div>
+    <p class="sc-body">
+      This is not a past question booklet. This is your complete Unilorin POST-UTME preparation system
+      built from years of obsessive work and tested in the real exam hall.
+    </p>
+
+    <div class="sc-table-wrap">
+      <div class="sc-table-head">
+        <span>What You Get</span>
+        <span>Market Value</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📚 2021–2025 Past Questions — 657+ Questions</span>
+        <span class="sc-item-val">₦3,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">💡 Full Explanations for Every Single Question</span>
+        <span class="sc-item-val">₦2,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">👥 Premium WhatsApp Community</span>
+        <span class="sc-item-val">₦5,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: How to Remember Everything You Read</span>
+        <span class="sc-item-val">₦1,500</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: Idioms Mastery Guide</span>
+        <span class="sc-item-val">₦1,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: Question Tags</span>
+        <span class="sc-item-val">₦1,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: Prepositions & Collocations</span>
+        <span class="sc-item-val">₦1,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: Concord Made Simple</span>
+        <span class="sc-item-val">₦1,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: Antonyms & Synonyms Bundle</span>
+        <span class="sc-item-val">₦1,500</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 PDF: Mathematics</span>
+        <span class="sc-item-val">₦1,500</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">📄 Current Affairs PDF</span>
+        <span class="sc-item-val">₦2,000</span>
+      </div>
+      <div class="sc-table-row">
+        <span class="sc-item-name">🎥 YouTube English Masterclass Access</span>
+        <span class="sc-item-val">₦3,000</span>
+      </div>
+      <div class="sc-table-row secret-row">
+        <span class="sc-item-name">🎁 Plus Other Secret Materials</span>
+        <span class="sc-item-val">Priceless</span>
+      </div>
+      <div class="sc-table-row total-row">
+        <span>Total Value</span>
+        <span class="sc-total-val">₦23,500+</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sc-price-block">
+    <div class="sc-price-label">You pay just</div>
+    <div class="sc-price-amount">₦2,500</div>
+    <div class="sc-price-was">Worth over ₦23,500</div>
+    <div class="sc-price-note">
+      One payment. No subscription. No renewal. No hidden anything.<br/>
+      The moment your payment is confirmed, everything above is yours. Forever.
+    </div>
+  </div>
+
+  <div class="sc-block">
+    <div class="sc-subhead">This is for you if:</div>
+    <div class="sc-checklist">
+      <div class="sc-check-item"><span class="icon">✅</span><span>You are writing Unilorin POST-UTME this cycle</span></div>
+      <div class="sc-check-item"><span class="icon">✅</span><span>You want to walk into that hall with every advantage possible</span></div>
+      <div class="sc-check-item"><span class="icon">✅</span><span>You know English is where most candidates bleed marks</span></div>
+      <div class="sc-check-item"><span class="icon">✅</span><span>You want to practice with questions that genuinely appeared in the exam</span></div>
+      <div class="sc-check-item"><span class="icon">✅</span><span>You want to be surrounded by serious, focused candidates</span></div>
+      <div class="sc-check-item"><span class="icon">✅</span><span>You want to give yourself a real shot and leave nothing on the table</span></div>
+    </div>
+  </div>
+
+  <div class="sc-block">
+    <div class="sc-subhead">This is not for you if:</div>
+    <div class="sc-checklist">
+      <div class="sc-cross-item"><span class="icon">❌</span><span>You are looking for expo or miracle shortcuts</span></div>
+      <div class="sc-cross-item"><span class="icon">❌</span><span>You plan to read anyhow and hope for the best</span></div>
+      <div class="sc-cross-item"><span class="icon">❌</span><span>You don't believe preparation makes a difference</span></div>
+    </div>
+    <p class="sc-body" style="margin-top:14px; font-size:0.83rem;">
+      If that is you, this page is not for you. But if you are still reading, deep down you already know that preparation is everything.
+    </p>
+  </div>
+
+  <div class="sc-warning">
+    <strong>A word of honesty.</strong> A great POST-UTME score alone does not guarantee admission.
+    Your JAMB score matters. Your O'level results matter. The full picture is what gets you in.
+    But here is what I know with complete certainty : <strong>a poor POST-UTME score guarantees you will not get in.</strong>
+    Every mark you drop is a mark another candidate picks up. The gap between getting your dream course
+    and watching someone else get it is often just 2 or 3 marks.
+    Don't leave those marks on the table.
+  </div>
+
+  <div class="sc-block">
+    <p class="sc-closing">
+      The students whose names are on this page: Qowiyu, Boluwatife, Hanifat - they were not the most
+      naturally gifted candidates in Nigeria. They were <strong>the most prepared.</strong>
+      That is the only difference between the student who tops the exam and the one who narrowly misses their course.
+    </p>
+    <p class="sc-closing">
+      The exam is coming. You already know what happens to candidates who wing it.
+      <strong>This is your moment to choose differently.</strong>
+    </p>
+  </div>
+
+</div>
 
   <!-- ALREADY PREMIUM BOX (shown if user is already premium) -->
   <div class="already-premium" id="alreadyPremium">
