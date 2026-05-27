@@ -136,7 +136,11 @@
       btnText.style.display = 'none';
 
       try {
-        await auth.sendPasswordResetEmail(email);
+        const actionCodeSettings = {
+  url: 'https://aide10.github.io/aceunilorin-pq/reset-password.html',
+  handleCodeInApp: false
+};
+await auth.sendPasswordResetEmail(email, actionCodeSettings);
         document.getElementById('resetForm').style.display = 'none';
         document.getElementById('successBox').classList.add('show');
       } catch (err) {
