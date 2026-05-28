@@ -537,9 +537,8 @@
       document.getElementById('page-' + page).classList.add('active');
       const navEl = document.getElementById('nav-' + page);
       if (navEl) navEl.classList.add(page === 'freebies' ? 'active-green' : 'active');
-
       if (page === 'freebies' && !freebiesLoaded) {
-        setTimeout(loadFreebies, 500);
+  loadFreebies();
       }
     }
 
