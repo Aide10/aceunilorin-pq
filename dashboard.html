@@ -48,7 +48,6 @@
     .blob-1 { width: 400px; height: 400px; background: #3B82F6; top: -100px; right: -80px; }
     .blob-2 { width: 300px; height: 300px; background: #6366F1; bottom: 60px; left: -60px; }
 
-    /* NAV */
     nav {
       position: sticky; top: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
@@ -66,9 +65,7 @@
       text-decoration: none;
     }
     .nav-logo span { color: var(--text); }
-
     .nav-right { display: flex; align-items: center; gap: 10px; }
-
     .theme-toggle {
       background: var(--surface2); border: 1px solid var(--border);
       color: var(--text); width: 36px; height: 36px;
@@ -77,7 +74,6 @@
       transition: transform 0.2s;
     }
     .theme-toggle:hover { transform: scale(1.1); }
-
     .logout-btn {
       background: transparent; border: 1.5px solid var(--border);
       color: var(--text-muted); padding: 7px 14px;
@@ -87,14 +83,16 @@
     }
     .logout-btn:hover { border-color: #EF4444; color: #EF4444; }
 
-    /* CONTENT */
+    /* PAGE SECTIONS */
+    .page { display: none; }
+    .page.active { display: block; }
+
     .content {
       max-width: 600px; margin: 0 auto;
       padding: 28px 20px; position: relative; z-index: 1;
       display: flex; flex-direction: column; gap: 24px;
     }
 
-    /* WELCOME */
     .welcome-card {
       background: linear-gradient(135deg, #1E3A8A, #1E40AF, #2563EB);
       border-radius: 22px; padding: 28px 24px;
@@ -106,29 +104,17 @@
       content: ''; position: absolute;
       top: -40px; right: -40px;
       width: 180px; height: 180px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50%;
+      background: rgba(255,255,255,0.06); border-radius: 50%;
     }
     .welcome-card::after {
       content: ''; position: absolute;
       bottom: -60px; right: 40px;
       width: 140px; height: 140px;
-      background: rgba(255,255,255,0.04);
-      border-radius: 50%;
+      background: rgba(255,255,255,0.04); border-radius: 50%;
     }
-    .welcome-greeting {
-      font-size: 0.82rem; color: rgba(255,255,255,0.7);
-      font-weight: 500; margin-bottom: 4px;
-    }
-    .welcome-name {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.7rem; font-weight: 800;
-      color: #fff; margin-bottom: 12px;
-    }
-    .welcome-sub {
-      font-size: 0.85rem; color: rgba(255,255,255,0.75);
-      line-height: 1.5;
-    }
+    .welcome-greeting { font-size: 0.82rem; color: rgba(255,255,255,0.7); font-weight: 500; margin-bottom: 4px; }
+    .welcome-name { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .welcome-sub { font-size: 0.85rem; color: rgba(255,255,255,0.75); line-height: 1.5; }
     .premium-tag {
       display: inline-flex; align-items: center; gap: 5px;
       background: rgba(255,255,255,0.15);
@@ -137,43 +123,25 @@
       margin-top: 12px; text-transform: uppercase; letter-spacing: 0.5px;
     }
 
-    /* STATS ROW */
     .stats-row {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      animation: fadeUp 0.5s 0.1s ease both;
+      gap: 12px; animation: fadeUp 0.5s 0.1s ease both;
     }
     .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--surface); border: 1px solid var(--border);
       border-radius: 16px; padding: 16px 12px;
       text-align: center; box-shadow: var(--card-shadow);
       transition: transform 0.2s;
     }
     .stat-card:hover { transform: translateY(-3px); }
-    .stat-num {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem; font-weight: 800;
-      color: var(--primary);
-    }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--primary); }
     .stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
 
-    /* SECTION TITLE */
-    .section-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1rem; font-weight: 800;
-      margin-bottom: 14px; letter-spacing: -0.3px;
-    }
+    .section-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.3px; }
 
-    /* QUICK ACCESS CARDS */
-    .quick-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      animation: fadeUp 0.5s 0.2s ease both;
-    }
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: fadeUp 0.5s 0.2s ease both; }
     .quick-card {
-      background: var(--surface);
-      border: 1.5px solid var(--border);
+      background: var(--surface); border: 1.5px solid var(--border);
       border-radius: 18px; padding: 22px 18px;
       text-decoration: none; color: var(--text);
       transition: all 0.2s; box-shadow: var(--card-shadow);
@@ -187,56 +155,29 @@
     }
     .quick-card:hover { transform: translateY(-4px); border-color: var(--card-accent, var(--primary)); }
     .quick-card:hover::before { opacity: 1; }
-
     .quick-card-icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
+      width: 44px; height: 44px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1.3rem; margin-bottom: 12px;
       background: var(--icon-bg, var(--primary-glow));
     }
-    .quick-card h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem; font-weight: 700; margin-bottom: 4px;
-    }
+    .quick-card h3 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; margin-bottom: 4px; }
     .quick-card p { font-size: 0.76rem; color: var(--text-muted); line-height: 1.4; }
-
     .quick-card.pq { --card-accent: #3B82F6; --icon-bg: rgba(59,130,246,0.15); }
     .quick-card.mock { --card-accent: #8B5CF6; --icon-bg: rgba(139,92,246,0.15); }
     .quick-card.study { --card-accent: #22C55E; --icon-bg: rgba(34,197,94,0.15); }
     .quick-card.leaderboard { --card-accent: #F59E0B; --icon-bg: rgba(245,158,11,0.15); }
 
-    /* LAST SCORE */
     .last-score-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--surface); border: 1px solid var(--border);
       border-radius: 18px; padding: 20px;
-      box-shadow: var(--card-shadow);
-      animation: fadeUp 0.5s 0.3s ease both;
+      box-shadow: var(--card-shadow); animation: fadeUp 0.5s 0.3s ease both;
     }
-    .last-score-inner {
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .last-score-left { display: flex; align-items: center; gap: 14px; }
-    .score-ring-sm {
-      width: 56px; height: 56px; flex-shrink: 0;
-    }
-    .score-info h4 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.9rem; font-weight: 700; margin-bottom: 2px;
-    }
-    .score-info p { font-size: 0.78rem; color: var(--text-muted); }
-    .view-link {
-      font-size: 0.8rem; color: var(--primary);
-      text-decoration: none; font-weight: 600;
-    }
+    .score-ring-sm { width: 56px; height: 56px; flex-shrink: 0; }
+    .view-link { font-size: 0.8rem; color: var(--primary); text-decoration: none; font-weight: 600; }
     .view-link:hover { text-decoration: underline; }
-    .no-score {
-      text-align: center; padding: 12px 0;
-      color: var(--text-muted); font-size: 0.88rem;
-    }
+    .no-score { text-align: center; padding: 12px 0; color: var(--text-muted); font-size: 0.88rem; }
 
-    /* UPGRADE BANNER */
     .upgrade-banner {
       background: linear-gradient(135deg, #F59E0B20, #EF444420);
       border: 1px solid rgba(245,158,11,0.3);
@@ -247,10 +188,7 @@
     .upgrade-banner.hidden { display: none; }
     .upgrade-left { display: flex; align-items: center; gap: 12px; }
     .upgrade-icon { font-size: 1.8rem; }
-    .upgrade-text h4 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.92rem; font-weight: 800; margin-bottom: 2px;
-    }
+    .upgrade-text h4 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 800; margin-bottom: 2px; }
     .upgrade-text p { font-size: 0.76rem; color: var(--text-muted); }
     .btn-upgrade {
       background: linear-gradient(135deg, #F59E0B, #EF4444);
@@ -262,27 +200,17 @@
     }
     .btn-upgrade:hover { transform: scale(1.05); }
 
-    /* LEADERBOARD PREVIEW */
     .leaderboard-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--surface); border: 1px solid var(--border);
       border-radius: 18px; overflow: hidden;
-      box-shadow: var(--card-shadow);
-      animation: fadeUp 0.5s 0.5s ease both;
+      box-shadow: var(--card-shadow); animation: fadeUp 0.5s 0.5s ease both;
     }
     .lb-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
     }
-    .lb-header h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem; font-weight: 800;
-    }
-    .lb-header a {
-      font-size: 0.78rem; color: var(--primary);
-      text-decoration: none; font-weight: 600;
-    }
+    .lb-header h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; }
+    .lb-header a { font-size: 0.78rem; color: var(--primary); text-decoration: none; font-weight: 600; }
     .lb-row {
       display: flex; align-items: center; gap: 14px;
       padding: 12px 20px; border-bottom: 1px solid var(--border);
@@ -290,12 +218,7 @@
     }
     .lb-row:last-child { border-bottom: none; }
     .lb-row:hover { background: var(--surface2); }
-    .lb-rank {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.85rem; font-weight: 800;
-      width: 24px; text-align: center;
-      color: var(--text-muted);
-    }
+    .lb-rank { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 800; width: 24px; text-align: center; color: var(--text-muted); }
     .lb-rank.gold { color: #F59E0B; }
     .lb-rank.silver { color: #94A3B8; }
     .lb-rank.bronze { color: #CD7C2F; }
@@ -303,30 +226,91 @@
       width: 34px; height: 34px; border-radius: 50%;
       background: var(--primary-glow);
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; font-weight: 700;
-      color: var(--primary); flex-shrink: 0;
+      font-size: 0.85rem; font-weight: 700; color: var(--primary); flex-shrink: 0;
     }
     .lb-info { flex: 1; }
     .lb-username { font-size: 0.88rem; font-weight: 600; }
     .lb-meta { font-size: 0.72rem; color: var(--text-muted); }
-    .lb-score {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem; font-weight: 800;
-      color: var(--primary);
+    .lb-score { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--primary); }
+    .lb-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.88rem; }
+
+    /* FREEBIES PAGE */
+    .freebies-header {
+      background: linear-gradient(135deg, #064E3B, #065F46, #047857);
+      border-radius: 22px; padding: 28px 24px;
+      position: relative; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(4,120,87,0.3);
+      animation: fadeUp 0.5s ease both;
     }
-    .lb-empty {
-      padding: 24px; text-align: center;
-      color: var(--text-muted); font-size: 0.88rem;
+    .freebies-header::before {
+      content: ''; position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      background: rgba(255,255,255,0.06); border-radius: 50%;
     }
+    .freebies-header h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .freebies-header p { font-size: 0.85rem; color: rgba(255,255,255,0.75); line-height: 1.5; }
+
+    .whatsapp-btn {
+      display: flex; align-items: center; gap: 12px;
+      background: #25D366; color: #fff;
+      border-radius: 14px; padding: 16px 20px;
+      text-decoration: none; font-weight: 700;
+      font-size: 0.95rem; transition: transform 0.2s;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.3);
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .whatsapp-btn:hover { transform: translateY(-2px); }
+    .whatsapp-btn .wa-icon { font-size: 1.5rem; }
+    .whatsapp-btn div p { font-size: 0.75rem; color: rgba(255,255,255,0.8); font-weight: 400; margin-top: 2px; }
+
+    .freebies-grid {
+      display: flex; flex-direction: column; gap: 12px;
+      animation: fadeUp 0.5s 0.2s ease both;
+    }
+    .freebie-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 16px; padding: 18px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: var(--card-shadow); transition: all 0.2s;
+      text-decoration: none; color: var(--text);
+    }
+    .freebie-card:hover { transform: translateY(-2px); border-color: #22C55E; }
+    .freebie-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: rgba(34,197,94,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .freebie-info { flex: 1; }
+    .freebie-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 3px; }
+    .freebie-desc { font-size: 0.75rem; color: var(--text-muted); }
+    .freebie-arrow { color: var(--text-muted); font-size: 1rem; }
+
+    .freebies-loading { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 0.88rem; }
+    .freebies-spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: #22C55E;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    .locked-box {
+      text-align: center; padding: 48px 24px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; box-shadow: var(--card-shadow);
+    }
+    .locked-box .lock-icon { font-size: 3rem; margin-bottom: 16px; }
+    .locked-box h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .locked-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
 
     /* BOTTOM NAV */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+      background: var(--surface); border-top: 1px solid var(--border);
       display: flex; justify-content: space-around; align-items: center;
-      padding: 10px 0 14px;
-      backdrop-filter: blur(16px);
+      padding: 10px 0 14px; backdrop-filter: blur(16px);
     }
     .nav-item {
       display: flex; flex-direction: column; align-items: center; gap: 3px;
@@ -336,13 +320,12 @@
       background: none; border: none; font-family: 'DM Sans', sans-serif;
     }
     .nav-item.active { color: var(--primary); }
+    .nav-item.active-green { color: #22C55E; }
     .nav-item:hover { color: var(--primary); }
     .nav-icon { font-size: 1.3rem; }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -350,7 +333,6 @@
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
 
-  <!-- NAV -->
   <nav>
     <a href="index.html" class="nav-logo">Ace<span>Unilorin</span> PQ</a>
     <div class="nav-right">
@@ -359,114 +341,151 @@
     </div>
   </nav>
 
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- WELCOME -->
-    <div class="welcome-card">
-      <div class="welcome-greeting" id="greeting">Good morning,</div>
-      <div class="welcome-name" id="userName">Loading...</div>
-      <div class="welcome-sub">Ready to study today? Keep pushing — your admission is closer than you think. 💪</div>
-      <div class="premium-tag" id="userBadge">🆓 Free Plan</div>
-    </div>
-
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num" id="statMocks">0</div>
-        <div class="stat-label">Mocks Taken</div>
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <div class="content">
+      <div class="welcome-card">
+        <div class="welcome-greeting" id="greeting">Good morning,</div>
+        <div class="welcome-name" id="userName">Loading...</div>
+        <div class="welcome-sub">Ready to study today? Keep pushing — your admission is closer than you think. 💪</div>
+        <div class="premium-tag" id="userBadge">🆓 Free Plan</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statBest">—</div>
-        <div class="stat-label">Best Score</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statRank">—</div>
-        <div class="stat-label">Your Rank</div>
-      </div>
-    </div>
 
-    <!-- QUICK ACCESS -->
-    <div>
-      <div class="section-title">Quick Access</div>
-      <div class="quick-grid">
-        <a href="pastquestions.html" class="quick-card pq">
-          <div class="quick-card-icon">📝</div>
-          <h3>Past Questions</h3>
-          <p>Practice by year</p>
-        </a>
-        <a href="mock.html" class="quick-card mock">
-          <div class="quick-card-icon">⏱️</div>
-          <h3>Mock Exam</h3>
-          <p>50 questions, 25 mins</p>
-        </a>
-        <div class="quick-card study" style="opacity:0.5;cursor:not-allowed;position:relative;" onclick="showComingSoon()">
-          <div style="position:absolute;top:8px;right:8px;background:rgba(34,197,94,0.2);color:#22C55E;font-size:0.6rem;font-weight:800;padding:2px 7px;border-radius:100px;text-transform:uppercase;letter-spacing:0.5px;">Soon</div>
-          <div class="quick-card-icon">📖</div>
-          <h3>Study Notes</h3>
-          <p>English, Math, C/Affairs</p>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num" id="statMocks">0</div>
+          <div class="stat-label">Mocks Taken</div>
         </div>
-        <a href="leaderboard.html" class="quick-card leaderboard">
-          <div class="quick-card-icon">🏆</div>
-          <h3>Leaderboard</h3>
-          <p>See top scorers</p>
-        </a>
-      </div>
-    </div>
-
-    <!-- LAST SCORE -->
-    <div class="last-score-card">
-      <div class="section-title">Last Mock Score</div>
-      <div id="lastScoreContent">
-        <div class="no-score">You haven't taken a mock yet. <a href="mock.html" style="color:var(--primary);font-weight:600;">Start now →</a></div>
-      </div>
-    </div>
-
-    <!-- UPGRADE BANNER -->
-    <div class="upgrade-banner" id="upgradeBanner">
-      <div class="upgrade-left">
-        <div class="upgrade-icon">🔓</div>
-        <div class="upgrade-text">
-          <h4>Unlock 2021–2025 PQs</h4>
-          <p>One-time payment. Access forever.</p>
+        <div class="stat-card">
+          <div class="stat-num" id="statBest">—</div>
+          <div class="stat-label">Best Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statRank">—</div>
+          <div class="stat-label">Your Rank</div>
         </div>
       </div>
-      <a href="upgrade.html" class="btn-upgrade">Upgrade</a>
-    </div>
 
-    <!-- LEADERBOARD PREVIEW -->
-    <div class="leaderboard-card">
-      <div class="lb-header">
-        <h3>🏆 Top Scorers</h3>
-        <a href="leaderboard.html">View All →</a>
+      <div>
+        <div class="section-title">Quick Access</div>
+        <div class="quick-grid">
+          <a href="pastquestions.html" class="quick-card pq">
+            <div class="quick-card-icon">📝</div>
+            <h3>Past Questions</h3>
+            <p>Practice by year</p>
+          </a>
+          <a href="mock.html" class="quick-card mock">
+            <div class="quick-card-icon">⏱️</div>
+            <h3>Mock Exam</h3>
+            <p>50 questions, 25 mins</p>
+          </a>
+          <div class="quick-card study" style="opacity:0.5;cursor:not-allowed;position:relative;" onclick="showComingSoon()">
+            <div style="position:absolute;top:8px;right:8px;background:rgba(34,197,94,0.2);color:#22C55E;font-size:0.6rem;font-weight:800;padding:2px 7px;border-radius:100px;text-transform:uppercase;letter-spacing:0.5px;">Soon</div>
+            <div class="quick-card-icon">📖</div>
+            <h3>Study Notes</h3>
+            <p>English, Math, C/Affairs</p>
+          </div>
+          <a href="leaderboard.html" class="quick-card leaderboard">
+            <div class="quick-card-icon">🏆</div>
+            <h3>Leaderboard</h3>
+            <p>See top scorers</p>
+          </a>
+        </div>
       </div>
-      <div id="leaderboardList">
-        <div class="lb-empty">No scores yet. Be the first! 🚀</div>
+
+      <div class="last-score-card">
+        <div class="section-title">Last Mock Score</div>
+        <div id="lastScoreContent">
+          <div class="no-score">You haven't taken a mock yet. <a href="mock.html" style="color:var(--primary);font-weight:600;">Start now →</a></div>
+        </div>
+      </div>
+
+      <div class="upgrade-banner" id="upgradeBanner">
+        <div class="upgrade-left">
+          <div class="upgrade-icon">🔓</div>
+          <div class="upgrade-text">
+            <h4>Unlock 2021–2025 PQs</h4>
+            <p>One-time payment. Access forever.</p>
+          </div>
+        </div>
+        <a href="upgrade.html" class="btn-upgrade">Upgrade</a>
+      </div>
+
+      <div class="leaderboard-card">
+        <div class="lb-header">
+          <h3>🏆 Top Scorers</h3>
+          <a href="leaderboard.html">View All →</a>
+        </div>
+        <div id="leaderboardList">
+          <div class="lb-empty">No scores yet. Be the first! 🚀</div>
+        </div>
       </div>
     </div>
+  </div>
 
+  <!-- FREEBIES PAGE -->
+  <div class="page" id="page-freebies">
+    <div class="content">
+
+      <div class="freebies-header">
+        <h2>🎁 Your Freebies</h2>
+        <p>Exclusive study resources and community access — your premium perks.</p>
+      </div>
+
+      <!-- Non-premium locked view -->
+      <div class="locked-box" id="freebiesLocked" style="display:none;">
+        <div class="lock-icon">🔒</div>
+        <h3>Premium Only</h3>
+        <p>Upgrade to access exclusive study materials and join our premium WhatsApp group.</p>
+        <a href="upgrade.html" class="btn-upgrade">Upgrade Now</a>
+      </div>
+
+      <!-- Premium content -->
+      <div id="freebiesContent" style="display:none;">
+
+        <!-- WhatsApp Group -->
+        <a id="whatsappBtn" href="#" target="_blank" class="whatsapp-btn">
+          <span class="wa-icon">💬</span>
+          <div>
+            <div>Join Premium WhatsApp Group</div>
+            <p>Connect with other premium students</p>
+          </div>
+        </a>
+
+        <!-- Resources -->
+        <div>
+          <div class="section-title">📚 Study Resources</div>
+          <div class="freebies-loading" id="freebiesLoading">
+            <div class="freebies-spinner"></div>
+            Loading resources...
+          </div>
+          <div class="freebies-grid" id="freebiesGrid" style="display:none;"></div>
+        </div>
+
+      </div>
+
+    </div>
   </div>
 
   <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <a href="dashboard.html" class="nav-item active">
+    <button class="nav-item active" id="nav-home" onclick="switchPage('home')">
       <span class="nav-icon">🏠</span>Home
-    </a>
+    </button>
     <a href="pastquestions.html" class="nav-item">
       <span class="nav-icon">📝</span>PQs
     </a>
     <a href="mock.html" class="nav-item">
       <span class="nav-icon">⏱️</span>Mock
     </a>
-    <div class="nav-item" style="opacity:0.4;cursor:not-allowed;" onclick="showComingSoon()">
-      <span class="nav-icon">📖</span>Study
-    </div>
+    <button class="nav-item" id="nav-freebies" onclick="switchPage('freebies')">
+      <span class="nav-icon">🎁</span>Freebies
+    </button>
     <a href="leaderboard.html" class="nav-item">
       <span class="nav-icon">🏆</span>Ranks
     </a>
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -484,6 +503,9 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+
+    let userIsPremium = false;
+    let freebiesLoaded = false;
 
     // Theme
     function toggleTheme() {
@@ -506,26 +528,39 @@
     }
     document.getElementById('greeting').textContent = getGreeting();
 
-    // Auth check
+    // Page switching
+    function switchPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active', 'active-green');
+      });
+      document.getElementById('page-' + page).classList.add('active');
+      const navEl = document.getElementById('nav-' + page);
+      if (navEl) navEl.classList.add(page === 'freebies' ? 'active-green' : 'active');
+
+      if (page === 'freebies' && !freebiesLoaded) {
+        loadFreebies();
+      }
+    }
+
+    // Auth
     auth.onAuthStateChanged(async user => {
       if (!user) { window.location.href = 'auth.html'; return; }
 
-      // Load user data
       try {
         const doc = await db.collection('users').doc(user.uid).get();
         const data = doc.data();
         const firstName = data.fullName ? data.fullName.split(' ')[0] : user.displayName || 'Student';
-
         document.getElementById('userName').textContent = firstName + '!';
 
-        // Premium badge
-        if (data.isPremium) {
+        userIsPremium = data.isPremium || false;
+
+        if (userIsPremium) {
           document.getElementById('userBadge').textContent = '⭐ Premium';
           document.getElementById('userBadge').style.background = 'rgba(245,158,11,0.25)';
           document.getElementById('upgradeBanner').classList.add('hidden');
         }
 
-        // Stats
         const statsDoc = await db.collection('userStats').doc(user.uid).get();
         if (statsDoc.exists) {
           const stats = statsDoc.data();
@@ -533,7 +568,6 @@
           document.getElementById('statBest').textContent = stats.bestScore ? stats.bestScore + '%' : '—';
         }
 
-        // Last score
         const lastResult = JSON.parse(localStorage.getItem('mockResult'));
         if (lastResult) {
           const pct = Math.round((lastResult.correct * 2));
@@ -544,7 +578,6 @@
           else if (pct >= 70) color = '#06B6D4';
           else if (pct >= 60) color = '#F59E0B';
           else if (pct >= 50) color = '#F97316';
-
           document.getElementById('lastScoreContent').innerHTML = `
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <div style="display:flex;align-items:center;gap:14px;">
@@ -568,10 +601,7 @@
           `;
         }
 
-        // Leaderboard preview
         loadLeaderboard();
-
-        // User rank
         loadUserRank(user.uid);
 
       } catch (err) {
@@ -579,15 +609,62 @@
       }
     });
 
-    // Load leaderboard top 5
+    // Load freebies from Firestore
+    async function loadFreebies() {
+      freebiesLoaded = true;
+
+      if (!userIsPremium) {
+        document.getElementById('freebiesLocked').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('freebiesContent').style.display = 'block';
+
+      try {
+        const doc = await db.collection('config').doc('premium').get();
+        const data = doc.data();
+
+        // WhatsApp link
+        if (data.whatsappLink) {
+          document.getElementById('whatsappBtn').href = data.whatsappLink;
+        }
+
+        // Freebies list
+        const freebies = data.freebies || [];
+        if (freebies.length === 0) {
+          document.getElementById('freebiesLoading').innerHTML = '<p>No resources yet. Check back soon!</p>';
+          return;
+        }
+
+        const icons = ['📄','📕','📗','📘','📙','📃','🗂️','📋','📑','🧾'];
+        let html = '';
+        freebies.forEach((item, i) => {
+          const icon = icons[i % icons.length];
+          html += `
+            <a href="${item.link}" target="_blank" class="freebie-card">
+              <div class="freebie-icon">${icon}</div>
+              <div class="freebie-info">
+                <div class="freebie-title">${item.title}</div>
+                <div class="freebie-desc">Tap to open in Google Drive</div>
+              </div>
+              <div class="freebie-arrow">→</div>
+            </a>
+          `;
+        });
+
+        document.getElementById('freebiesLoading').style.display = 'none';
+        document.getElementById('freebiesGrid').style.display = 'flex';
+        document.getElementById('freebiesGrid').innerHTML = html;
+
+      } catch (err) {
+        document.getElementById('freebiesLoading').innerHTML = '<p>Failed to load resources. Try again later.</p>';
+      }
+    }
+
     async function loadLeaderboard() {
       try {
-        const snap = await db.collection('leaderboard')
-          .orderBy('bestScore', 'desc')
-          .limit(5).get();
-
+        const snap = await db.collection('leaderboard').orderBy('bestScore', 'desc').limit(5).get();
         if (snap.empty) return;
-
         const medals = ['gold', 'silver', 'bronze', '', ''];
         let html = '';
         snap.docs.forEach((doc, i) => {
@@ -609,37 +686,31 @@
       } catch (e) {}
     }
 
-    // Load user rank
     async function loadUserRank(uid) {
       try {
-        const snap = await db.collection('leaderboard')
-          .orderBy('bestScore', 'desc').get();
+        const snap = await db.collection('leaderboard').orderBy('bestScore', 'desc').get();
         const idx = snap.docs.findIndex(d => d.id === uid);
-        if (idx !== -1) {
-          document.getElementById('statRank').textContent = '#' + (idx + 1);
-        }
+        if (idx !== -1) document.getElementById('statRank').textContent = '#' + (idx + 1);
       } catch (e) {}
     }
 
-    // Logout
     async function handleLogout() {
       await auth.signOut();
       window.location.href = 'auth.html';
     }
-  
-  function showComingSoon() {
-    let toast = document.getElementById('comingSoonToast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.id = 'comingSoonToast';
-      toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;border:1px solid rgba(34,197,94,0.3);color:#22C55E;padding:10px 20px;border-radius:100px;font-size:0.82rem;font-weight:700;z-index:999;transition:all 0.3s;opacity:0;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
-      toast.textContent = '📖 Study Notes — Coming Soon!';
-      document.body.appendChild(toast);
-    }
-    setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
-    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(20px)'; }, 2500);
-  }
 
-</script>
+    function showComingSoon() {
+      let toast = document.getElementById('comingSoonToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'comingSoonToast';
+        toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;border:1px solid rgba(34,197,94,0.3);color:#22C55E;padding:10px 20px;border-radius:100px;font-size:0.82rem;font-weight:700;z-index:999;transition:all 0.3s;opacity:0;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+        toast.textContent = '📖 Study Notes — Coming Soon!';
+        document.body.appendChild(toast);
+      }
+      setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(20px)'; }, 2500);
+    }
+  </script>
 </body>
 </html>
