@@ -1,1 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AceUnilorin PQ — Icon Generator</title>
+  <style>
+    body {
+      background: #0a1628;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: sans-serif;
+      gap: 32px;
+      color: #e2d4a0;
+    }
+    h2 { margin: 0; font-size: 1.1rem; opacity: 0.7; }
+    .row { display: flex; gap: 40px; align-items: flex-end; flex-wrap: wrap; justify-content: center; }
+    .icon-box { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    canvas { border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    button {
+      background: #0d7377;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    button:hover { background: #14a8ad; }
+    p { opacity: 0.6; font-size: 0.85rem; text-align: center; max-width: 420px; }
+  </style>
+</head>
+<body>
 
+<h2>AceUnilorin PQ — Icon Generator</h2>
+<p>Click each download button. Save as <code>icon-192.png</code> and <code>icon-512.png</code>, then upload to an <code>/icons/</code> folder in your repo.</p>
+
+<div class="row">
+  <div class="icon-box">
+    <canvas id="c192" width="192" height="192"></canvas>
+    <button onclick="download('c192', 'icon-192.png')">Download 192×192</button>
+  </div>
+  <div class="icon-box">
+    <canvas id="c512" width="512" height="512"></canvas>
+    <button onclick="download('c512', 'icon-512.png')">Download 512×512</button>
+  </div>
+</div>
+
+<script>
+  function drawIcon(canvasId, size) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const s = size;
+
+    // Background gradient (navy → dark teal)
+    const bg = ctx.createLinearGradient(0, 0, s, s);
+    bg.addColorStop(0, '#0a1628');
+    bg.addColorStop(1, '#0d3d3f');
+    ctx.fillStyle = bg;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, s, s, s * 0.18);
+    ctx.fill();
+
+    // Gold arc accent
+    ctx.beginPath();
+    ctx.arc(s * 0.5, s * 0.5, s * 0.38, Math.PI * 1.1, Math.PI * 0.1, false);
+    ctx.strokeStyle = '#c9a84c';
+    ctx.lineWidth = s * 0.035;
+    ctx.stroke();
+
+    // Teal inner circle
+    ctx.beginPath();
+    ctx.arc(s * 0.5, s * 0.5, s * 0.28, 0, Math.PI * 2);
+    ctx.fillStyle = '#0d7377';
+    ctx.fill();
+
+    // "ACE" text
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${s * 0.18}px Georgia, serif`;
+    ctx.fillText('ACE', s * 0.5, s * 0.44);
+
+    // "PQ" text smaller
+    ctx.fillStyle = '#e2d4a0';
+    ctx.font = `bold ${s * 0.11}px Georgia, serif`;
+    ctx.fillText('PQ', s * 0.5, s * 0.62);
+  }
+
+  function download(canvasId, filename) {
+    const canvas = document.getElementById(canvasId);
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  drawIcon('c192', 192);
+  drawIcon('c512', 512);
+</script>
+</body>
+</html>
