@@ -756,11 +756,12 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
 
-  async function saveToLeaderboard(correct) {
+    async function saveToLeaderboard(correct) {
     try {
       const user = auth.currentUser;
       if (!user) return;
       const score = correct * 2;
+
       const userDoc = await db.collection('users').doc(user.uid).get();
       const username = userDoc.exists ? userDoc.data().username : 'unknown';
 
@@ -768,24 +769,39 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
       const lbDoc = await lbRef.get();
       const prevBest = lbDoc.exists ? (lbDoc.data().bestScore || 0) : 0;
       const mocksTaken = lbDoc.exists ? (lbDoc.data().mocksTaken || 0) + 1 : 1;
+      const newBest = Math.max(score, prevBest);
 
+      // Save this user's leaderboard entry first
       await lbRef.set({
         username,
-        bestScore: Math.max(score, prevBest),
+        bestScore: newBest,
         mocksTaken,
         lastScore: score,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      // Recalculate rank — fetch all scores, find position
+      const snap = await db.collection('leaderboard')
+        .orderBy('bestScore', 'desc')
+        .get();
+
+      const batch = db.batch();
+      snap.docs.forEach((doc, i) => {
+        batch.update(db.collection('leaderboard').doc(doc.id), { rank: i + 1 });
+      });
+      await batch.commit();
 
       // Update user stats
       await db.collection('userStats').doc(user.uid).set({
         mocksTaken,
-        bestScore: Math.max(score, prevBest),
+        bestScore: newBest,
         lastScore: score,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
     } catch (e) { console.error('Leaderboard save error:', e); }
   }
+
 
   // ── SCREEN SWITCH ──
   function showScreen(id) {
