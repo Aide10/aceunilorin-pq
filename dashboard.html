@@ -612,10 +612,20 @@
     async function loadFreebies() {
       freebiesLoaded = true;
 
-      if (!userIsPremium) {
-        document.getElementById('freebiesLocked').style.display = 'block';
-        return;
-      }
+      async function loadFreebies() {
+  freebiesLoaded = true;
+
+  // Wait for auth to finish setting userIsPremium
+  let attempts = 0;
+  while (auth.currentUser === null && attempts < 10) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
+  }
+
+  if (!userIsPremium) {
+    document.getElementById('freebiesLocked').style.display = 'block';
+    return;
+    }
 
       document.getElementById('freebiesContent').style.display = 'block';
 
