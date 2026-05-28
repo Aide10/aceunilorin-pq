@@ -456,11 +456,12 @@
     }
 
     async function loadUserRank(uid) {
-      try {
-        const snap = await db.collection('leaderboard').orderBy('bestScore', 'desc').get();
-        const idx = snap.docs.findIndex(d => d.id === uid);
-        if (idx !== -1) document.getElementById('statRank').textContent = '#' + (idx + 1);
-      } catch (e) {}
+  try {
+    const doc = await db.collection('leaderboard').doc(uid).get();
+    if (doc.exists && doc.data().rank) {
+      document.getElementById('statRank').textContent = '#' + doc.data().rank;
+    }
+  } catch (e) {}
     }
 
     async function handleLogout() {
