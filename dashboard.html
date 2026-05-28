@@ -639,13 +639,16 @@
         const icons = ['📄','📕','📗','📘','📙','📃','🗂️','📋','📑','🧾'];
         let html = '';
         freebies.forEach((item, i) => {
-          const icon = icons[i % icons.length];
-          html += `
-            <a href="${item.link}" target="_blank" class="freebie-card">
-              <div class="freebie-icon">${icon}</div>
-              <div class="freebie-info">
-                <div class="freebie-title">${item.title}</div>
-                <div class="freebie-desc">Tap to open in Google Drive</div>
+  const icon = icons[i % icons.length];
+  const entries = Object.entries(item);
+  const title = entries[0][0];
+  const link = entries[0][1];
+  html += `
+    <a href="${link}" target="_blank" class="freebie-card">
+      <div class="freebie-icon">${icon}</div>
+      <div class="freebie-info">
+        <div class="freebie-title">${title}</div>               
+        <div class="freebie-desc">Tap to open in Google Drive</div>
               </div>
               <div class="freebie-arrow">→</div>
             </a>
