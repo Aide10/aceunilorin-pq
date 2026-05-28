@@ -10,21 +10,15 @@
     :root[data-theme="light"]{--bg:#F1F5FB;--surface:#FFFFFF;--surface2:#E8EFF9;--surface3:#D8E4F4;--primary:#2563EB;--pg:rgba(37,99,235,0.1);--text:#0F172A;--muted:#64748B;--border:rgba(0,0,0,0.07);--gold:#D97706;--silver:#64748B;--bronze:#92400E;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px;}
-
-    /* HEADER */
     .header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
     .back-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:1rem;transition:background .2s;}
     .back-btn:hover{background:var(--surface3);}
     .header-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;}
     .theme-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;}
-
-    /* HERO */
     .hero{padding:28px 18px 20px;text-align:center;}
     .hero-icon{font-size:2.8rem;margin-bottom:10px;display:block;}
     .hero-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:6px;}
     .hero-sub{font-size:.83rem;color:var(--muted);line-height:1.6;max-width:280px;margin:0 auto;}
-
-    /* MY RANK CARD */
     .my-rank-wrap{padding:0 18px 20px;}
     .my-rank-card{background:linear-gradient(135deg,#3B82F6,#6366F1);border-radius:18px;padding:18px 20px;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;}
     .my-rank-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);}
@@ -39,14 +33,10 @@
     .my-rank-card.grey{background:var(--surface2);border:1px solid var(--border);}
     .my-rank-card.grey .mrn,.my-rank-card.grey .mri-name,.my-rank-card.grey .mrs{color:var(--text);}
     .my-rank-card.grey .mri-meta,.my-rank-card.grey .mrn span,.my-rank-card.grey .mrs span{color:var(--muted);}
-
-    /* FILTER */
     .filter-wrap{padding:0 18px 16px;}
     .filter-tabs{display:flex;background:var(--surface);border-radius:12px;padding:4px;border:1px solid var(--border);}
     .ftab{flex:1;padding:9px 6px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;border-radius:8px;cursor:pointer;transition:all .2s;text-align:center;}
     .ftab.active{background:var(--primary);color:#fff;}
-
-    /* PODIUM */
     .podium-wrap{padding:0 18px 24px;}
     .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;height:175px;}
     .podium-slot{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;max-width:110px;}
@@ -60,8 +50,6 @@
     .p1 .p-block{background:linear-gradient(180deg,rgba(245,158,11,.22),rgba(245,158,11,.05));height:95px;border:1px solid rgba(245,158,11,.3);}
     .p2 .p-block{background:linear-gradient(180deg,rgba(148,163,184,.18),rgba(148,163,184,.04));height:68px;border:1px solid rgba(148,163,184,.2);}
     .p3 .p-block{background:linear-gradient(180deg,rgba(205,124,58,.18),rgba(205,124,58,.04));height:52px;border:1px solid rgba(205,124,58,.2);}
-
-    /* LIST */
     .list-wrap{padding:0 18px;}
     .list-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
     .list-title{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
@@ -80,8 +68,6 @@
     .lb-score{font-family:'Syne',sans-serif;font-size:.98rem;font-weight:800;color:var(--primary);}
     .lb-slabel{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
     .me-tag{background:var(--primary);color:#fff;font-size:.55rem;font-weight:800;padding:2px 6px;border-radius:100px;flex-shrink:0;}
-
-    /* STATES */
     .loading-wrap{text-align:center;padding:40px 20px;color:var(--muted);}
     .spinner{width:30px;height:30px;border:3px solid var(--surface2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -93,12 +79,17 @@
     .play-btn:hover{transform:translateY(-2px);}
     .load-more{width:100%;padding:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:.83rem;cursor:pointer;margin-top:4px;transition:all .2s;}
     .load-more:hover{border-color:var(--primary);color:var(--primary);}
-
-    /* SKELETON */
     .skel{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:14px;height:62px;margin-bottom:8px;}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    /* BOTTOM NAV */
+    /* LOCKED BOX */
+    .locked-box{margin:0 18px;text-align:center;padding:48px 24px;background:var(--surface);border:1px solid var(--border);border-radius:20px;}
+    .locked-box .lock-icon{font-size:3rem;margin-bottom:16px;}
+    .locked-box h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:8px;}
+    .locked-box p{font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+    .btn-upgrade{display:inline-block;background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:none;transition:transform .2s;}
+    .btn-upgrade:hover{transform:scale(1.05);}
+
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 16px;z-index:50;}
     .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--muted);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:4px 0;transition:color .2s;}
     .nav-item.active,.nav-item:hover{color:var(--primary);}
@@ -117,41 +108,52 @@
     <span class="hero-icon">🏆</span>
     <div class="hero-title">Top Performers</div>
     <div class="hero-sub">Compete with other students. Take more mocks to climb the ranks!</div>
-<button onclick="forceRefresh()" style="margin-top:12px;padding:8px 18px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;">🔄 Refresh Rankings</button>
+    <button onclick="forceRefresh()" id="refreshBtn" style="display:none;margin-top:12px;padding:8px 18px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.8rem;cursor:pointer;">🔄 Refresh Rankings</button>
   </div>
 
-  <div class="my-rank-wrap" id="myRankWrap" style="display:none">
-    <div class="my-rank-card" id="myRankCard">
-      <div class="mrn" id="mrn">—<span>Your Rank</span></div>
-      <div class="mri">
-        <div class="mri-name" id="mriName">—</div>
-        <div class="mri-meta" id="mriMeta">—</div>
+  <!-- Locked view for free users -->
+  <div class="locked-box" id="lockedBox" style="display:none;">
+    <div class="lock-icon">🔒</div>
+    <h3>Premium Feature</h3>
+    <p>Upgrade to premium to see the full leaderboard, your rank, and compete with other students.</p>
+    <a href="upgrade.html" class="btn-upgrade">Upgrade Now</a>
+  </div>
+
+  <!-- Premium content -->
+  <div id="premiumContent" style="display:none;">
+    <div class="my-rank-wrap" id="myRankWrap" style="display:none">
+      <div class="my-rank-card" id="myRankCard">
+        <div class="mrn" id="mrn">—<span>Your Rank</span></div>
+        <div class="mri">
+          <div class="mri-name" id="mriName">—</div>
+          <div class="mri-meta" id="mriMeta">—</div>
+        </div>
+        <div class="mrs" id="mrs">—<span>Best Score</span></div>
       </div>
-      <div class="mrs" id="mrs">—<span>Best Score</span></div>
     </div>
-  </div>
 
-  <div class="filter-wrap">
-    <div class="filter-tabs">
-      <button class="ftab active" onclick="setFilter('score',this)">🏆 Best Score</button>
-      <button class="ftab" onclick="setFilter('mocks',this)">⏱️ Most Mocks</button>
+    <div class="filter-wrap">
+      <div class="filter-tabs">
+        <button class="ftab active" onclick="setFilter('score',this)">🏆 Best Score</button>
+        <button class="ftab" onclick="setFilter('mocks',this)">⏱️ Most Mocks</button>
+      </div>
     </div>
-  </div>
 
-  <div class="podium-wrap" id="podiumWrap" style="display:none">
-    <div class="podium" id="podium"></div>
-  </div>
+    <div class="podium-wrap" id="podiumWrap" style="display:none">
+      <div class="podium" id="podium"></div>
+    </div>
 
-  <div class="list-wrap">
-    <div class="list-hdr">
-      <div class="list-title">Rankings</div>
-      <div class="list-ct" id="listCt"></div>
+    <div class="list-wrap">
+      <div class="list-hdr">
+        <div class="list-title">Rankings</div>
+        <div class="list-ct" id="listCt"></div>
+      </div>
+      <div id="lbList">
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      </div>
+      <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMore()">Load more...</button>
     </div>
-    <div id="lbList">
-      <div class="skel"></div><div class="skel"></div><div class="skel"></div>
-      <div class="skel"></div><div class="skel"></div><div class="skel"></div>
-    </div>
-    <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadMore()">Load more...</button>
   </div>
 
   <div class="bottom-nav">
@@ -168,29 +170,39 @@
   <script>
     firebase.initializeApp({apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"});
     const auth=firebase.auth(), db=firebase.firestore();
-    db.enablePersistence({synchronizeTabs: true}).catch(err => console.error("Cache error:", err));
+    db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
 
-    // ── THEME ──
     const th=localStorage.getItem('theme')||'dark';
     document.documentElement.setAttribute('data-theme',th);
     document.getElementById('themeBtn').textContent=th==='dark'?'☀️':'🌙';
     function toggleTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('themeBtn').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
 
-    // ── STATE ──
     let entries=[], myUID=null, myEntry=null, filterMode='score', loaded=0;
     const PAGE=20;
     const COLORS=['#3B82F6','#8B5CF6','#EC4899','#10B981','#F59E0B','#EF4444','#06B6D4','#F97316'];
     function avColor(n){let h=0;for(let i=0;i<(n||'?').length;i++)h=(n||'?').charCodeAt(i)+((h<<5)-h);return COLORS[Math.abs(h)%COLORS.length];}
     function avInit(n){return(n||'?')[0].toUpperCase();}
 
-    // ── AUTH ──
     auth.onAuthStateChanged(async u=>{
       if(!u){window.location.href='auth.html';return;}
       myUID=u.uid;
+
+      // Check premium
+      const userDoc=await db.collection('users').doc(u.uid).get();
+      const isPremium=userDoc.exists && userDoc.data().isPremium===true;
+
+      if(!isPremium){
+        document.getElementById('lockedBox').style.display='block';
+        document.getElementById('lbList').innerHTML='';
+        return;
+      }
+
+      // Premium — show content
+      document.getElementById('premiumContent').style.display='block';
+      document.getElementById('refreshBtn').style.display='inline-block';
       await load();
     });
 
-    // ── LOAD ──
     async function load(){
       showSkel();
       try{
@@ -211,7 +223,6 @@
       }
     }
 
-    // ── MY RANK ──
     function renderMyRank(){
       if(!myEntry){document.getElementById('myRankWrap').style.display='none';return;}
       document.getElementById('myRankWrap').style.display='block';
@@ -223,12 +234,10 @@
       document.getElementById('mrs').innerHTML=(myEntry.bestScore||0)+'%<span>Best Score</span>';
     }
 
-    // ── PODIUM ──
     function renderPodium(){
       const top=entries.slice(0,3);
       if(!top.length){document.getElementById('podiumWrap').style.display='none';return;}
       document.getElementById('podiumWrap').style.display='block';
-      // Display order: 2nd left, 1st centre, 3rd right
       const display=[top[1],top[0],top[2]].map((e,di)=>({e,cls:['p2','p1','p3'][di],crown:['','👑',''][di]}));
       document.getElementById('podium').innerHTML=display.map(({e,cls,crown})=>{
         if(!e) return '<div class="podium-slot '+cls+'"></div>';
@@ -236,8 +245,7 @@
         const val=filterMode==='score'?(e.bestScore||0)+'%':(e.mocksTaken||0)+' mocks';
         return `<div class="podium-slot ${cls}">
           <div class="p-avatar" style="background:${avColor(e.username||e.fullName)};border-color:${avColor(e.username||e.fullName)}">
-            ${crown?`<span class="crown">${crown}</span>`:''}
-            ${avInit(e.username||e.fullName)}
+            ${crown?`<span class="crown">${crown}</span>`:''}${avInit(e.username||e.fullName)}
           </div>
           <div class="p-name">${e.username||'Student'}${isMe?' 👈':''}</div>
           <div class="p-val">${val}</div>
@@ -247,19 +255,16 @@
       }).join('');
     }
 
-    // ── LIST ──
     function renderList(reset){
       if(reset) loaded=0;
       const chunk=entries.slice(loaded,loaded+PAGE);
       loaded+=chunk.length;
-
       if(!entries.length){
         document.getElementById('lbList').innerHTML=`<div class="empty-wrap"><div class="empty-icon">🏁</div><div class="empty-title">No rankings yet</div><div class="empty-sub">Be the first! Take a mock exam to get on the board.</div><a href="mock.html" class="play-btn">⏱️ Take a Mock</a></div>`;
         document.getElementById('listCt').textContent='';
         document.getElementById('loadMoreBtn').style.display='none';
         return;
       }
-
       document.getElementById('listCt').textContent=entries.length+' students';
       const html=chunk.map((e,ci)=>{
         const isMe=e.uid===myUID;
@@ -273,13 +278,9 @@
             <div class="lb-name"><span class="lb-name-text">${e.username||e.fullName||'Student'}</span>${isMe?'<span class="me-tag">YOU</span>':''}</div>
             <div class="lb-meta">${e.mocksTaken||0} mock${(e.mocksTaken||0)!==1?'s':''} · Last: ${e.lastScore||0}%</div>
           </div>
-          <div class="lb-right">
-            <div class="lb-score">${val}</div>
-            <div class="lb-slabel">${vlabel}</div>
-          </div>
+          <div class="lb-right"><div class="lb-score">${val}</div><div class="lb-slabel">${vlabel}</div></div>
         </div>`;
       }).join('');
-
       if(reset) document.getElementById('lbList').innerHTML=html;
       else document.getElementById('lbList').insertAdjacentHTML('beforeend',html);
       document.getElementById('loadMoreBtn').style.display=loaded<entries.length?'block':'none';
@@ -289,15 +290,12 @@
     function setFilter(mode,btn){filterMode=mode;document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');load();}
     function showSkel(){document.getElementById('lbList').innerHTML='<div class="skel"></div>'.repeat(6);document.getElementById('podiumWrap').style.display='none';document.getElementById('loadMoreBtn').style.display='none';}
     async function forceRefresh(){
-  showSkel();
-  const field=filterMode==='score'?'bestScore':'mocksTaken';
-  const snap=await db.collection('leaderboard').orderBy(field,'desc').limit(100).get({source:'server'});
-  entries=snap.docs.map((d,i)=>({...d.data(),uid:d.id,rank:i+1}));
-  myEntry=entries.find(e=>e.uid===myUID)||null;
-  renderMyRank();
-  renderPodium();
-  loaded=0;
-  renderList(true);
+      showSkel();
+      const field=filterMode==='score'?'bestScore':'mocksTaken';
+      const snap=await db.collection('leaderboard').orderBy(field,'desc').limit(100).get({source:'server'});
+      entries=snap.docs.map((d,i)=>({...d.data(),uid:d.id,rank:i+1}));
+      myEntry=entries.find(e=>e.uid===myUID)||null;
+      renderMyRank();renderPodium();loaded=0;renderList(true);
     }
   </script>
 </body>
