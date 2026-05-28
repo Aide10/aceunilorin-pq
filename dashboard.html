@@ -386,16 +386,24 @@
     });
 
     async function loadFreebies() {
-      freebiesLoaded = true;
-      let attempts = 0;
-      while (!auth.currentUser && attempts < 15) {
-        await new Promise(r => setTimeout(r, 200));
-        attempts++;
-      }
-      if (!userIsPremium) {
-        document.getElementById('freebiesLocked').style.display = 'block';
-        return;
-      }
+  freebiesLoaded = true;
+
+  // Wait for userIsPremium to be set by auth callback
+  let attempts = 0;
+  while (!auth.currentUser && attempts < 15) {
+    await new Promise(r => setTimeout(r, 200));
+    attempts++;
+  }
+  // Re-read premium status directly from Firestore to avoid race condition
+  try {
+    const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+    userIsPremium = userDoc.data().isPremium || false;
+  } catch(e) {}
+
+  if (!userIsPremium) {
+    document.getElementById('freebiesLocked').style.display = 'block';
+    return;
+  }
       document.getElementById('freebiesContent').style.display = 'block';
       try {
         const doc = await db.collection('config').doc('premium').get();
