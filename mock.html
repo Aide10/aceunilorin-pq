@@ -745,11 +745,10 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
     localStorage.setItem('mockResult', JSON.stringify(result));
 
     // Save to Firestore leaderboard
-    saveToLeaderboard(correct);
-
-    window.location.href = 'results.html';
-  }
-
+    // Save to Firestore leaderboard then redirect
+    saveToLeaderboard(correct).finally(() => {
+      window.location.href = 'results.html';
+    });
   function formatTime(totalSecs) {
     const m = Math.floor(totalSecs / 60);
     const s = totalSecs % 60;
