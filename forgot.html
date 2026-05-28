@@ -150,7 +150,7 @@ await auth.sendPasswordResetEmail(email, actionCodeSettings);
         if (err.code === 'auth/user-not-found') {
           errEl.textContent = 'No account found with this email.';
         } else {
-          errEl.textContent = 'Something went wrong. Try again.';
+          errEl.textContent = err.code + ': ' + err.message;
         }
         errEl.classList.add('show');
       }
