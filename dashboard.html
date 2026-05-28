@@ -88,6 +88,16 @@
     .lb-meta { font-size: 0.72rem; color: var(--text-muted); }
     .lb-score { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--primary); }
     .lb-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.88rem; }
+    /* Leaderboard locked preview */
+    .lb-locked { padding: 28px 20px; text-align: center; }
+    .lb-locked .lock-emoji { font-size: 2rem; margin-bottom: 10px; }
+    .lb-locked p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+    .lb-locked a { font-size: 0.8rem; color: var(--primary); font-weight: 700; text-decoration: none; }
+    .lb-blur-row { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid var(--border); filter: blur(4px); pointer-events: none; user-select: none; opacity: 0.5; }
+    .lb-blur-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary-glow); flex-shrink: 0; }
+    .lb-blur-info { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .lb-blur-line { height: 10px; border-radius: 4px; background: var(--surface2); }
+    .lb-blur-score { width: 36px; height: 20px; border-radius: 4px; background: var(--primary-glow); }
     /* FREEBIES */
     .freebies-header { background: linear-gradient(135deg, #064E3B, #065F46, #047857); border-radius: 22px; padding: 28px 24px; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(4,120,87,0.3); animation: fadeUp 0.5s ease both; }
     .freebies-header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: rgba(255,255,255,0.06); border-radius: 50%; }
@@ -111,7 +121,6 @@
     .locked-box .lock-icon { font-size: 3rem; margin-bottom: 16px; }
     .locked-box h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
     .locked-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
-    /* BOTTOM NAV */
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; padding: 10px 0 14px; backdrop-filter: blur(16px); }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; color: var(--text-muted); font-size: 0.65rem; font-weight: 600; transition: color 0.2s; cursor: pointer; background: none; border: none; font-family: 'DM Sans', sans-serif; }
     .nav-item.active { color: var(--primary); }
@@ -143,11 +152,16 @@
         <div class="welcome-sub">Ready to study today? Keep pushing — your admission is closer than you think. 💪</div>
         <div class="premium-tag" id="userBadge">🆓 Free Plan</div>
       </div>
+
       <div class="stats-row">
         <div class="stat-card"><div class="stat-num" id="statMocks">0</div><div class="stat-label">Mocks Taken</div></div>
         <div class="stat-card"><div class="stat-num" id="statBest">—</div><div class="stat-label">Best Score</div></div>
-        <div class="stat-card"><div class="stat-num" id="statRank">—</div><div class="stat-label">Your Rank</div></div>
+        <div class="stat-card" id="rankCard" onclick="handleRankClick()">
+          <div class="stat-num" id="statRank">—</div>
+          <div class="stat-label">Your Rank</div>
+        </div>
       </div>
+
       <div>
         <div class="section-title">Quick Access</div>
         <div class="quick-grid">
@@ -160,16 +174,35 @@
           <a href="leaderboard.html" class="quick-card leaderboard"><div class="quick-card-icon">🏆</div><h3>Leaderboard</h3><p>See top scorers</p></a>
         </div>
       </div>
+
       <div class="last-score-card">
         <div class="section-title">Last Mock Score</div>
         <div id="lastScoreContent"><div class="no-score">You haven't taken a mock yet. <a href="mock.html" style="color:var(--primary);font-weight:600;">Start now →</a></div></div>
       </div>
+
       <div class="upgrade-banner" id="upgradeBanner">
         <div class="upgrade-left"><div class="upgrade-icon">🔓</div><div class="upgrade-text"><h4>Unlock 2021–2025 PQs</h4><p>One-time payment. Access forever.</p></div></div>
         <a href="upgrade.html" class="btn-upgrade">Upgrade</a>
       </div>
+
+      <!-- Leaderboard preview -->
       <div class="leaderboard-card">
-        <div class="lb-header"><h3>🏆 Top Scorers</h3><a href="leaderboard.html">View All →</a></div>
+        <div class="lb-header">
+          <h3>🏆 Top Scorers</h3>
+          <a href="leaderboard.html" id="lbViewAll">View All →</a>
+        </div>
+        <!-- Free user blurred preview -->
+        <div id="leaderboardLocked" style="display:none;">
+          <div class="lb-blur-row"><div class="lb-blur-avatar"></div><div class="lb-blur-info"><div class="lb-blur-line" style="width:60%"></div><div class="lb-blur-line" style="width:40%"></div></div><div class="lb-blur-score"></div></div>
+          <div class="lb-blur-row"><div class="lb-blur-avatar"></div><div class="lb-blur-info"><div class="lb-blur-line" style="width:50%"></div><div class="lb-blur-line" style="width:35%"></div></div><div class="lb-blur-score"></div></div>
+          <div class="lb-blur-row"><div class="lb-blur-avatar"></div><div class="lb-blur-info"><div class="lb-blur-line" style="width:55%"></div><div class="lb-blur-line" style="width:30%"></div></div><div class="lb-blur-score"></div></div>
+          <div class="lb-locked">
+            <div class="lock-emoji">🔒</div>
+            <p>Upgrade to premium to see top scorers and your rank.</p>
+            <a href="upgrade.html">Upgrade Now →</a>
+          </div>
+        </div>
+        <!-- Premium leaderboard -->
         <div id="leaderboardList"><div class="lb-empty">No scores yet. Be the first! 🚀</div></div>
       </div>
     </div>
@@ -231,7 +264,6 @@
     let userIsPremium = false;
     let freebiesLoaded = false;
 
-    // Theme
     function toggleTheme() {
       const html = document.documentElement;
       const isDark = html.getAttribute('data-theme') === 'dark';
@@ -251,19 +283,39 @@
     }
     document.getElementById('greeting').textContent = getGreeting();
 
-    // Page switching
     function switchPage(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'active-green'));
       document.getElementById('page-' + page).classList.add('active');
       const navEl = document.getElementById('nav-' + page);
       if (navEl) navEl.classList.add(page === 'freebies' ? 'active-green' : 'active');
-      if (page === 'freebies' && !freebiesLoaded) {
-        loadFreebies();
+      if (page === 'freebies' && !freebiesLoaded) loadFreebies();
+    }
+
+    // Auto-open freebies tab if redirected from another page
+    if (window.location.hash === '#freebies') {
+      window.addEventListener('load', () => switchPage('freebies'));
+    }
+
+    function handleRankClick() {
+      if (!userIsPremium) {
+        showPremiumToast();
       }
     }
 
-    // Auth
+    function showPremiumToast() {
+      let toast = document.getElementById('premiumToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'premiumToast';
+        toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;border:1px solid rgba(245,158,11,0.4);color:#F59E0B;padding:10px 20px;border-radius:100px;font-size:0.82rem;font-weight:700;z-index:999;transition:all 0.3s;opacity:0;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+        toast.innerHTML = '🔒 Premium feature — <a href="upgrade.html" style="color:#F59E0B;text-decoration:underline;">Upgrade</a>';
+        document.body.appendChild(toast);
+      }
+      setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
+      setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(-50%) translateY(20px)'; }, 3000);
+    }
+
     auth.onAuthStateChanged(async user => {
       if (!user) { window.location.href = 'auth.html'; return; }
       try {
@@ -272,17 +324,31 @@
         const firstName = data.fullName ? data.fullName.split(' ')[0] : user.displayName || 'Student';
         document.getElementById('userName').textContent = firstName + '!';
         userIsPremium = data.isPremium || false;
+
         if (userIsPremium) {
           document.getElementById('userBadge').textContent = '⭐ Premium';
           document.getElementById('userBadge').style.background = 'rgba(245,158,11,0.25)';
           document.getElementById('upgradeBanner').classList.add('hidden');
+          // Show premium leaderboard
+          document.getElementById('leaderboardList').style.display = 'block';
+          document.getElementById('leaderboardLocked').style.display = 'none';
+          loadLeaderboard();
+          loadUserRank(user.uid);
+        } else {
+          // Free user — show locked leaderboard, lock rank
+          document.getElementById('leaderboardList').style.display = 'none';
+          document.getElementById('leaderboardLocked').style.display = 'block';
+          document.getElementById('statRank').textContent = '🔒';
+          document.getElementById('rankCard').style.cursor = 'pointer';
         }
+
         const statsDoc = await db.collection('userStats').doc(user.uid).get();
         if (statsDoc.exists) {
           const stats = statsDoc.data();
           document.getElementById('statMocks').textContent = stats.mocksTaken || 0;
           document.getElementById('statBest').textContent = stats.bestScore ? stats.bestScore + '%' : '—';
         }
+
         const lastResult = JSON.parse(localStorage.getItem('mockResult'));
         if (lastResult) {
           const pct = Math.round(lastResult.correct * 2);
@@ -314,67 +380,52 @@
               <a href="results.html" class="view-link">View →</a>
             </div>`;
         }
-        loadLeaderboard();
-        loadUserRank(user.uid);
       } catch (err) {
         document.getElementById('userName').textContent = 'Student!';
       }
     });
 
-    // Load freebies - single clean function
     async function loadFreebies() {
       freebiesLoaded = true;
-
-      // Wait up to 3s for auth to finish
       let attempts = 0;
       while (!auth.currentUser && attempts < 15) {
         await new Promise(r => setTimeout(r, 200));
         attempts++;
       }
-
       if (!userIsPremium) {
         document.getElementById('freebiesLocked').style.display = 'block';
         return;
       }
-
       document.getElementById('freebiesContent').style.display = 'block';
-
       try {
         const doc = await db.collection('config').doc('premium').get();
         const data = doc.data();
-
-        if (data.whatsappLink) {
-          document.getElementById('whatsappBtn').href = data.whatsappLink;
-        }
-
+        if (data.whatsappLink) document.getElementById('whatsappBtn').href = data.whatsappLink;
         const freebies = data.freebies || [];
         if (freebies.length === 0) {
           document.getElementById('freebiesLoading').innerHTML = '<p>No resources yet. Check back soon!</p>';
           return;
         }
-
         const icons = ['📄','📕','📗','📘','📙','📃','🗂️','📋','📑','🧾'];
         let html = '';
         freebies.forEach((item) => {
-  const entries = Object.entries(item);
-  entries.forEach(([title, link], i) => {
-    const icon = icons[i % icons.length];
-    html += `
-      <a href="${link}" target="_blank" class="freebie-card">
-        <div class="freebie-icon">${icon}</div>
-        <div class="freebie-info">
-          <div class="freebie-title">${title}</div>
-          <div class="freebie-desc">Tap to open in Google Drive</div>
-        </div>
-        <div class="freebie-arrow">→</div>
-      </a>`;
-  });
-});
-
+          const entries = Object.entries(item);
+          entries.forEach(([title, link], i) => {
+            const icon = icons[i % icons.length];
+            html += `
+              <a href="${link}" target="_blank" class="freebie-card">
+                <div class="freebie-icon">${icon}</div>
+                <div class="freebie-info">
+                  <div class="freebie-title">${title}</div>
+                  <div class="freebie-desc">Tap to open in Google Drive</div>
+                </div>
+                <div class="freebie-arrow">→</div>
+              </a>`;
+          });
+        });
         document.getElementById('freebiesLoading').style.display = 'none';
         document.getElementById('freebiesGrid').style.display = 'flex';
         document.getElementById('freebiesGrid').innerHTML = html;
-
       } catch (err) {
         document.getElementById('freebiesLoading').innerHTML = '<p>Failed to load resources. Try again later.</p>';
       }
