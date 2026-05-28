@@ -539,7 +539,7 @@
       if (navEl) navEl.classList.add(page === 'freebies' ? 'active-green' : 'active');
 
       if (page === 'freebies' && !freebiesLoaded) {
-        loadFreebies();
+        setTimeout(loadFreebies, 500);
       }
     }
 
