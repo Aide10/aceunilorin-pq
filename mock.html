@@ -749,6 +749,7 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
     saveToLeaderboard(correct).finally(() => {
       window.location.href = 'results.html';
     });
+  }
   function formatTime(totalSecs) {
     const m = Math.floor(totalSecs / 60);
     const s = totalSecs % 60;
