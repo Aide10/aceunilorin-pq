@@ -88,7 +88,6 @@
     .lb-meta { font-size: 0.72rem; color: var(--text-muted); }
     .lb-score { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--primary); }
     .lb-empty { padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.88rem; }
-    /* Leaderboard locked preview */
     .lb-locked { padding: 28px 20px; text-align: center; }
     .lb-locked .lock-emoji { font-size: 2rem; margin-bottom: 10px; }
     .lb-locked p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
@@ -127,6 +126,23 @@
     .nav-item.active-green { color: #22C55E; }
     .nav-item:hover { color: var(--primary); }
     .nav-icon { font-size: 1.3rem; }
+    /* WhatsApp Channel Banner */
+    .wa-channel-banner {
+      display: flex; align-items: center; gap: 14px;
+      background: linear-gradient(135deg, #0a3d2b, #075E54);
+      border: 1.5px solid rgba(37,211,102,0.3);
+      border-radius: 18px; padding: 18px 20px;
+      text-decoration: none; color: #fff;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.15);
+      animation: fadeUp 0.5s 0.15s ease both;
+      transition: transform 0.2s;
+    }
+    .wa-channel-banner:hover { transform: translateY(-2px); }
+    .wa-channel-banner .wa-ch-icon { font-size: 2rem; flex-shrink: 0; }
+    .wa-channel-banner .wa-ch-text { flex: 1; }
+    .wa-channel-banner .wa-ch-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.92rem; margin-bottom: 3px; }
+    .wa-channel-banner .wa-ch-sub { font-size: 0.73rem; color: rgba(255,255,255,0.75); }
+    .wa-channel-banner .wa-ch-btn { background: #25D366; border-radius: 10px; padding: 8px 14px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
@@ -162,6 +178,16 @@
         </div>
       </div>
 
+      <!-- WHATSAPP CHANNEL BANNER -->
+      <a href="https://whatsapp.com/channel/0029VbCDeYF3wtbAMcpHyi2y" target="_blank" class="wa-channel-banner">
+        <div class="wa-ch-icon">📢</div>
+        <div class="wa-ch-text">
+          <div class="wa-ch-title">Join Our WhatsApp Channel</div>
+          <div class="wa-ch-sub">Tips, answers & updates — free for everyone</div>
+        </div>
+        <div class="wa-ch-btn">Join Free</div>
+      </a>
+
       <div>
         <div class="section-title">Quick Access</div>
         <div class="quick-grid">
@@ -191,7 +217,6 @@
           <h3>🏆 Top Scorers</h3>
           <a href="leaderboard.html" id="lbViewAll">View All →</a>
         </div>
-        <!-- Free user blurred preview -->
         <div id="leaderboardLocked" style="display:none;">
           <div class="lb-blur-row"><div class="lb-blur-avatar"></div><div class="lb-blur-info"><div class="lb-blur-line" style="width:60%"></div><div class="lb-blur-line" style="width:40%"></div></div><div class="lb-blur-score"></div></div>
           <div class="lb-blur-row"><div class="lb-blur-avatar"></div><div class="lb-blur-info"><div class="lb-blur-line" style="width:50%"></div><div class="lb-blur-line" style="width:35%"></div></div><div class="lb-blur-score"></div></div>
@@ -202,7 +227,6 @@
             <a href="upgrade.html">Upgrade Now →</a>
           </div>
         </div>
-        <!-- Premium leaderboard -->
         <div id="leaderboardList"><div class="lb-empty">No scores yet. Be the first! 🚀</div></div>
       </div>
     </div>
@@ -292,15 +316,12 @@
       if (page === 'freebies' && !freebiesLoaded) loadFreebies();
     }
 
-    // Auto-open freebies tab if redirected from another page
     if (window.location.hash === '#freebies') {
       window.addEventListener('load', () => switchPage('freebies'));
     }
 
     function handleRankClick() {
-      if (!userIsPremium) {
-        showPremiumToast();
-      }
+      if (!userIsPremium) showPremiumToast();
     }
 
     function showPremiumToast() {
@@ -329,13 +350,11 @@
           document.getElementById('userBadge').textContent = '⭐ Premium';
           document.getElementById('userBadge').style.background = 'rgba(245,158,11,0.25)';
           document.getElementById('upgradeBanner').classList.add('hidden');
-          // Show premium leaderboard
           document.getElementById('leaderboardList').style.display = 'block';
           document.getElementById('leaderboardLocked').style.display = 'none';
           loadLeaderboard();
           loadUserRank(user.uid);
         } else {
-          // Free user — show locked leaderboard, lock rank
           document.getElementById('leaderboardList').style.display = 'none';
           document.getElementById('leaderboardLocked').style.display = 'block';
           document.getElementById('statRank').textContent = '🔒';
@@ -386,24 +405,21 @@
     });
 
     async function loadFreebies() {
-  freebiesLoaded = true;
+      freebiesLoaded = true;
+      let attempts = 0;
+      while (!auth.currentUser && attempts < 15) {
+        await new Promise(r => setTimeout(r, 200));
+        attempts++;
+      }
+      try {
+        const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+        userIsPremium = userDoc.data().isPremium || false;
+      } catch(e) {}
 
-  // Wait for userIsPremium to be set by auth callback
-  let attempts = 0;
-  while (!auth.currentUser && attempts < 15) {
-    await new Promise(r => setTimeout(r, 200));
-    attempts++;
-  }
-  // Re-read premium status directly from Firestore to avoid race condition
-  try {
-    const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
-    userIsPremium = userDoc.data().isPremium || false;
-  } catch(e) {}
-
-  if (!userIsPremium) {
-    document.getElementById('freebiesLocked').style.display = 'block';
-    return;
-  }
+      if (!userIsPremium) {
+        document.getElementById('freebiesLocked').style.display = 'block';
+        return;
+      }
       document.getElementById('freebiesContent').style.display = 'block';
       try {
         const doc = await db.collection('config').doc('premium').get();
@@ -464,12 +480,12 @@
     }
 
     async function loadUserRank(uid) {
-  try {
-    const doc = await db.collection('leaderboard').doc(uid).get();
-    if (doc.exists && doc.data().rank) {
-      document.getElementById('statRank').textContent = '#' + doc.data().rank;
-    }
-  } catch (e) {}
+      try {
+        const doc = await db.collection('leaderboard').doc(uid).get();
+        if (doc.exists && doc.data().rank) {
+          document.getElementById('statRank').textContent = '#' + doc.data().rank;
+        }
+      } catch (e) {}
     }
 
     async function handleLogout() {
