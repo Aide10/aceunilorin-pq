@@ -23,6 +23,7 @@
       font-family: 'DM Sans', sans-serif; background: var(--bg);
       color: var(--text); min-height: 100vh;
       transition: background 0.3s, color 0.3s; padding-bottom: 48px;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
     }
     .top-bar {
       background: #0B1535; padding: 14px 20px;
@@ -163,6 +164,14 @@
   </div>
 
   <script>
+    // ── SECURITY: Disable copy/select/right-click ──
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && ['c','a','p','u'].includes(e.key.toLowerCase())) e.preventDefault();
+    });
+
+    // ── THEME ──
     function toggleTheme() {
       const html = document.documentElement;
       const isDark = html.getAttribute('data-theme') === 'dark';
@@ -178,37 +187,40 @@
 
     const result = JSON.parse(localStorage.getItem('mockResult')) || { correct:36, wrong:10, skipped:4, timeTaken:'18:42', timeUp:false, reviewData:[] };
 
-    const correct = result.correct;
-    const wrong = result.wrong;
-    const skipped = result.skipped;
-    const marks = correct * 2;
+    const correct    = result.correct;
+    const wrong      = result.wrong;
+    const skipped    = result.skipped;
+    const marks      = correct * 2;
     const percentage = Math.round((marks / 100) * 100);
 
-    const ring = document.getElementById('ringFill');
-    const ringText = document.getElementById('ringText');
+    const ring     = document.getElementById('ringFill');
+    const ringText  = document.getElementById('ringText');
     const ringGrade = document.getElementById('ringGrade');
 
     let color, grade;
-    if (percentage === 100) { color='#A855F7'; grade='Perfect'; }
-    else if (percentage >= 90) { color='#22C55E'; grade='Excellent'; }
-    else if (percentage >= 80) { color='#3B82F6'; grade='Very Good'; }
-    else if (percentage >= 70) { color='#06B6D4'; grade='Good'; }
-    else if (percentage >= 60) { color='#F59E0B'; grade='Okay'; }
-    else if (percentage >= 50) { color='#F97316'; grade='Fair'; }
-    else { color='#EF4444'; grade='Poor'; }
+    if (percentage === 100)      { color='#A855F7'; grade='Perfect'; }
+    else if (percentage >= 90)   { color='#22C55E'; grade='Excellent'; }
+    else if (percentage >= 80)   { color='#3B82F6'; grade='Very Good'; }
+    else if (percentage >= 70)   { color='#06B6D4'; grade='Good'; }
+    else if (percentage >= 60)   { color='#F59E0B'; grade='Okay'; }
+    else if (percentage >= 50)   { color='#F97316'; grade='Fair'; }
+    else                          { color='#EF4444'; grade='Poor'; }
 
     ring.style.stroke = color;
     ringGrade.textContent = grade;
     ringGrade.style.fill = color;
-    setTimeout(() => { ring.style.strokeDashoffset = 339.3 - (percentage / 100) * 339.3; ringText.textContent = percentage + '%'; }, 300);
+    setTimeout(() => {
+      ring.style.strokeDashoffset = 339.3 - (percentage / 100) * 339.3;
+      ringText.textContent = percentage + '%';
+    }, 300);
 
     document.getElementById('scoreDetail').textContent = `${marks} / 100 marks`;
     if (result.timeUp) document.getElementById('timeUpBadge').innerHTML = '<div class="timeup-badge">⏰ Time Up — Auto Submitted</div>';
     document.getElementById('bCorrect').textContent = correct;
-    document.getElementById('bWrong').textContent = wrong;
+    document.getElementById('bWrong').textContent   = wrong;
     document.getElementById('bSkipped').textContent = skipped;
-    document.getElementById('bMarks').textContent = `${marks} / 100`;
-    document.getElementById('bTime').textContent = result.timeTaken || '—';
+    document.getElementById('bMarks').textContent   = `${marks} / 100`;
+    document.getElementById('bTime').textContent    = result.timeTaken || '—';
 
     const reviewData = result.reviewData || [];
 
@@ -224,18 +236,18 @@
 
       filtered.forEach(q => {
         const globalIndex = reviewData.indexOf(q);
-        const statusIcon = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭️';
+        const statusIcon  = q.status === 'correct' ? '✅' : q.status === 'wrong' ? '❌' : '⏭️';
         const letters = ['A','B','C','D','E'];
-        const opts = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
+        const opts    = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
 
         let optionsHTML = '';
         opts.forEach((opt, oi) => {
           if (!opt) return;
-          const letter = letters[oi];
-          const isCorrect = letter === q.correctAnswer;
+          const letter      = letters[oi];
+          const isCorrect   = letter === q.correctAnswer;
           const isUserWrong = letter === q.userAnswer && q.userAnswer !== q.correctAnswer;
-          let cls = 'review-option';
-          if (isCorrect) cls += ' correct-ans';
+          let cls    = 'review-option';
+          if (isCorrect)   cls += ' correct-ans';
           else if (isUserWrong) cls += ' user-wrong';
           let suffix = isCorrect ? ' ✓ Correct' : isUserWrong ? ' ✗ Your Answer' : '';
           optionsHTML += `<div class="${cls}"><div class="review-option-letter">${letter}</div><span>${opt}${suffix}</span></div>`;
