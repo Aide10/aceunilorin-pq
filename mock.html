@@ -23,6 +23,7 @@
       font-family: 'DM Sans', sans-serif; background: var(--bg);
       color: var(--text); min-height: 100vh;
       transition: background 0.3s, color 0.3s; padding-bottom: 40px;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
     }
     .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.1; pointer-events: none; z-index: 0; }
     .blob-1 { width: 400px; height: 400px; background: #3B82F6; top: -100px; right: -80px; }
@@ -56,18 +57,6 @@
     .back-link:hover { color: var(--primary); }
     .page-header h1 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; }
     .page-header p { color: var(--text-muted); font-size: 0.92rem; }
-
-    .mock-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
-    .mock-type-card {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: 18px; padding: 24px 18px; text-align: center;
-      cursor: pointer; transition: all 0.2s; box-shadow: var(--card-shadow);
-    }
-    .mock-type-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-    .mock-type-card.selected { border-color: var(--primary); background: var(--primary-glow); }
-    .mock-type-icon { font-size: 2rem; margin-bottom: 12px; }
-    .mock-type-card h3 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 800; margin-bottom: 6px; }
-    .mock-type-card p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
 
     .info-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -229,8 +218,8 @@
       <p>Simulate the real Unilorin CBT experience.</p>
     </div>
 
-    <!-- Mock type selection -->
-    <div style="background:var(--surface);border:2px solid var(--primary);border-radius:18px;padding:20px 18px;margin-bottom:28px;display:flex;align-items:center;gap:14px;background:var(--primary-glow);">
+    <!-- Mock type banner -->
+    <div style="background:var(--primary-glow);border:2px solid var(--primary);border-radius:18px;padding:20px 18px;margin-bottom:28px;display:flex;align-items:center;gap:14px;">
       <div style="font-size:2rem;flex-shrink:0;">📝</div>
       <div>
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:4px;color:var(--text);">Past Questions Mock</div>
@@ -349,7 +338,14 @@
   const db = firebase.firestore();
   db.enablePersistence({synchronizeTabs: true}).catch(err => console.log(err));
 
-  // Theme
+  // ── SECURITY: Disable copy/select/right-click ──
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['c','a','p','u'].includes(e.key.toLowerCase())) e.preventDefault();
+  });
+
+  // ── THEME ──
   function toggleTheme() {
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
@@ -361,13 +357,12 @@
   document.documentElement.setAttribute('data-theme', saved);
   document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '☀️' : '🌙';
 
-  // Auth check
+  // ── AUTH ──
   auth.onAuthStateChanged(user => {
     if (!user) window.location.href = 'auth.html';
   });
 
   // ── STATE ──
-  let mockType = 'pq';
   let questions = [];
   let currentIndex = 0;
   let userAnswers = {};
@@ -375,21 +370,17 @@
   let secondsLeft = 25 * 60;
   let mockStartTime = null;
 
-  // ── LOBBY ──
-  // Mock type fixed to pq only
-
+  // ── START MOCK ──
   async function startMock() {
     const btn = document.querySelector('#lobbyScreen .btn-primary');
     btn.disabled = true;
 
-    // Show loading overlay
     showLoadingOverlay('Preparing your mock exam...');
 
     try {
-      const freeYears = [2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
+      const freeYears    = [2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2017,2018,2019];
       const premiumYears = [2021,2022,2023,2024,2025];
 
-      // Check premium
       const user = auth.currentUser;
       let isPremium = false;
       if (user) {
@@ -397,23 +388,25 @@
         isPremium = doc.exists && doc.data().isPremium;
       }
 
-      let yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
-
+      const yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
       const TARGET = 50;
       let allQuestions = [];
 
-      // Step 1: Fetch ALL years in PARALLEL (much faster on mobile)
       updateLoadingOverlay('Loading questions...');
-      const yearPools = [];
+
       const fetchResults = await Promise.allSettled(
         yearsToUse.map(year =>
           db.collection('pastquestions').doc(String(year)).get()
-  .then(docSnap => {
-    const fakeSnap = { forEach: (fn) => (docSnap.data()?.questions || []).forEach(d => fn({data: () => d, id: d.id})) };
-    return { year, snap: fakeSnap };
-  })
-          )
-);
+            .then(docSnap => {
+              const fakeSnap = {
+                forEach: (fn) => (docSnap.data()?.questions || []).forEach(d => fn({ data: () => d, id: d.id }))
+              };
+              return { year, snap: fakeSnap };
+            })
+        )
+      );
+
+      const yearPools = [];
       for (const result of fetchResults) {
         if (result.status === 'fulfilled') {
           const { year, snap } = result.value;
@@ -424,19 +417,15 @@
       }
       updateLoadingOverlay(`Loaded ${yearPools.length} year(s) of questions...`);
 
-      // Step 2: Flatten, de-prioritise recently seen, shuffle, pick up to TARGET
       if (yearPools.length > 0) {
         const allPooled = yearPools.flat();
 
-        // Load recently seen questions (stored from last 2 mocks)
-        const recentRaw = localStorage.getItem('recentMockQs');
+        const recentRaw  = localStorage.getItem('recentMockQs');
         const recentSeen = recentRaw ? new Set(JSON.parse(recentRaw)) : new Set();
 
-        // Split into unseen and seen pools
         const unseen = allPooled.filter(q => !recentSeen.has(`${q.year}-${q.number}`));
-        const seen = allPooled.filter(q => recentSeen.has(`${q.year}-${q.number}`));
+        const seen   = allPooled.filter(q =>  recentSeen.has(`${q.year}-${q.number}`));
 
-        // Fisher-Yates shuffle both pools independently
         const shuffle = arr => {
           for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -447,37 +436,11 @@
         shuffle(unseen);
         shuffle(seen);
 
-        // Unseen questions come first, seen fill up remainder if needed
         allQuestions = [...unseen, ...seen].slice(0, TARGET);
 
-        // Save these as recently seen (keep last 100 — roughly 2 mocks)
-        const newRecent = allQuestions.map(q => `${q.year}-${q.number}`);
+        const newRecent     = allQuestions.map(q => `${q.year}-${q.number}`);
         const updatedRecent = [...Array.from(recentSeen), ...newRecent].slice(-100);
         localStorage.setItem('recentMockQs', JSON.stringify(updatedRecent));
-      }
-
-      // If full mock, also mix in study questions to fill up to TARGET
-      if (mockType === 'full' && allQuestions.length < TARGET) {
-        const subjects = ['english', 'math', 'currentaffairs'];
-        const studyPools = [];
-        for (const subject of subjects) {
-          try {
-            const snap = await db.collection('studyquestions').doc(subject)
-              .collection('questions').limit(100).get();
-            const qs = [];
-            snap.forEach(d => qs.push({ ...d.data(), id: d.id, subject }));
-            if (qs.length > 0) studyPools.push(qs);
-          } catch (e) { console.warn("Skipped subject:", e.message); }
-        }
-        studyPools.forEach(pool => pool.sort(() => Math.random() - 0.5));
-        let si = 0, guard = 0;
-        const sIdx = new Array(studyPools.length).fill(0);
-        while (allQuestions.length < TARGET && studyPools.length > 0 && guard++ < 500) {
-          const p = studyPools[si % studyPools.length];
-          const ix = sIdx[si % studyPools.length];
-          if (ix < p.length) { allQuestions.push(p[ix]); sIdx[si % studyPools.length]++; }
-          si++;
-        }
       }
 
       hideLoadingOverlay();
@@ -488,13 +451,12 @@
         return;
       }
 
-      // Shuffle and cap at 50
       allQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, TARGET);
-      questions = allQuestions;
-      userAnswers = {};
-      currentIndex = 0;
-      secondsLeft = 25 * 60;
-      mockStartTime = Date.now();
+      questions      = allQuestions;
+      userAnswers    = {};
+      currentIndex   = 0;
+      secondsLeft    = 25 * 60;
+      mockStartTime  = Date.now();
 
       showScreen('cbtScreen');
       renderQuestion();
@@ -509,13 +471,13 @@
     }
   }
 
-  // Loading overlay helpers
+  // ── LOADING OVERLAY ──
   function showLoadingOverlay(msg) {
     let el = document.getElementById('loadingOverlay');
     if (!el) {
       el = document.createElement('div');
       el.id = 'loadingOverlay';
-      el.style.cssText = `position:fixed;inset:0;z-index:300;background:rgba(15,23,42,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;`;
+      el.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(15,23,42,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
       el.innerHTML = `
         <div style="width:44px;height:44px;border:4px solid #253147;border-top-color:#3B82F6;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
         <div id="loadingOverlayText" style="color:#94A3B8;font-size:0.92rem;font-family:'DM Sans',sans-serif;"></div>
@@ -530,9 +492,8 @@
 
   function updateLoadingOverlay(msg) {
     const textEl = document.getElementById('loadingOverlayText');
-    const barEl = document.getElementById('loadingOverlayBar');
+    const barEl  = document.getElementById('loadingOverlayBar');
     if (textEl) textEl.textContent = msg;
-    // Parse progress from msg for bar
     const match = msg.match(/(\d+)\/(\d+)/);
     if (match && barEl) barEl.style.width = `${Math.round((+match[1] / +match[2]) * 100)}%`;
   }
@@ -558,55 +519,48 @@
   function updateTimerDisplay() {
     const mins = Math.floor(secondsLeft / 60);
     const secs = secondsLeft % 60;
-    const display = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     const el = document.getElementById('timerDisplay');
-    el.textContent = display;
+    el.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     el.className = 'timer';
     if (secondsLeft <= 300) el.classList.add('warning');
-    if (secondsLeft <= 60) el.classList.remove('warning'), el.classList.add('danger');
+    if (secondsLeft <= 60)  { el.classList.remove('warning'); el.classList.add('danger'); }
   }
 
   // ── RENDER QUESTION ──
   function renderQuestion() {
-    const q = questions[currentIndex];
+    const q     = questions[currentIndex];
     const total = questions.length;
 
-    const yearTag = q.year ? ` <span style="font-size:.65rem;background:rgba(59,130,246,.15);color:#3B82F6;padding:2px 8px;border-radius:100px;border:1px solid rgba(59,130,246,.25);font-weight:700;vertical-align:middle;">${q.year}</span>` : '';
+    const yearTag = q.year
+      ? ` <span style="font-size:.65rem;background:rgba(59,130,246,.15);color:#3B82F6;padding:2px 8px;border-radius:100px;border:1px solid rgba(59,130,246,.25);font-weight:700;vertical-align:middle;">${q.year}</span>`
+      : '';
     document.getElementById('qNumber').innerHTML = `Question ${currentIndex + 1} of ${total}${yearTag}`;
     document.getElementById('qText').textContent = q.question || q.text || 'Question text not available';
 
-    const opts = document.getElementById('optionsContainer');
+    const opts    = document.getElementById('optionsContainer');
     opts.innerHTML = '';
-    const letters = ['A','B','C','D','E'];
+    const letters    = ['A','B','C','D','E'];
     const rawOptions = [q.optionA, q.optionB, q.optionC, q.optionD, q.optionE];
 
-    // Build option objects with original letter and text
     let optObjs = rawOptions
       .map((text, i) => ({ text, origLetter: letters[i] }))
       .filter(o => o.text);
 
-    // Shuffle options — but keep shuffle consistent per question using question index as seed
-    // Use stored shuffle if already seen this question, else generate and store
     if (!q._shuffled) {
       for (let i = optObjs.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [optObjs[i], optObjs[j]] = [optObjs[j], optObjs[i]];
       }
-      q._shuffled = optObjs; // cache so re-visiting question shows same order
+      q._shuffled = optObjs;
     } else {
       optObjs = q._shuffled;
     }
 
-    // Map new display letters A,B,C... to original correct answer
-    const correctOrigLetter = q.answer; // e.g. 'B'
+    const correctOrigLetter = q.answer;
     let displayCorrectLetter = 'A';
-
     optObjs.forEach((opt, i) => {
-      const displayLetter = letters[i];
-      if (opt.origLetter === correctOrigLetter) displayCorrectLetter = displayLetter;
+      if (opt.origLetter === correctOrigLetter) displayCorrectLetter = letters[i];
     });
-
-    // Store the remapped correct letter on question for grading
     q._displayAnswer = displayCorrectLetter;
 
     optObjs.forEach((opt, i) => {
@@ -618,17 +572,14 @@
       opts.appendChild(div);
     });
 
-    // Update progress
     const answered = Object.keys(userAnswers).length;
     document.getElementById('progressBar').style.width = `${(answered / total) * 100}%`;
     document.getElementById('progressLabel').textContent = `${answered} / ${total} answered`;
 
-    // Prev/Next/Submit buttons
     document.getElementById('prevBtn').disabled = currentIndex === 0;
-document.getElementById('nextBtn').style.display = currentIndex < total - 1 ? 'flex' : 'none';
-document.getElementById('submitBtn').style.display = 'flex'; // Always visible
+    document.getElementById('nextBtn').style.display  = currentIndex < total - 1 ? 'flex' : 'none';
+    document.getElementById('submitBtn').style.display = 'flex';
 
-    // Update grid
     updateQGrid();
   }
 
@@ -669,23 +620,23 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
 
   // ── SUBMIT ──
   function openSubmitModal() {
-  const answered = Object.keys(userAnswers).length;
-  const total = questions.length;
+    const answered  = Object.keys(userAnswers).length;
+    const total     = questions.length;
 
-  // Warn if less than 50% answered
-  if (answered < total * 0.5) {
-    toast(`⚠️ Only ${answered} of ${total} answered. Are you sure?`, 'info');
-    setTimeout(() => {
-      document.getElementById('submitModal').classList.add('open');
-    }, 1500);
-    return;
-  }
-    const unanswered = questions.length - answered;
+    if (answered < total * 0.5) {
+      toast(`⚠️ Only ${answered} of ${total} answered. Are you sure?`, 'info');
+      setTimeout(() => {
+        document.getElementById('submitModal').classList.add('open');
+      }, 1500);
+      return;
+    }
+
+    const unanswered = total - answered;
     const mins = Math.floor(secondsLeft / 60);
     const secs = secondsLeft % 60;
-    document.getElementById('modalAnswered').textContent = answered;
+    document.getElementById('modalAnswered').textContent   = answered;
     document.getElementById('modalUnanswered').textContent = unanswered;
-    document.getElementById('modalTimeLeft').textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    document.getElementById('modalTimeLeft').textContent   = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
     document.getElementById('submitModal').classList.add('open');
   }
 
@@ -702,8 +653,7 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
     const reviewData = [];
 
     questions.forEach((q, i) => {
-      const userAns = userAnswers[i] || null;
-      // Use the display-remapped correct answer (accounts for option shuffling)
+      const userAns   = userAnswers[i] || null;
       const correctAns = q._displayAnswer || q.answer || q.correctAnswer;
       let status = 'skipped';
       if (userAns) {
@@ -711,7 +661,6 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
         else { wrong++; status = 'wrong'; }
       } else { skipped++; }
 
-      // Build review options using shuffled order if available
       const letters = ['A','B','C','D','E'];
       let rOptA = q.optionA, rOptB = q.optionB, rOptC = q.optionC, rOptD = q.optionD, rOptE = q.optionE || null;
       if (q._shuffled) {
@@ -727,8 +676,7 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
       reviewData.push({
         question: q.question || q.text,
         optionA: rOptA, optionB: rOptB,
-        optionC: rOptC, optionD: rOptD,
-        optionE: rOptE,
+        optionC: rOptC, optionD: rOptD, optionE: rOptE,
         correctAnswer: correctAns,
         userAnswer: userAns,
         explanation: q.explanation || '',
@@ -740,84 +688,73 @@ document.getElementById('submitBtn').style.display = 'flex'; // Always visible
       ? formatTime(Math.floor((Date.now() - mockStartTime) / 1000))
       : '25:00';
 
-    // Save result
-    const result = { correct, wrong, skipped, timeTaken, timeUp, mockType, reviewData };
+    const result = { correct, wrong, skipped, timeTaken, timeUp, mockType: 'pq', reviewData };
     localStorage.setItem('mockResult', JSON.stringify(result));
 
-    // Save to Firestore leaderboard
-    // Save to Firestore leaderboard then redirect
     saveToLeaderboard(correct).finally(() => {
       window.location.href = 'results.html';
     });
   }
+
   function formatTime(totalSecs) {
     const m = Math.floor(totalSecs / 60);
     const s = totalSecs % 60;
     return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
 
-    async function saveToLeaderboard(correct) {
-  try {
-    const user = auth.currentUser;
-    if (!user) return;
-    const score = correct * 2;
+  async function saveToLeaderboard(correct) {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      const score = correct * 2;
 
-    const userDoc = await db.collection('users').doc(user.uid).get();
-    const username = userDoc.exists ? userDoc.data().username : 'unknown';
+      const userDoc  = await db.collection('users').doc(user.uid).get();
+      const username = userDoc.exists ? userDoc.data().username : 'unknown';
 
-    const lbRef = db.collection('leaderboard').doc(user.uid);
-    const lbDoc = await lbRef.get();
-    const prevBest = lbDoc.exists ? (lbDoc.data().bestScore || 0) : 0;
-    const mocksTaken = lbDoc.exists ? (lbDoc.data().mocksTaken || 0) + 1 : 1;
-    const newBest = Math.max(score, prevBest);
+      const lbRef  = db.collection('leaderboard').doc(user.uid);
+      const lbDoc  = await lbRef.get();
+      const prevBest   = lbDoc.exists ? (lbDoc.data().bestScore  || 0) : 0;
+      const mocksTaken = lbDoc.exists ? (lbDoc.data().mocksTaken || 0) + 1 : 1;
+      const newBest    = Math.max(score, prevBest);
 
-    // Count users with higher best score to calculate rank
-    const higherSnap = await db.collection('leaderboard')
-      .where('bestScore', '>', newBest)
-      .get();
-    const rank = higherSnap.size + 1;
+      const higherSnap = await db.collection('leaderboard')
+        .where('bestScore', '>', newBest).get();
+      const rank = higherSnap.size + 1;
 
-    // Save leaderboard entry with rank
-    await lbRef.set({
-      username,
-      bestScore: newBest,
-      mocksTaken,
-      lastScore: score,
-      rank,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+      await lbRef.set({
+        username, bestScore: newBest, mocksTaken, lastScore: score, rank,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
-    // Update user stats
-    await db.collection('userStats').doc(user.uid).set({
-      mocksTaken,
-      bestScore: newBest,
-      lastScore: score,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+      await db.collection('userStats').doc(user.uid).set({
+        mocksTaken, bestScore: newBest, lastScore: score,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
-  } catch (e) { console.error('Leaderboard save error:', e); }
-    }
+    } catch (e) { console.error('Leaderboard save error:', e); }
+  }
 
   // ── SCREEN SWITCH ──
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
+
   // ── TOAST ──
-let toastTimer;
-function toast(msg, type = 'info') {
-  let t = document.getElementById('mockToast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'mockToast';
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1E293B;border-radius:12px;padding:10px 20px;font-size:0.82rem;font-weight:700;z-index:999;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,0.4);border:1px solid #3B82F6;color:#3B82F6;';
-    document.body.appendChild(t);
+  let toastTimer;
+  function toast(msg, type = 'info') {
+    let t = document.getElementById('mockToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'mockToast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1E293B;border-radius:12px;padding:10px 20px;font-size:0.82rem;font-weight:700;z-index:999;transition:transform 0.3s;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,0.4);border:1px solid #3B82F6;color:#3B82F6;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 4000);
   }
-  t.textContent = msg;
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 4000);
-}
 </script>
 </body>
 </html>
