@@ -342,6 +342,95 @@
       try {
         const doc = await db.collection('users').doc(user.uid).get();
         const data = doc.data();
+
+        // ── USERNAME GUARD: prompt existing users who have no username ──
+        if (!data.username) {
+          // Show a blocking modal to collect username
+          let usernameModal = document.getElementById('usernameModal');
+          if (!usernameModal) {
+            usernameModal = document.createElement('div');
+            usernameModal.id = 'usernameModal';
+            usernameModal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,0.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;';
+            usernameModal.innerHTML = `
+              <div style="background:#1E293B;border:1px solid rgba(255,255,255,0.07);border-radius:24px;padding:36px 28px;width:100%;max-width:380px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+                <div style="font-size:2.4rem;margin-bottom:14px;">👤</div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:10px;color:#F1F5F9;">Set Your Username</div>
+                <p style="color:#94A3B8;font-size:0.86rem;line-height:1.6;margin-bottom:22px;">You need a username to appear on the leaderboard and access all features. Choose one to continue.</p>
+                <input id="newUsernameInput" type="text" placeholder="e.g. aminabello" autocomplete="off"
+                  style="width:100%;padding:13px 14px;background:#253147;border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;color:#F1F5F9;font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;margin-bottom:8px;box-sizing:border-box;"/>
+                <div id="usernameModalErr" style="color:#EF4444;font-size:0.78rem;min-height:18px;margin-bottom:12px;text-align:left;display:none;"></div>
+                <button id="usernameModalBtn" onclick="submitNewUsername()"
+                  style="width:100%;padding:14px;background:#3B82F6;color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;">
+                  Save Username →
+                </button>
+              </div>`;
+            document.body.appendChild(usernameModal);
+          }
+
+          // Make input focus-friendly on mobile
+          setTimeout(() => document.getElementById('newUsernameInput').focus(), 300);
+
+          // Define the submit function
+          window.submitNewUsername = async function() {
+            const input = document.getElementById('newUsernameInput');
+            const errEl = document.getElementById('usernameModalErr');
+            const btn   = document.getElementById('usernameModalBtn');
+            const newUsername = input.value.trim().toLowerCase();
+
+            errEl.style.display = 'none';
+            if (!newUsername || newUsername.length < 3) {
+              errEl.textContent = 'Username must be at least 3 characters.';
+              errEl.style.display = 'block'; return;
+            }
+            if (!/^[a-z0-9 _.-]+$/.test(newUsername)) {
+              errEl.textContent = 'Only letters, numbers, spaces, _ . - allowed.';
+              errEl.style.display = 'block'; return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+
+            try {
+              // Check uniqueness
+              const taken = await db.collection('usernames').doc(newUsername).get();
+              if (taken.exists) {
+                errEl.textContent = 'Username already taken. Try another.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Save Username →';
+                return;
+              }
+
+              // Save to users doc and reserve in usernames collection
+              await db.collection('users').doc(user.uid).update({ username: newUsername });
+              await db.collection('usernames').doc(newUsername).set({ uid: user.uid });
+
+              // Also update leaderboard doc if it exists
+              const lbDoc = await db.collection('leaderboard').doc(user.uid).get();
+              if (lbDoc.exists) {
+                await db.collection('leaderboard').doc(user.uid).update({ username: newUsername });
+              }
+
+              usernameModal.remove();
+              // Reload to refresh dashboard with new username
+              window.location.reload();
+            } catch (err) {
+              errEl.textContent = 'Error saving username. Try again.';
+              errEl.style.display = 'block';
+              btn.disabled = false;
+              btn.textContent = 'Save Username →';
+            }
+          };
+
+          // Allow Enter key to submit
+          document.getElementById('newUsernameInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') window.submitNewUsername();
+          });
+
+          return; // Stop further dashboard loading until username is set
+        }
+        // ── END USERNAME GUARD ──
+
         const firstName = data.fullName ? data.fullName.split(' ')[0] : user.displayName || 'Student';
         document.getElementById('userName').textContent = firstName + '!';
         userIsPremium = data.isPremium || false;
