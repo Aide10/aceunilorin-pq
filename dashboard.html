@@ -342,8 +342,6 @@
       try {
         const doc = await db.collection('users').doc(user.uid).get();
         const data = doc.data();
-        // TEMP DEBUG
-        alert('UID: ' + user.uid + '\nisPremium: ' + data.isPremium + '\nfullName: ' + data.fullName);
 
         // ── USERNAME GUARD: prompt existing users who have no username ──
         if (!data.username) {
