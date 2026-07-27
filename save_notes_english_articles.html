@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Save Study Notes — AceUnilorin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:8px;}
+.count{font-size:.82rem;color:#3B82F6;font-weight:700;margin-bottom:28px;}
+.q-preview{background:#1A2640;border-radius:12px;padding:12px 14px;margin-bottom:24px;text-align:left;max-height:160px;overflow-y:auto;}
+.q-preview::-webkit-scrollbar{width:3px;}
+.q-preview::-webkit-scrollbar-thumb{background:#3B82F6;border-radius:100px;}
+.q-item{font-size:.72rem;color:#94A3B8;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.q-item:last-child{border-bottom:none;}
+.q-num{color:#3B82F6;font-weight:700;}
+.q-ans{color:#22C55E;font-weight:700;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field:focus{outline:none;border-color:#3B82F6;}
+.field::placeholder{color:#4A5568;}
+.login-note{font-size:.72rem;color:#4A5568;margin-bottom:16px;line-height:1.5;}
+.progress-wrap{margin-bottom:16px;}
+.progress-bar{background:#1A2640;border-radius:100px;height:10px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#3B82F6,#6366F1);transition:width .3s;}
+.progress-text{font-size:.8rem;color:#64748B;}
+.success{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:20px 16px;}
+.success-icon{font-size:2rem;margin-bottom:8px;}
+.success-title{font-family:'Syne',sans-serif;font-weight:800;color:#22C55E;font-size:1rem;margin-bottom:6px;}
+.success-sub{font-size:.78rem;color:#64748B;line-height:1.6;}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:.8rem;color:#EF4444;font-weight:600;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">📘</div>
+  <div class="title" id="titleEl">Study Notes</div>
+  <div class="sub" id="subEl">22 Rules of English Articles — Studypaedia</div>
+  <div class="count" id="countEl">0 topics ready to save</div>
+
+  <div class="q-preview" id="preview"></div>
+
+  <div id="mainArea">
+    <div class="login-note">Sign in with your admin account to save — Firestore rules require it.</div>
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="saveBtn" onclick="signInAndSave()">🔐 Sign In &amp; Save to Firestore</button>
+  </div>
+</div>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* Auto-generated from "STUDYPAEDIA'S 22 RULES OF ENGLISH ARTICLES" by Ohijei Aidelokhai.
+   NOTE ON `order`: set to 1, 2, 3 below as placeholders. If you already have other
+   English topics uploaded, check the highest existing `order` value in
+   studynotes/english/topics and bump these up so they slot in where you want. */
+const SUBJECT = 'english';
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+
+const NOTES = [
+  {
+    "topicId": "definite-article-the-part1",
+    "title": "The Definite Article 'THE' — People, Places & Things",
+    "emoji": "📘",
+    "order": 1,
+    "content": [
+      "Names of families take 'the': The Agbaizas, The Buharis, The Trumps.",
+      "When a tribe's name is the same as its language, use 'the': The Igbo, The Yoruba, The French.",
+      "Organisations take 'the': The United Nations, The EFCC, The IMF.",
+      "Traditional and official titles take 'the': The Oba of Benin, The Governor, The President.",
+      "Countries with States, Nations, or Kingdoms attached take 'the': The United States, The United Kingdom, The USSR.",
+      "Newspapers and magazines take 'the': The Vanguard, The Guardian, The Daily Times.",
+      "Superlative adjectives take 'the': the most handsome man in the world, the cleverest of them all.",
+      "Uncountable (mass) nouns take 'the': the water, the sand, the oil, the salt.",
+      "Countable plural nouns take 'the': the boys, the mats, the books, the phones.",
+      "Adjectives used to name a group of people take 'the': 'the rich can be stingy sometimes', 'the happy are always fun to be with'.",
+      "Public places — restaurants, stadiums, hotels, cinemas, museums — take 'the': The Stamford Bridge, The Sheraton, The KFC."
+    ],
+    "example": "The most intelligent girl in the class always sits in front — notice 'the' before the superlative 'most intelligent'."
+  },
+  {
+    "topicId": "definite-article-the-part2",
+    "title": "The Definite Article 'THE' — Time, Nature & Reference",
+    "emoji": "📙",
+    "order": 2,
+    "content": [
+      "A unit of time used in place of 'every' takes 'the': 'paid by the week' means paid every week.",
+      "A period of time mentioned in a general way takes 'the': 'he sleeps during the day'; 'independence during the 1950s'.",
+      "Specific nouns known to both speaker and listener take 'the': 'The Nigerian striker missed a sitter during the 2010 World Cup.'",
+      "Rivers, forests, deserts, canals, and oceans take 'the': The Niger, The Sahara, The Atlantic Ocean, The Suez.",
+      "Musical instruments take 'the': 'The guitar is hard to master'; 'Ali plays the violin with remarkable skill.'",
+      "Objects that represent every other of their kind take 'the': 'The television has made many people mentally lazy'; 'Fleming discovered the penicillin.'",
+      "When two people share a name, 'the' marks out the better-known one: 'I saw one Zlatan in Nigeria, not the Zlatan of Major League Soccer.'"
+    ],
+    "example": "So many third world countries got their independence during the 1950s — 'the' marks a general time period, not a specific date."
+  },
+  {
+    "topicId": "indefinite-articles-a-an",
+    "title": "Indefinite Articles 'A' and 'AN'",
+    "emoji": "📗",
+    "order": 3,
+    "content": [
+      "Singular countable nouns take 'a' or 'an': an egg, a car, a bag.",
+      "Use 'AN' when the noun's initial SOUND is a vowel, no matter how it's spelled: an elephant, an orange, an hour, an honour.",
+      "Use 'A' when the spelling starts with a vowel but is pronounced as a consonant sound: a unique language, a universal law, a hotel, a European lady.",
+      "A countable noun takes the indefinite article the first time it's mentioned, then 'the' on every mention after that."
+    ],
+    "example": "A female goat is on the wall. The female goat has beards. — first mention uses 'a', later mentions use 'the'."
+  }
+];
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// Header + preview
+document.getElementById('titleEl').textContent = SUBJECT.charAt(0).toUpperCase() + SUBJECT.slice(1) + ' Notes';
+document.getElementById('countEl').textContent = `${NOTES.length} topic${NOTES.length===1?'':'s'} ready to save`;
+
+const prev = document.getElementById('preview');
+prev.innerHTML = NOTES.slice(0,12).map((n,i) =>
+  `<div class="q-item"><span class="q-num">${i+1}.</span> ${n.title.substring(0,50)}${n.title.length>50?'...':''} <span class="q-ans">→ ${n.topicId}</span></div>`
+).join('') + (NOTES.length > 12 ? `<div class="q-item" style="color:#3B82F6;text-align:center;padding-top:6px;">... and ${NOTES.length - 12} more</div>` : '');
+
+// Writes via the Firestore SDK's set(..., {merge:true}) instead of raw REST —
+// this is what actually attaches your signed-in ID token, which is what your
+// Firestore rules (allow write: if isAdmin()) require. Also retries once on
+// a transient network drop.
+async function fsSet(col, docId, data, attempt = 1) {
+  try {
+    await db.collection(col).doc(docId).set({...data, updatedAt: new Date().toISOString()}, {merge: true});
+  } catch (err) {
+    const isNetworkError = err.code === 'unavailable' || err instanceof TypeError;
+    if (isNetworkError && attempt < 3) {
+      await new Promise(res => setTimeout(res, attempt * 1000));
+      return fsSet(col, docId, data, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+async function signInAndSave() {
+  const btn = document.getElementById('saveBtn');
+  const area = document.getElementById('mainArea');
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+
+  if (!email || !password) {
+    alert('Enter your admin email and password first.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (cred.user.uid !== ADMIN_UID) {
+      area.innerHTML = `
+        <div class="error">🚫 Signed in, but this account is not the admin account (UID mismatch). Nothing was saved.</div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  } catch (err) {
+    area.innerHTML = `
+      <div class="error">🚫 Sign-in failed: ${err.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  if (navigator.onLine === false) {
+    area.innerHTML = `
+      <div class="error">📡 Your device shows no internet connection right now.</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+      <div class="progress-text" id="pText">Saving 0 of ${NOTES.length}...</div>
+    </div>`;
+
+  let saved = 0;
+  for (const n of NOTES) {
+    try {
+      const { topicId, ...docData } = n; // topicId is the doc ID, not stored as a field
+      await fsSet(`studynotes/${SUBJECT}/topics`, topicId, docData);
+      saved++;
+      const pct = Math.round((saved / NOTES.length) * 100);
+      document.getElementById('pFill').style.width = pct + '%';
+      document.getElementById('pText').textContent = `Saving ${saved} of ${NOTES.length}... (${pct}%)`;
+    } catch(e) {
+      document.getElementById('mainArea').innerHTML = `
+        <div class="error">❌ Failed at "${n.title}" (${n.topicId}): ${e.message}</div>
+        <div class="error" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:#94A3B8;">
+          ✅ ${saved} topics were saved before the error.
+        </div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  }
+
+  document.getElementById('mainArea').innerHTML = `
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">All ${saved} topics saved!</div>
+      <div class="success-sub">Notes are now live under studynotes/${SUBJECT}/topics on AceUnilorin PQ.</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
+￼Enter
