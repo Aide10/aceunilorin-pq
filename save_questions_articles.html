@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Save Quiz Questions — AceUnilorin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:8px;}
+.count{font-size:.82rem;color:#3B82F6;font-weight:700;margin-bottom:28px;}
+.q-preview{background:#1A2640;border-radius:12px;padding:12px 14px;margin-bottom:24px;text-align:left;max-height:160px;overflow-y:auto;}
+.q-preview::-webkit-scrollbar{width:3px;}
+.q-preview::-webkit-scrollbar-thumb{background:#3B82F6;border-radius:100px;}
+.q-item{font-size:.72rem;color:#94A3B8;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.q-item:last-child{border-bottom:none;}
+.q-num{color:#3B82F6;font-weight:700;}
+.q-ans{color:#22C55E;font-weight:700;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field:focus{outline:none;border-color:#3B82F6;}
+.field::placeholder{color:#4A5568;}
+.login-note{font-size:.72rem;color:#4A5568;margin-bottom:16px;line-height:1.5;}
+.progress-wrap{margin-bottom:16px;}
+.progress-bar{background:#1A2640;border-radius:100px;height:10px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#3B82F6,#6366F1);transition:width .3s;}
+.progress-text{font-size:.8rem;color:#64748B;}
+.success{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:20px 16px;}
+.success-icon{font-size:2rem;margin-bottom:8px;}
+.success-title{font-family:'Syne',sans-serif;font-weight:800;color:#22C55E;font-size:1rem;margin-bottom:6px;}
+.success-sub{font-size:.78rem;color:#64748B;line-height:1.6;}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:.8rem;color:#EF4444;font-weight:600;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">🧠</div>
+  <div class="title" id="titleEl">Articles Quiz</div>
+  <div class="sub" id="subEl">31 questions — appends after your current highest question number</div>
+  <div class="count" id="countEl">0 questions ready to save</div>
+
+  <div class="q-preview" id="preview"></div>
+
+  <div id="mainArea">
+    <div class="login-note">Sign in with your admin account to save — Firestore rules require it.</div>
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="saveBtn" onclick="signInAndSave()">🔐 Sign In &amp; Save to Firestore</button>
+  </div>
+</div>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* ============================================================
+   PASTE YOUR QUIZ QUESTIONS HERE.
+   Matches exactly what study-english.html's quiz reads from
+   studyquestions/{subject}/questions/{questionId}:
+
+   question     -> the question text
+   optionA..E    -> answer choices (E is optional — omit if only 4 options)
+   answer        -> the correct letter, e.g. "B"
+   explanation   -> optional string shown after answering
+
+   You do NOT need to set `number` or a doc ID yourself — this
+   script automatically finds the current highest `number` for
+   this subject and appends yours right after it, in the order
+   you list them below, so they show up at the END of the quiz.
+   ============================================================ */
+const SUBJECT = 'english'; // must match an existing subject: 'english', 'math', or 'ca'
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+
+const QUESTIONS = [
+  {
+    "question": "The secretary considered the visit ...... honour to him.",
+    "optionA": "an", "optionB": "a", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Honour begins with a silent h, so it is pronounced as if it starts with a vowel sound (\"onour\"), making 'an' the correct article."
+  },
+  {
+    "question": "Have you got ...... charger?",
+    "optionA": "an", "optionB": "a", "optionC": "the", "optionD": "No article",
+    "answer": "B",
+    "explanation": "Charger begins with a consonant sound (/ch/), so 'a' is the correct indefinite article."
+  },
+  {
+    "question": "We have got only ...... hour to do this task.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "B",
+    "explanation": "Hour starts with a silent h, so it takes 'an'."
+  },
+  {
+    "question": "I saw a bird on the tree. ..... bird was red.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "'The' refers back to the specific bird already mentioned."
+  },
+  {
+    "question": "Benin is ...... capital of Edo State.",
+    "optionA": "a", "optionB": "the", "optionC": "an", "optionD": "No article",
+    "answer": "B",
+    "explanation": "We use 'the' before unique positions such as 'the capital'."
+  },
+  {
+    "question": "Wole Soyinka is ...... famous writer.",
+    "optionA": "an", "optionB": "a", "optionC": "the", "optionD": "No article",
+    "answer": "B",
+    "explanation": "'Famous writer' is a singular countable noun beginning with a consonant sound."
+  },
+  {
+    "question": "Is this ....... your new mansion?",
+    "optionA": "No article", "optionB": "a", "optionC": "an", "optionD": "the",
+    "answer": "A",
+    "explanation": "No article is used before possessive adjectives like 'your'."
+  },
+  {
+    "question": "..... moon is too bright today.",
+    "optionA": "A", "optionB": "The", "optionC": "An", "optionD": "No article",
+    "answer": "B",
+    "explanation": "There is only one moon around the Earth, so 'the' is used."
+  },
+  {
+    "question": "I bought some biscuits, ice cream and .... bottle of whiskey.",
+    "optionA": "an", "optionB": "the", "optionC": "a", "optionD": "No article",
+    "answer": "C",
+    "explanation": "Bottle begins with a consonant sound and refers to one unspecified bottle."
+  },
+  {
+    "question": "Have you been to ...... Sicily?",
+    "optionA": "the", "optionB": "No article", "optionC": "a", "optionD": "an",
+    "answer": "B",
+    "explanation": "Most islands and countries take no article."
+  },
+  {
+    "question": "Jane told us ...... interesting story.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "B",
+    "explanation": "'Interesting' begins with a vowel sound, so 'an' is correct."
+  },
+  {
+    "question": "Tammy Abraham was born in ..... UK.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "We say 'the UK' because it is a shortened form of 'the United Kingdom'."
+  },
+  {
+    "question": "I don't like going out to watch football late in .... night.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "The fixed expression is 'at night' or 'in the night' — in this sentence, 'the' is required."
+  },
+  {
+    "question": "Have you talked with .... mom today?",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "D",
+    "explanation": "No article is used before a possessive adjective such as 'your' (understood here)."
+  },
+  {
+    "question": "Some scientists did say that ..... Earth was flat.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "We say 'the Earth' because it is a unique planet."
+  },
+  {
+    "question": "Where is ...... Sahara Desert located?",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Deserts are normally preceded by 'the'."
+  },
+  {
+    "question": "My younger brother wants to become ........ banker.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Banker begins with a consonant sound."
+  },
+  {
+    "question": "My uncle plays ...... piano very well.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "We use 'the' with musical instruments."
+  },
+  {
+    "question": "I wrote a beautiful poem for her. ...... poem made her heart melt.",
+    "optionA": "The", "optionB": "A", "optionC": "An", "optionD": "No article",
+    "answer": "A",
+    "explanation": "The second sentence refers to the specific poem already mentioned."
+  },
+  {
+    "question": "We travelled to ...... Netherlands earlier this year.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Country names that are plural take 'the'."
+  },
+  {
+    "question": "Bernard has travelled to ..... United States of America.",
+    "optionA": "the", "optionB": "a", "optionC": "an", "optionD": "No article",
+    "answer": "A",
+    "explanation": "We say 'the United States of America' because it is a plural country name."
+  },
+  {
+    "question": "The immigrants drowned at ........ Atlantic Ocean while trying to travel overseas.",
+    "optionA": "a", "optionB": "the", "optionC": "an", "optionD": "No article",
+    "answer": "B",
+    "explanation": "Oceans are always preceded by 'the'."
+  },
+  {
+    "question": "Tobi said that he waited for ........ hour.",
+    "optionA": "an", "optionB": "a", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Hour starts with a silent h, so 'an' is used."
+  },
+  {
+    "question": "There is ..... university in the capital city of Nairobi.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Although 'university' begins with u, it is pronounced \"you\" — a consonant sound."
+  },
+  {
+    "question": "Mr Osaro once worked in ........ European shopping company.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "European begins with the \"you\" sound, so 'a' is correct."
+  },
+  {
+    "question": "There is ....... hotel at the corner of the road.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "In modern English, the h in hotel is pronounced, so 'a hotel' is standard."
+  },
+  {
+    "question": "To tell you ........., I don't know the answer.",
+    "optionA": "truth", "optionB": "the truth", "optionC": "a truth", "optionD": "an truth",
+    "answer": "B",
+    "explanation": "The fixed expression is 'to tell you the truth'."
+  },
+  {
+    "question": "I don't like to flatter people but I must say that Jane is ......... beautiful girl in the school.",
+    "optionA": "the most", "optionB": "most", "optionC": "more", "optionD": "very",
+    "answer": "A",
+    "explanation": "'The most' is used to form the superlative when comparing Jane with everyone else."
+  },
+  {
+    "question": "The governor was ...... unionist before he joined politics.",
+    "optionA": "a", "optionB": "an", "optionC": "the", "optionD": "No article",
+    "answer": "A",
+    "explanation": "Unionist begins with the \"you\" sound, so it takes 'a'."
+  },
+  {
+    "question": "We left ...... USA and crossed ......... Atlantic Ocean to ........ Europe.",
+    "optionA": "the / the / no article", "optionB": "no article / the / the", "optionC": "the / a / the", "optionD": "a / the / no article",
+    "answer": "A",
+    "explanation": "We say 'the USA', 'the Atlantic Ocean', but simply 'Europe' without an article."
+  },
+  {
+    "question": "He sent the expensive present to one Miss Gloria of Umukoro Community High School and not ...... Miss Gloria of General Electric.",
+    "optionA": "a", "optionB": "the", "optionC": "an", "optionD": "No article",
+    "answer": "B",
+    "explanation": "'The' identifies the specific Miss Gloria being contrasted with the first one mentioned."
+  }
+];
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.getElementById('countEl').textContent = `${QUESTIONS.length} question${QUESTIONS.length===1?'':'s'} ready to save`;
+
+const prev = document.getElementById('preview');
+prev.innerHTML = QUESTIONS.slice(0,12).map((q,i) =>
+  `<div class="q-item"><span class="q-num">${i+1}.</span> ${q.question.substring(0,45)}${q.question.length>45?'...':''} <span class="q-ans">→ ${q.answer}</span></div>`
+).join('') + (QUESTIONS.length > 12 ? `<div class="q-item" style="color:#3B82F6;text-align:center;padding-top:6px;">... and ${QUESTIONS.length - 12} more</div>` : '');
+
+async function fsAdd(col, data, attempt = 1) {
+  try {
+    await db.collection(col).add({...data, createdAt: new Date().toISOString()});
+  } catch (err) {
+    const isNetworkError = err.code === 'unavailable' || err instanceof TypeError;
+    if (isNetworkError && attempt < 3) {
+      await new Promise(res => setTimeout(res, attempt * 1000));
+      return fsAdd(col, data, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+async function signInAndSave() {
+  const btn = document.getElementById('saveBtn');
+  const area = document.getElementById('mainArea');
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+
+  if (!email || !password) {
+    alert('Enter your admin email and password first.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (cred.user.uid !== ADMIN_UID) {
+      area.innerHTML = `
+        <div class="error">🚫 Signed in, but this account is not the admin account (UID mismatch). Nothing was saved.</div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  } catch (err) {
+    area.innerHTML = `
+      <div class="error">🚫 Sign-in failed: ${err.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  if (navigator.onLine === false) {
+    area.innerHTML = `
+      <div class="error">📡 Your device shows no internet connection right now.</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `<div class="progress-text" id="pText">Checking current highest question number...</div>`;
+
+  // Find the current highest `number` for this subject, so new questions
+  // append after it instead of overwriting or colliding with existing ones.
+  let startNumber = 1;
+  try {
+    const col = `studyquestions/${SUBJECT}/questions`;
+    const snap = await db.collection(col).orderBy('number', 'desc').limit(1).get();
+    if (!snap.empty) {
+      startNumber = (snap.docs[0].data().number || 0) + 1;
+    }
+  } catch (e) {
+    area.innerHTML = `
+      <div class="error">❌ Could not check existing question numbers: ${e.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+      <div class="progress-text" id="pText">Saving 0 of ${QUESTIONS.length}... (starting at #${startNumber})</div>
+    </div>`;
+
+  let saved = 0;
+  for (const q of QUESTIONS) {
+    try {
+      const number = startNumber + saved;
+      await fsAdd(`studyquestions/${SUBJECT}/questions`, {...q, number});
+      saved++;
+      const pct = Math.round((saved / QUESTIONS.length) * 100);
+      document.getElementById('pFill').style.width = pct + '%';
+      document.getElementById('pText').textContent = `Saving ${saved} of ${QUESTIONS.length}... (${pct}%)`;
+    } catch(e) {
+      document.getElementById('mainArea').innerHTML = `
+        <div class="error">❌ Failed at "${q.question.substring(0,40)}...": ${e.message}</div>
+        <div class="error" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:#94A3B8;">
+          ✅ ${saved} questions were saved before the error.
+        </div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  }
+
+  document.getElementById('mainArea').innerHTML = `
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">All ${saved} questions saved!</div>
+      <div class="success-sub">Appended as #${startNumber} through #${startNumber + saved - 1} in studyquestions/${SUBJECT}/questions.</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
