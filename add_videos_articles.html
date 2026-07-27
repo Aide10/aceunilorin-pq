@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Add Video to Articles Topic — AceUnilorin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:24px;word-break:break-all;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field::placeholder{color:#4A5568;}
+.line{font-size:.82rem;line-height:1.7;padding:14px 16px;border-radius:10px;text-align:left;}
+.ok{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);color:#22C55E;}
+.bad{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#EF4444;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">▶️</div>
+  <div class="title">Add Video to Articles Topic</div>
+  <div class="sub">https://youtu.be/M67GHeR286s?si=H_pCkbh1zYyM7qlW</div>
+  <div id="mainArea">
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="saveBtn" onclick="signInAndSave()">🔐 Sign In &amp; Add Video Link</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+const SUBJECT = 'english';
+const TOPIC_ID = 'articles';
+const VIDEO_URL = 'https://youtu.be/M67GHeR286s?si=H_pCkbh1zYyM7qlW';
+
+async function signInAndSave() {
+  const btn = document.getElementById('saveBtn');
+  const area = document.getElementById('mainArea');
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+  if (!email || !password) { alert('Enter your admin email and password.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (cred.user.uid !== ADMIN_UID) {
+      area.innerHTML = `<div class="line bad">🚫 Signed in, but this is not the admin account. Nothing was saved.</div>`;
+      return;
+    }
+  } catch (err) {
+    area.innerHTML = `<div class="line bad">🚫 Sign-in failed: ${err.message}</div><button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  try {
+    await db.collection('studynotes').doc(SUBJECT).collection('topics').doc(TOPIC_ID)
+      .set({ videoUrl: VIDEO_URL, updatedAt: new Date().toISOString() }, { merge: true });
+    area.innerHTML = `
+      <div class="line ok">✅ Video link added to the "Articles" topic.<br><br>
+      Refresh study-english.html — a "▶️ Watch Video" button should now appear on that topic's card.</div>`;
+  } catch (e) {
+    area.innerHTML = `<div class="line bad">❌ Failed to save: ${e.message}</div><button class="retry" onclick="location.reload()">Try again</button>`;
+  }
+}
+</script>
+</body>
+</html>
