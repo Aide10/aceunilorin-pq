@@ -25,11 +25,6 @@
     .hero-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#14B8A6,#06B6D4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 8px 24px rgba(20,184,166,0.3);flex-shrink:0;}
     .hero-text h1{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;}
     .hero-text p{font-size:0.82rem;color:var(--text-muted);margin-top:3px;}
-    .tabs{display:flex;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:24px;border:1px solid var(--border);animation:fadeUp 0.5s 0.1s ease both;}
-    .tab-btn{flex:1;padding:10px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;border-radius:10px;cursor:pointer;transition:all 0.2s;}
-    .tab-btn.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px var(--primary-glow);}
-    .tab-content{display:none;}
-    .tab-content.active{display:block;animation:fadeUp 0.3s ease both;}
 
     /* NOTES */
     .notes-loading{text-align:center;padding:40px 20px;color:var(--text-muted);}
@@ -43,30 +38,31 @@
     .topic-header:hover{background:var(--surface2);}
     .topic-header-left{display:flex;align-items:center;gap:12px;}
     .topic-emoji{font-size:1.2rem;}
-    /* Notes write-up content now renders in a serif face, matching a printed
-       study booklet feel. App chrome (nav, tabs, buttons) stays in the brand font. */
     .topic-title{font-family:'Times New Roman',Times,serif;font-size:0.98rem;font-weight:700;}
     .topic-chevron{font-size:0.75rem;color:var(--text-muted);transition:transform 0.25s;flex-shrink:0;}
     .topic-card.open .topic-chevron{transform:rotate(180deg);}
     .topic-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border);}
     .topic-card.open .topic-body{display:block;animation:fadeUp 0.25s ease both;}
-    .topic-body ul{padding-left:18px;margin-top:12px;}
+    .subtopic-block{margin-top:16px;}
+    .subtopic-block:first-child{margin-top:14px;}
+    .subtopic-title{font-family:'Times New Roman',Times,serif;font-size:0.9rem;font-weight:700;color:var(--primary);margin-bottom:6px;padding-bottom:6px;border-bottom:1px dashed var(--border);}
+    .topic-body ul{padding-left:18px;margin-top:8px;}
     .topic-body li{font-family:'Times New Roman',Times,serif;font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:3px;}
-    .example-box{background:var(--surface2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:12px;font-family:'Times New Roman',Times,serif;font-size:0.9rem;line-height:1.6;color:var(--text-muted);}
+    .example-box{background:var(--surface2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:10px;font-family:'Times New Roman',Times,serif;font-size:0.9rem;line-height:1.6;color:var(--text-muted);}
     .example-box strong{color:var(--primary);}
+    .topic-quiz-btn{width:100%;margin-top:18px;padding:13px;border-radius:12px;border:none;background:var(--primary);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;}
+    .topic-quiz-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
+    .topic-quiz-btn .qcount{opacity:0.85;font-weight:500;}
+    .topic-video-btn{width:100%;margin-top:14px;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:all 0.2s;}
+    .topic-video-btn:hover{border-color:#EF4444;color:#EF4444;}
 
-    /* QUIZ */
-    .quiz-intro{text-align:center;padding:24px 0 20px;}
-    .quiz-intro .big-icon{font-size:3rem;margin-bottom:12px;}
-    .quiz-intro h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:6px;}
-    .quiz-intro p{font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;}
-    .btn{padding:13px 24px;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;}
-    .btn-primary{background:var(--primary);color:#fff;}
-    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
-    .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);}
-    .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
-    .quiz-engine{display:none;}
-    .quiz-engine.active{display:block;animation:fadeUp 0.3s ease both;}
+    /* QUIZ ENGINE (shared, scoped to whichever topic was clicked) */
+    .quiz-overlay{display:none;margin-top:12px;}
+    .quiz-overlay.active{display:block;animation:fadeUp 0.3s ease both;}
+    .quiz-panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--card-shadow);}
+    .quiz-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .quiz-panel-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;}
+    .quiz-close{background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;line-height:1;}
     .qpb-wrap{margin-bottom:16px;}
     .qpb-bg{background:var(--surface2);border-radius:100px;height:5px;overflow:hidden;}
     .qpb-fill{height:100%;background:linear-gradient(90deg,#14B8A6,#06B6D4);border-radius:100px;transition:width 0.3s;}
@@ -74,19 +70,24 @@
     .q-counter{font-size:0.75rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
     .q-text{font-size:0.98rem;font-weight:600;line-height:1.65;margin-bottom:20px;}
     .options{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
-    .option{background:var(--surface);border:2px solid var(--border);border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;}
+    .option{background:var(--bg);border:2px solid var(--border);border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;}
     .option:hover{border-color:var(--primary);background:var(--primary-glow);}
     .option.selected{border-color:var(--primary);background:var(--primary-glow);}
     .option-letter{width:30px;height:30px;border-radius:7px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:800;flex-shrink:0;transition:all 0.2s;}
     .option.selected .option-letter{background:var(--primary);color:#fff;}
     .option-text{font-size:0.88rem;line-height:1.4;}
-    .quiz-nav{display:flex;gap:10px;margin-bottom:16px;}
+    .quiz-nav{display:flex;gap:10px;margin-bottom:6px;}
     .nav-btn{flex:1;padding:12px;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:5px;}
     .nav-btn:hover{border-color:var(--primary);color:var(--primary);}
     .nav-btn:disabled{opacity:0.35;cursor:not-allowed;}
     .nav-btn.submit-btn{background:var(--primary);color:#fff;border-color:var(--primary);}
     .loading-state{text-align:center;padding:32px;color:var(--text-muted);}
-    .batch-result{display:none;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;margin-top:8px;}
+    .btn{padding:13px 24px;border-radius:13px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+    .btn-primary{background:var(--primary);color:#fff;}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--primary-glow);}
+    .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);}
+    .btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+    .batch-result{display:none;}
     .batch-result.active{display:block;animation:fadeUp 0.3s ease both;}
     .batch-score{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;text-align:center;margin-bottom:4px;}
     .batch-label{font-size:0.85rem;color:var(--text-muted);text-align:center;margin-bottom:18px;}
@@ -101,6 +102,7 @@
     .br-ans .w{color:#EF4444;font-weight:700;}
     .br-exp{font-size:0.75rem;color:var(--text-muted);font-style:italic;margin-top:6px;padding-top:6px;border-top:1px solid var(--border);}
     .batch-btns{display:flex;flex-direction:column;gap:8px;}
+    .index-warning{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px 14px;font-size:0.78rem;color:#F59E0B;line-height:1.6;}
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(15,23,42,0.92);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;padding:10px 0 14px;}
     [data-theme="light"] .bottom-nav{background:rgba(240,253,249,0.92);}
     .bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--text-muted);font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:0 14px;}
@@ -120,51 +122,11 @@
   <a href="study.html" class="back-link">← Back to Study Hub</a>
   <div class="subject-hero">
     <div class="hero-icon">📖</div>
-    <div class="hero-text"><h1>Use of English</h1><p>Notes + Practice Questions</p></div>
-  </div>
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('notes',this)">📒 Notes</button>
-    <button class="tab-btn" onclick="switchTab('quiz',this)">🧠 Quiz</button>
+    <div class="hero-text"><h1>Use of English</h1><p>Notes + Practice Questions, by topic</p></div>
   </div>
 
-  <!-- NOTES TAB -->
-  <div class="tab-content active" id="tab-notes">
-    <div id="notesContainer">
-      <div class="notes-loading"><div class="spinner"></div>Loading notes...</div>
-    </div>
-  </div>
-
-  <!-- QUIZ TAB -->
-  <div class="tab-content" id="tab-quiz">
-    <div id="quizIntro">
-      <div class="quiz-intro">
-        <div class="big-icon">🧠</div>
-        <h3>English Quiz</h3>
-        <p>5 questions at a time. Review your answers and explanations after each set.</p>
-        <button class="btn btn-primary" onclick="startQuiz()">Start Quiz →</button>
-      </div>
-    </div>
-    <div class="quiz-engine" id="quizEngine">
-      <div class="qpb-wrap"><div class="qpb-bg"><div class="qpb-fill" id="qpbFill" style="width:0%"></div></div><div class="qpb-label" id="qpbLabel">Question 1 of 5</div></div>
-      <div class="q-counter" id="qCounter">Question 1 of 5</div>
-      <div class="q-text" id="qText"></div>
-      <div class="options" id="optionsContainer"></div>
-      <div class="quiz-nav">
-        <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
-        <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
-        <button class="nav-btn submit-btn" id="submitBtn" onclick="submitBatch()" style="display:none;">Submit ✓</button>
-      </div>
-      <div id="loadingMore" class="loading-state" style="display:none;"><div class="spinner"></div><div>Loading questions...</div></div>
-    </div>
-    <div class="batch-result" id="batchResult">
-      <div class="batch-score" id="batchScore">0/5</div>
-      <div class="batch-label" id="batchLabel"></div>
-      <div class="batch-review" id="batchReview"></div>
-      <div class="batch-btns">
-        <button class="btn btn-primary" id="nextBatchBtn" onclick="nextBatch()">Next 5 Questions →</button>
-        <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:4px;">🔁 Restart</button>
-      </div>
-    </div>
+  <div id="notesContainer">
+    <div class="notes-loading"><div class="spinner"></div>Loading notes...</div>
   </div>
 </div>
 
@@ -185,18 +147,12 @@
   const auth=firebase.auth(), db=firebase.firestore();
   const SUBJECT='english', BATCH=5;
   let questions=[],currentIndex=0,userAnswers={},lastDoc=null,hasMore=true,uid=null;
+  let currentTopicId=null, currentTopicQuestionCount=0;
 
   function toggleTheme(){const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.querySelector('.theme-toggle').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
   const saved=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',saved);document.querySelector('.theme-toggle').textContent=saved==='dark'?'☀️':'🌙';
 
   auth.onAuthStateChanged(u=>{if(!u){window.location.href='auth.html';return;}uid=u.uid;loadNotes();});
-
-  function switchTab(tab,btn){
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-'+tab).classList.add('active');
-  }
 
   // ── NOTES ──
   async function loadNotes(){
@@ -209,13 +165,44 @@
         return;
       }
       container.innerHTML='';
-      snap.forEach(doc=>{
+      for(const doc of snap.docs){
         const t=doc.data();
-        const points=(t.content||[]).map(p=>`<li>${p}</li>`).join('');
-        const example=t.example?`<div class="example-box"><strong>💡 Note:</strong> ${t.example}</div>`:'';
+        const topicId=doc.id;
+
+        // Count questions tagged to this topic so the button can show "(N questions)"
+        let qCount=0;
+        try{
+          const qSnap=await db.collection('studyquestions').doc(SUBJECT).collection('questions')
+            .where('topicId','==',topicId).get();
+          qCount=qSnap.size;
+        }catch(e){ /* index may not exist yet for equality-only count; ignore */ }
+
+        let bodyHtml='';
+        if(Array.isArray(t.subtopics)&&t.subtopics.length){
+          // Multi-section topic
+          bodyHtml=t.subtopics.map(s=>{
+            const points=(s.content||[]).map(p=>`<li>${p}</li>`).join('');
+            const example=s.example?`<div class="example-box"><strong>💡 Note:</strong> ${s.example}</div>`:'';
+            return `<div class="subtopic-block"><div class="subtopic-title">${s.subtitle||''}</div><ul>${points}</ul>${example}</div>`;
+          }).join('');
+        } else {
+          // Single flat-content topic (legacy / simple shape)
+          const points=(t.content||[]).map(p=>`<li>${p}</li>`).join('');
+          const example=t.example?`<div class="example-box"><strong>💡 Note:</strong> ${t.example}</div>`:'';
+          bodyHtml=`<ul>${points}</ul>${example}`;
+        }
+
+        const quizBtn=qCount>0
+          ? `<button class="topic-quiz-btn" onclick="event.stopPropagation();openTopicQuiz('${topicId}', this)">🧠 Take Quiz on This Topic <span class="qcount">(${qCount} question${qCount===1?'':'s'})</span></button>`
+          : '';
+
+        const videoBtn=t.videoUrl
+          ? `<a class="topic-video-btn" href="${t.videoUrl}" target="_blank" onclick="event.stopPropagation()">▶️ Watch Video</a>`
+          : '';
+
         container.innerHTML+=`
-          <div class="topic-card" onclick="this.classList.toggle('open')">
-            <div class="topic-header">
+          <div class="topic-card" data-topic-id="${topicId}">
+            <div class="topic-header" onclick="this.parentElement.classList.toggle('open')">
               <div class="topic-header-left">
                 <span class="topic-emoji">${t.emoji||'📌'}</span>
                 <span class="topic-title">${t.title}</span>
@@ -223,60 +210,104 @@
               <span class="topic-chevron">▼</span>
             </div>
             <div class="topic-body">
-              <ul>${points}</ul>
-              ${example}
+              ${bodyHtml}
+              ${videoBtn}
+              ${quizBtn}
+              <div class="quiz-overlay" id="quizOverlay-${topicId}"></div>
             </div>
           </div>`;
-      });
+      }
     }catch(e){
       container.innerHTML=`<div class="notes-empty"><div class="empty-icon">⚠️</div><p>Failed to load notes. Check your connection.</p></div>`;
       console.error(e);
     }
   }
 
-  // ── QUIZ ──
-  async function startQuiz(){document.getElementById('quizIntro').style.display='none';document.getElementById('quizEngine').classList.add('active');await loadBatch();}
+  // ── TOPIC-SCOPED QUIZ ──
+  function quizPanelShell(topicId){
+    return `
+      <div class="quiz-panel">
+        <div class="quiz-panel-header">
+          <div class="quiz-panel-title">🧠 Topic Quiz</div>
+          <button class="quiz-close" onclick="closeTopicQuiz('${topicId}')">✕</button>
+        </div>
+        <div id="quizEngine-${topicId}"></div>
+        <div class="batch-result" id="batchResult-${topicId}"></div>
+      </div>`;
+  }
 
-  async function loadBatch(){
-    document.getElementById('loadingMore').style.display='block';
+  async function openTopicQuiz(topicId, btnEl){
+    currentTopicId=topicId;
+    const overlay=document.getElementById('quizOverlay-'+topicId);
+    overlay.innerHTML=quizPanelShell(topicId);
+    overlay.classList.add('active');
+    btnEl.style.display='none';
+    lastDoc=null; hasMore=true;
+    await loadBatch(topicId);
+    overlay.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+
+  function closeTopicQuiz(topicId){
+    const overlay=document.getElementById('quizOverlay-'+topicId);
+    overlay.classList.remove('active');
+    overlay.innerHTML='';
+    const card=overlay.closest('.topic-card');
+    const btn=card.querySelector('.topic-quiz-btn');
+    if(btn) btn.style.display='flex';
+  }
+
+  async function loadBatch(topicId){
+    const engine=document.getElementById('quizEngine-'+topicId);
+    engine.innerHTML=`<div class="loading-state"><div class="spinner"></div><div>Loading questions...</div></div>`;
     try{
-      let q=db.collection('studyquestions').doc(SUBJECT).collection('questions').orderBy('number').limit(BATCH);
+      let q=db.collection('studyquestions').doc(SUBJECT).collection('questions')
+        .where('topicId','==',topicId).orderBy('number').limit(BATCH);
       if(lastDoc) q=q.startAfter(lastDoc);
       const snap=await q.get();
-      document.getElementById('loadingMore').style.display='none';
       if(snap.empty||snap.docs.length<BATCH) hasMore=false;
-      if(snap.empty){showDone();return false;}
+      if(snap.empty){ showTopicDone(topicId); return; }
       lastDoc=snap.docs[snap.docs.length-1];
       questions=snap.docs.map(d=>({...d.data(),id:d.id}));
-      currentIndex=0;userAnswers={};renderQuestion();return true;
-    }catch(e){document.getElementById('loadingMore').style.display='none';alert('Failed to load. Check connection.');console.error(e);return false;}
+      currentIndex=0; userAnswers={};
+      renderQuestion(topicId);
+    }catch(e){
+      console.error(e);
+      let hint='';
+      if(e.code==='failed-precondition' || (e.message&&e.message.includes('index'))){
+        hint=`<div class="index-warning">⚠️ Firestore needs a composite index for this query (topicId + number). Check your browser console for a link from Firebase — tap it once to auto-create the index, then try again.</div>`;
+      }
+      engine.innerHTML=`<div class="loading-state">Failed to load questions.${hint}</div>`;
+    }
   }
 
-  function renderQuestion(){
+  function renderQuestion(topicId){
+    const engine=document.getElementById('quizEngine-'+topicId);
     const q=questions[currentIndex],total=questions.length;
-    document.getElementById('qCounter').textContent=`Question ${currentIndex+1} of ${total}`;
-    document.getElementById('qpbLabel').textContent=`Question ${currentIndex+1} of ${total}`;
-    document.getElementById('qpbFill').style.width=`${((currentIndex+1)/total)*100}%`;
-    document.getElementById('qText').textContent=q.question||q.text||'';
-    const opts=document.getElementById('optionsContainer');opts.innerHTML='';
-    ['A','B','C','D','E'].forEach((l,i)=>{
+    const opts=['A','B','C','D','E'].map((l,i)=>{
       const opt=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE][i];
-      if(!opt)return;
-      const div=document.createElement('div');
-      div.className='option'+(userAnswers[currentIndex]===l?' selected':'');
-      div.onclick=()=>selectAnswer(l);
-      div.innerHTML=`<div class="option-letter">${l}</div><div class="option-text">${opt}</div>`;
-      opts.appendChild(div);
-    });
-    document.getElementById('prevBtn').disabled=currentIndex===0;
-    document.getElementById('nextBtn').style.display=currentIndex<total-1?'flex':'none';
-    document.getElementById('submitBtn').style.display=currentIndex===total-1?'flex':'none';
+      if(!opt) return '';
+      const sel=userAnswers[currentIndex]===l?' selected':'';
+      return `<div class="option${sel}" onclick="selectAnswer('${topicId}','${l}')"><div class="option-letter">${l}</div><div class="option-text">${opt}</div></div>`;
+    }).join('');
+
+    engine.innerHTML=`
+      <div class="qpb-wrap"><div class="qpb-bg"><div class="qpb-fill" style="width:${((currentIndex+1)/total)*100}%"></div></div>
+        <div class="qpb-label">Question ${currentIndex+1} of ${total}</div></div>
+      <div class="q-counter">Question ${currentIndex+1} of ${total}</div>
+      <div class="q-text">${q.question||q.text||''}</div>
+      <div class="options">${opts}</div>
+      <div class="quiz-nav">
+        <button class="nav-btn" onclick="navigate('${topicId}',-1)" ${currentIndex===0?'disabled':''}>← Prev</button>
+        ${currentIndex<total-1
+          ? `<button class="nav-btn" onclick="navigate('${topicId}',1)">Next →</button>`
+          : `<button class="nav-btn submit-btn" onclick="submitBatch('${topicId}')">Submit ✓</button>`}
+      </div>`;
   }
 
-  function selectAnswer(l){userAnswers[currentIndex]=l;renderQuestion();}
-  function navigate(d){currentIndex=Math.max(0,Math.min(questions.length-1,currentIndex+d));renderQuestion();}
+  function selectAnswer(topicId,l){userAnswers[currentIndex]=l;renderQuestion(topicId);}
+  function navigate(topicId,d){currentIndex=Math.max(0,Math.min(questions.length-1,currentIndex+d));renderQuestion(topicId);}
 
-  function submitBatch(){
+  function submitBatch(topicId){
     let correct=0;const review=[];
     questions.forEach((q,i)=>{
       const ua=userAnswers[i]||null,ca=q.answer||q.correctAnswer;
@@ -295,13 +326,12 @@
       if(sr){const d=JSON.parse(sr);if(d.lastDate===today)count=d.count;else if(d.lastDate===yesterday)count=d.count+1;}
       localStorage.setItem(sk,JSON.stringify({count,lastDate:today}));
     }
-    document.getElementById('quizEngine').classList.remove('active');
-    const br=document.getElementById('batchResult');br.classList.add('active');
-    document.getElementById('batchScore').textContent=`${correct}/${questions.length}`;
+    document.getElementById('quizEngine-'+topicId).innerHTML='';
+    const br=document.getElementById('batchResult-'+topicId);
+    br.classList.add('active');
     const pct=Math.round((correct/questions.length)*100);
-    document.getElementById('batchLabel').textContent=pct===100?'Perfect! 🎉':pct>=80?'Excellent! 🔥':pct>=60?'Good effort 👍':pct>=40?'Keep practising 💪':'Review the notes and try again 📖';
     const letters=['A','B','C','D','E'];
-    document.getElementById('batchReview').innerHTML=review.map((q,i)=>{
+    const reviewHtml=review.map((q,i)=>{
       const opts=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE];
       const ca=q.answer||q.correctAnswer;
       const correctOpt=opts[letters.indexOf(ca)]||'';
@@ -314,22 +344,37 @@
         ${q.explanation?`<div class="br-exp">💡 ${q.explanation}</div>`:''}
       </div>`;
     }).join('');
-    if(!hasMore) document.getElementById('nextBatchBtn').textContent='🔁 Restart Quiz';
+    br.innerHTML=`
+      <div class="batch-score">${correct}/${questions.length}</div>
+      <div class="batch-label">${pct===100?'Perfect! 🎉':pct>=80?'Excellent! 🔥':pct>=60?'Good effort 👍':pct>=40?'Keep practising 💪':'Review the notes and try again 📖'}</div>
+      <div class="batch-review">${reviewHtml}</div>
+      <div class="batch-btns">
+        <button class="btn btn-primary" onclick="nextTopicBatch('${topicId}')">${hasMore?'Next 5 Questions →':'🔁 Restart Topic Quiz'}</button>
+        <button class="btn btn-outline" onclick="closeTopicQuiz('${topicId}')">Close</button>
+      </div>`;
   }
 
-  async function nextBatch(){
-    document.getElementById('batchResult').classList.remove('active');
-    if(!hasMore){lastDoc=null;hasMore=true;}
-    document.getElementById('quizEngine').classList.add('active');
-    await loadBatch();
+  async function nextTopicBatch(topicId){
+    document.getElementById('batchResult-'+topicId).classList.remove('active');
+    document.getElementById('batchResult-'+topicId).innerHTML='';
+    if(!hasMore){ lastDoc=null; hasMore=true; }
+    await loadBatch(topicId);
   }
 
-  function restartQuiz(){lastDoc=null;hasMore=true;document.getElementById('batchResult').classList.remove('active');document.getElementById('quizEngine').classList.add('active');loadBatch();}
+  function showTopicDone(topicId){
+    const engine=document.getElementById('quizEngine-'+topicId);
+    engine.innerHTML=`
+      <div class="loading-state">
+        <div style="font-size:2.4rem;margin-bottom:10px;">🎉</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:6px;">All questions done!</div>
+        <div style="margin-bottom:16px;">You've completed every question for this topic.</div>
+        <button class="btn btn-primary" onclick="restartTopicQuiz('${topicId}')">🔁 Start Over</button>
+      </div>`;
+  }
 
-  function showDone(){
-    document.getElementById('quizEngine').classList.remove('active');
-    const intro=document.getElementById('quizIntro');intro.style.display='block';
-    intro.innerHTML=`<div class="quiz-intro"><div class="big-icon">🎉</div><h3>All questions done!</h3><p>You've completed all available English questions.</p><button class="btn btn-primary" onclick="restartQuiz()">🔁 Start Over</button></div>`;
+  async function restartTopicQuiz(topicId){
+    lastDoc=null; hasMore=true;
+    await loadBatch(topicId);
   }
 </script>
 </body>
