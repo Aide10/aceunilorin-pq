@@ -43,14 +43,16 @@
     .topic-header:hover{background:var(--surface2);}
     .topic-header-left{display:flex;align-items:center;gap:12px;}
     .topic-emoji{font-size:1.2rem;}
-    .topic-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:800;}
+    /* Notes write-up content now renders in a serif face, matching a printed
+       study booklet feel. App chrome (nav, tabs, buttons) stays in the brand font. */
+    .topic-title{font-family:'Times New Roman',Times,serif;font-size:0.98rem;font-weight:700;}
     .topic-chevron{font-size:0.75rem;color:var(--text-muted);transition:transform 0.25s;flex-shrink:0;}
     .topic-card.open .topic-chevron{transform:rotate(180deg);}
     .topic-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border);}
     .topic-card.open .topic-body{display:block;animation:fadeUp 0.25s ease both;}
     .topic-body ul{padding-left:18px;margin-top:12px;}
-    .topic-body li{font-size:0.85rem;color:var(--text-muted);line-height:1.75;margin-bottom:3px;}
-    .example-box{background:var(--surface2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:12px;font-size:0.82rem;line-height:1.6;color:var(--text-muted);}
+    .topic-body li{font-family:'Times New Roman',Times,serif;font-size:0.92rem;color:var(--text-muted);line-height:1.75;margin-bottom:3px;}
+    .example-box{background:var(--surface2);border-left:3px solid var(--primary);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:12px;font-family:'Times New Roman',Times,serif;font-size:0.9rem;line-height:1.6;color:var(--text-muted);}
     .example-box strong{color:var(--primary);}
 
     /* QUIZ */
