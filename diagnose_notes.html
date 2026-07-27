@@ -83,13 +83,26 @@ async function runDiagnostic() {
     log('❌ Could not read users/' + uid + ': ' + e.code + ' — ' + e.message, 'bad');
   }
 
-  // 3. Attempt the exact read study-english.html performs
+  // 3. Attempt the exact read study-english.html performs (a QUERY)
   try {
     const snap = await db.collection('studynotes').doc('english').collection('topics').orderBy('order').get();
-    log('✅ studynotes/english/topics read SUCCEEDED. Docs found: ' + snap.size, 'ok');
+    log('✅ QUERY studynotes/english/topics (orderBy) SUCCEEDED. Docs found: ' + snap.size, 'ok');
     snap.forEach(d => log('  → ' + d.id + ': ' + (d.data().title || '(no title field)'), 'info'));
   } catch (e) {
-    log('❌ studynotes/english/topics read FAILED.\nCode: ' + e.code + '\nMessage: ' + e.message, 'bad');
+    log('❌ QUERY studynotes/english/topics (orderBy) FAILED.\nCode: ' + e.code + '\nMessage: ' + e.message, 'bad');
+  }
+
+  // 4. Attempt a SINGLE DOCUMENT read on one known topic — isolates whether
+  // this is a query-specific rules issue vs a plain permissions issue.
+  try {
+    const doc = await db.collection('studynotes').doc('english').collection('topics').doc('definite-article-the-part1').get();
+    if (doc.exists) {
+      log('✅ SINGLE-DOC GET studynotes/english/topics/definite-article-the-part1 SUCCEEDED.\nData: ' + JSON.stringify(doc.data()).substring(0, 200), 'ok');
+    } else {
+      log('⚠️ SINGLE-DOC GET succeeded (no permission error) but the document does not exist at that ID.', 'info');
+    }
+  } catch (e) {
+    log('❌ SINGLE-DOC GET studynotes/english/topics/definite-article-the-part1 FAILED.\nCode: ' + e.code + '\nMessage: ' + e.message, 'bad');
   }
 }
 </script>
