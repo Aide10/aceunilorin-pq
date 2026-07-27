@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Restructure Articles Topic — AceUnilorin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:440px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:24px;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field::placeholder{color:#4A5568;}
+.line{font-size:.78rem;line-height:1.7;padding:10px 12px;border-radius:8px;margin-bottom:8px;white-space:pre-wrap;word-break:break-word;text-align:left;}
+.ok{background:rgba(34,197,94,0.1);color:#22C55E;}
+.bad{background:rgba(239,68,68,0.1);color:#EF4444;}
+.info{background:rgba(59,130,246,0.1);color:#93C5FD;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🔧</div>
+  <div class="title">Restructure Articles Topic</div>
+  <div class="sub">Merges the 3 existing Articles note docs into one topic with sub-sections, then tags all 31 quiz questions with topicId "articles".</div>
+  <div id="loginArea">
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="runBtn" onclick="run()">🔐 Sign In &amp; Run Migration</button>
+  </div>
+  <div id="out"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+const SUBJECT = 'english';
+const OLD_TOPIC_IDS = ['definite-article-the-part1', 'definite-article-the-part2', 'indefinite-articles-a-an'];
+const NEW_TOPIC_ID = 'articles';
+
+// Exact text of all 31 Articles questions, used to identify which existing
+// studyquestions docs to tag — safe regardless of their auto-generated IDs.
+const ARTICLE_QUESTION_TEXTS = [
+  "The secretary considered the visit ...... honour to him.",
+  "Have you got ...... charger?",
+  "We have got only ...... hour to do this task.",
+  "I saw a bird on the tree. ..... bird was red.",
+  "Benin is ...... capital of Edo State.",
+  "Wole Soyinka is ...... famous writer.",
+  "Is this ....... your new mansion?",
+  "..... moon is too bright today.",
+  "I bought some biscuits, ice cream and .... bottle of whiskey.",
+  "Have you been to ...... Sicily?",
+  "Jane told us ...... interesting story.",
+  "Tammy Abraham was born in ..... UK.",
+  "I don't like going out to watch football late in .... night.",
+  "Have you talked with .... mom today?",
+  "Some scientists did say that ..... Earth was flat.",
+  "Where is ...... Sahara Desert located?",
+  "My younger brother wants to become ........ banker.",
+  "My uncle plays ...... piano very well.",
+  "I wrote a beautiful poem for her. ...... poem made her heart melt.",
+  "We travelled to ...... Netherlands earlier this year.",
+  "Bernard has travelled to ..... United States of America.",
+  "The immigrants drowned at ........ Atlantic Ocean while trying to travel overseas.",
+  "Tobi said that he waited for ........ hour.",
+  "There is ..... university in the capital city of Nairobi.",
+  "Mr Osaro once worked in ........ European shopping company.",
+  "There is ....... hotel at the corner of the road.",
+  "To tell you ........., I don't know the answer.",
+  "I don't like to flatter people but I must say that Jane is ......... beautiful girl in the school.",
+  "The governor was ...... unionist before he joined politics.",
+  "We left ...... USA and crossed ......... Atlantic Ocean to ........ Europe.",
+  "He sent the expensive present to one Miss Gloria of Umukoro Community High School and not ...... Miss Gloria of General Electric."
+];
+
+function log(msg, cls) {
+  const out = document.getElementById('out');
+  const div = document.createElement('div');
+  div.className = 'line ' + (cls || 'info');
+  div.textContent = msg;
+  out.appendChild(div);
+}
+
+async function run() {
+  const btn = document.getElementById('runBtn');
+  const email = document.getElementById('emailInput').value.trim();
+  const pass = document.getElementById('passInput').value;
+  if (!email || !pass) { alert('Enter admin email and password'); return; }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+  document.getElementById('out').innerHTML = '';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    if (cred.user.uid !== ADMIN_UID) {
+      log('🚫 Signed in, but this is not the admin account. Aborting — nothing changed.', 'bad');
+      return;
+    }
+    log('✅ Signed in as admin.', 'ok');
+  } catch (e) {
+    log('🚫 Sign-in failed: ' + e.message, 'bad');
+    return;
+  }
+
+  // STEP 1: Fetch the 3 old topic docs
+  btn.textContent = 'Reading existing topics...';
+  const oldDocs = [];
+  try {
+    for (const id of OLD_TOPIC_IDS) {
+      const doc = await db.collection('studynotes').doc(SUBJECT).collection('topics').doc(id).get();
+      if (doc.exists) {
+        oldDocs.push({ id, data: doc.data() });
+        log('📄 Found old topic: ' + id + ' ("' + doc.data().title + '")', 'ok');
+      } else {
+        log('⚠️ Old topic not found (may already be migrated): ' + id, 'info');
+      }
+    }
+  } catch (e) {
+    log('❌ Failed reading old topics: ' + e.message, 'bad');
+    return;
+  }
+
+  if (oldDocs.length === 0) {
+    log('Nothing to merge — old topic docs are already gone. Skipping to question tagging.', 'info');
+  } else {
+    // STEP 2: Build merged doc with subtopics array
+    const merged = {
+      title: "Articles — 'A', 'An' & 'THE'",
+      emoji: '📘',
+      order: 1,
+      subtopics: oldDocs.map(d => ({
+        subtitle: d.data.title,
+        content: d.data.content || [],
+        example: d.data.example || null
+      })),
+      updatedAt: new Date().toISOString()
+    };
+
+    btn.textContent = 'Writing merged topic...';
+    try {
+      await db.collection('studynotes').doc(SUBJECT).collection('topics').doc(NEW_TOPIC_ID).set(merged);
+      log('✅ Wrote merged topic "articles" with ' + merged.subtopics.length + ' sub-sections.', 'ok');
+    } catch (e) {
+      log('❌ Failed writing merged topic: ' + e.message, 'bad');
+      return;
+    }
+
+    // STEP 3: Delete the 3 old docs
+    btn.textContent = 'Deleting old topic docs...';
+    for (const d of oldDocs) {
+      try {
+        await db.collection('studynotes').doc(SUBJECT).collection('topics').doc(d.id).delete();
+        log('🗑️ Deleted old topic: ' + d.id, 'ok');
+      } catch (e) {
+        log('❌ Failed deleting ' + d.id + ': ' + e.message, 'bad');
+      }
+    }
+  }
+
+  // STEP 4: Tag all 31 questions with topicId "articles"
+  btn.textContent = 'Tagging quiz questions...';
+  try {
+    const snap = await db.collection('studyquestions').doc(SUBJECT).collection('questions').get();
+    let tagged = 0, alreadyTagged = 0, notMatched = 0;
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      if (ARTICLE_QUESTION_TEXTS.includes(data.question)) {
+        if (data.topicId === NEW_TOPIC_ID) {
+          alreadyTagged++;
+        } else {
+          await db.collection('studyquestions').doc(SUBJECT).collection('questions').doc(doc.id).update({ topicId: NEW_TOPIC_ID });
+          tagged++;
+        }
+      } else {
+        notMatched++;
+      }
+    }
+    log('✅ Tagged ' + tagged + ' question(s) with topicId "articles".', 'ok');
+    if (alreadyTagged) log('ℹ️ ' + alreadyTagged + ' question(s) were already tagged.', 'info');
+    if (notMatched) log('ℹ️ ' + notMatched + ' other question(s) in this subject were left untouched (not Articles questions).', 'info');
+  } catch (e) {
+    log('❌ Failed tagging questions: ' + e.message, 'bad');
+    return;
+  }
+
+  btn.textContent = '✅ Migration Complete';
+  log('🎉 Done. Refresh study-english.html to see the restructured topic.', 'ok');
+}
+</script>
+</body>
+</html>
