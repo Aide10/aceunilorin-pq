@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Diagnose Study Notes — AceUnilorin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:monospace;background:#0A0F1E;color:#F1F5F9;min-height:100vh;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;max-width:500px;margin:0 auto;}
+h1{font-size:1.1rem;margin-bottom:16px;}
+.field{width:100%;padding:12px;background:#1A2640;border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:10px;}
+.btn{width:100%;padding:14px;background:#3B82F6;color:#fff;border:none;border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;margin-bottom:16px;}
+.line{font-size:.78rem;line-height:1.7;padding:8px 10px;border-radius:6px;margin-bottom:6px;white-space:pre-wrap;word-break:break-word;}
+.ok{background:rgba(34,197,94,0.1);color:#22C55E;}
+.bad{background:rgba(239,68,68,0.1);color:#EF4444;}
+.info{background:rgba(59,130,246,0.1);color:#93C5FD;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🔍 Study Notes Diagnostic</h1>
+  <input class="field" id="email" type="email" placeholder="Account email to test"/>
+  <input class="field" id="pass" type="password" placeholder="Password"/>
+  <button class="btn" onclick="runDiagnostic()">Run Diagnostic</button>
+  <div id="out"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function log(msg, cls) {
+  const out = document.getElementById('out');
+  const div = document.createElement('div');
+  div.className = 'line ' + (cls || 'info');
+  div.textContent = msg;
+  out.appendChild(div);
+}
+
+async function runDiagnostic() {
+  document.getElementById('out').innerHTML = '';
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  if (!email || !pass) { alert('Enter email and password'); return; }
+
+  // 1. Sign in
+  let uid;
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pass);
+    uid = cred.user.uid;
+    log('✅ Signed in. UID: ' + uid, 'ok');
+  } catch (e) {
+    log('❌ Sign-in failed: ' + e.code + ' — ' + e.message, 'bad');
+    return;
+  }
+
+  // 2. Fetch users/{uid} and inspect isPremium exactly
+  try {
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      log('❌ users/' + uid + ' does NOT exist in Firestore.', 'bad');
+    } else {
+      const data = userDoc.data();
+      const val = data.isPremium;
+      log('📄 users/' + uid + ' document found.', 'ok');
+      log('isPremium raw value: ' + JSON.stringify(val) + '\ntypeof: ' + typeof val, val === true ? 'ok' : 'bad');
+      log('All field names in this doc: ' + Object.keys(data).map(k => JSON.stringify(k)).join(', '), 'info');
+    }
+  } catch (e) {
+    log('❌ Could not read users/' + uid + ': ' + e.code + ' — ' + e.message, 'bad');
+  }
+
+  // 3. Attempt the exact read study-english.html performs
+  try {
+    const snap = await db.collection('studynotes').doc('english').collection('topics').orderBy('order').get();
+    log('✅ studynotes/english/topics read SUCCEEDED. Docs found: ' + snap.size, 'ok');
+    snap.forEach(d => log('  → ' + d.id + ': ' + (d.data().title || '(no title field)'), 'info'));
+  } catch (e) {
+    log('❌ studynotes/english/topics read FAILED.\nCode: ' + e.code + '\nMessage: ' + e.message, 'bad');
+  }
+}
+</script>
+</body>
+</html>
