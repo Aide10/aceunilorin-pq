@@ -223,22 +223,22 @@
       <div style="font-size:2rem;flex-shrink:0;">📝</div>
       <div>
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:4px;color:var(--text);">Past Questions Mock</div>
-        <div style="font-size:0.78rem;color:var(--text-muted);">50 questions drawn randomly from all available past exam years</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);">100 questions drawn randomly from all available past exam years</div>
       </div>
     </div>
 
     <!-- Info -->
     <div class="info-card">
       <div class="info-item">
-        <div class="info-val">50</div>
+        <div class="info-val">100</div>
         <div class="info-label">Questions</div>
       </div>
       <div class="info-item">
-        <div class="info-val">25</div>
+        <div class="info-val">60</div>
         <div class="info-label">Minutes</div>
       </div>
       <div class="info-item">
-        <div class="info-val">2</div>
+        <div class="info-val">1</div>
         <div class="info-label">Marks/Question</div>
       </div>
     </div>
@@ -257,19 +257,19 @@
   <div class="cbt-header">
     <div class="timer-wrap">
       <span class="timer-icon">⏱️</span>
-      <span class="timer" id="timerDisplay">25:00</span>
+      <span class="timer" id="timerDisplay">60:00</span>
     </div>
     <div class="progress-wrap">
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
       </div>
-      <div class="progress-label" id="progressLabel">0 / 50 answered</div>
+      <div class="progress-label" id="progressLabel">0 / 100 answered</div>
     </div>
   </div>
 
   <!-- Question -->
   <div class="question-wrap">
-    <div class="q-number" id="qNumber">Question 1 of 50</div>
+    <div class="q-number" id="qNumber">Question 1 of 100</div>
     <div class="q-text" id="qText">Loading question...</div>
     <div class="options" id="optionsContainer"></div>
   </div>
@@ -303,7 +303,7 @@
         <div class="modal-stat-label">Answered</div>
       </div>
       <div class="modal-stat">
-        <div class="modal-stat-val" id="modalUnanswered">50</div>
+        <div class="modal-stat-val" id="modalUnanswered">100</div>
         <div class="modal-stat-label">Unanswered</div>
       </div>
       <div class="modal-stat">
@@ -367,7 +367,7 @@
   let currentIndex = 0;
   let userAnswers = {};
   let timerInterval = null;
-  let secondsLeft = 25 * 60;
+  let secondsLeft = 60 * 60;
   let mockStartTime = null;
 
   // ── START MOCK ──
@@ -389,7 +389,7 @@
       }
 
       const yearsToUse = isPremium ? [...freeYears, ...premiumYears] : [...freeYears];
-      const TARGET = 50;
+      const TARGET = 100;
       let allQuestions = [];
 
       updateLoadingOverlay('Loading questions...');
@@ -455,7 +455,7 @@
       questions      = allQuestions;
       userAnswers    = {};
       currentIndex   = 0;
-      secondsLeft    = 25 * 60;
+      secondsLeft    = 60 * 60;
       mockStartTime  = Date.now();
 
       showScreen('cbtScreen');
@@ -686,7 +686,7 @@
 
     const timeTaken = mockStartTime
       ? formatTime(Math.floor((Date.now() - mockStartTime) / 1000))
-      : '25:00';
+      : '60:00';
 
     const result = { correct, wrong, skipped, timeTaken, timeUp, mockType: 'pq', reviewData };
     localStorage.setItem('mockResult', JSON.stringify(result));
@@ -706,7 +706,7 @@
     try {
       const user = auth.currentUser;
       if (!user) return;
-      const score = correct * 2;
+      const score = correct * 1;
 
       const userDoc  = await db.collection('users').doc(user.uid).get();
       const username = userDoc.exists ? userDoc.data().username : 'unknown';
