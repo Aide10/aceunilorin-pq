@@ -134,7 +134,7 @@
     <!-- BREAKDOWN -->
     <div class="breakdown-card">
       <div class="breakdown-title">Score Breakdown</div>
-      <div class="breakdown-row"><span class="breakdown-key">Total Questions</span><span class="breakdown-val" id="bTotal">50</span></div>
+      <div class="breakdown-row"><span class="breakdown-key">Total Questions</span><span class="breakdown-val" id="bTotal">100</span></div>
       <div class="breakdown-row"><span class="breakdown-key">Correct Answers</span><span class="breakdown-val correct-val" id="bCorrect">—</span></div>
       <div class="breakdown-row"><span class="breakdown-key">Wrong Answers</span><span class="breakdown-val wrong-val" id="bWrong">—</span></div>
       <div class="breakdown-row"><span class="breakdown-key">Unanswered</span><span class="breakdown-val skipped-val" id="bSkipped">—</span></div>
@@ -202,12 +202,12 @@
 
     document.getElementById('topDate').textContent = new Date().toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
 
-    const result = JSON.parse(localStorage.getItem('mockResult')) || { correct:36, wrong:10, skipped:4, timeTaken:'18:42', timeUp:false, reviewData:[] };
+    const result = JSON.parse(localStorage.getItem('mockResult')) || { correct:72, wrong:20, skipped:8, timeTaken:'42:10', timeUp:false, reviewData:[] };
 
     const correct    = result.correct;
     const wrong      = result.wrong;
     const skipped    = result.skipped;
-    const marks      = correct * 2;
+    const marks      = correct * 1;
     const percentage = Math.round((marks / 100) * 100);
 
     const ring     = document.getElementById('ringFill');
