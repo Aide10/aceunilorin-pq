@@ -192,7 +192,7 @@
         <div class="section-title">Quick Access</div>
         <div class="quick-grid">
           <a href="pastquestions.html" class="quick-card pq"><div class="quick-card-icon">📝</div><h3>Past Questions</h3><p>Practice by year</p></a>
-          <a href="mock.html" class="quick-card mock"><div class="quick-card-icon">⏱️</div><h3>Mock Exam</h3><p>50 questions, 25 mins</p></a>
+          <a href="mock.html" class="quick-card mock"><div class="quick-card-icon">⏱️</div><h3>Mock Exam</h3><p>100 questions, 60 mins</p></a>
           <a href="study.html" class="quick-card study">
             <div class="quick-card-icon">📖</div><h3>Study Notes</h3><p>English, Math, C/Affairs</p>
           </a>
@@ -458,7 +458,7 @@
 
         const lastResult = JSON.parse(localStorage.getItem('mockResult'));
         if (lastResult) {
-          const pct = Math.round(lastResult.correct * 2);
+          const pct = Math.round(lastResult.correct * 1);
           let color = '#EF4444';
           if (pct === 100) color = '#A855F7';
           else if (pct >= 90) color = '#22C55E';
