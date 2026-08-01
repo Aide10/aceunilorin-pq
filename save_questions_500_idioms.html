@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Save Quiz Questions — AceUnilorin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:8px;}
+.count{font-size:.82rem;color:#3B82F6;font-weight:700;margin-bottom:28px;}
+.q-preview{background:#1A2640;border-radius:12px;padding:12px 14px;margin-bottom:24px;text-align:left;max-height:160px;overflow-y:auto;}
+.q-preview::-webkit-scrollbar{width:3px;}
+.q-preview::-webkit-scrollbar-thumb{background:#3B82F6;border-radius:100px;}
+.q-item{font-size:.72rem;color:#94A3B8;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.q-item:last-child{border-bottom:none;}
+.q-num{color:#3B82F6;font-weight:700;}
+.q-ans{color:#22C55E;font-weight:700;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field:focus{outline:none;border-color:#3B82F6;}
+.field::placeholder{color:#4A5568;}
+.login-note{font-size:.72rem;color:#4A5568;margin-bottom:16px;line-height:1.5;}
+.progress-wrap{margin-bottom:16px;}
+.progress-bar{background:#1A2640;border-radius:100px;height:10px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#3B82F6,#6366F1);transition:width .3s;}
+.progress-text{font-size:.8rem;color:#64748B;}
+.success{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:20px 16px;}
+.success-icon{font-size:2rem;margin-bottom:8px;}
+.success-title{font-family:'Syne',sans-serif;font-weight:800;color:#22C55E;font-size:1rem;margin-bottom:6px;}
+.success-sub{font-size:.78rem;color:#64748B;line-height:1.6;}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:.8rem;color:#EF4444;font-weight:600;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">🧠</div>
+  <div class="title" id="titleEl">500 Idioms Quiz</div>
+  <div class="sub" id="subEl">41 questions — tagged to the "500-idioms" topic</div>
+  <div class="count" id="countEl">0 questions ready to save</div>
+
+  <div class="q-preview" id="preview"></div>
+
+  <div id="mainArea">
+    <div class="login-note">Sign in with your admin account to save — Firestore rules require it.</div>
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="saveBtn" onclick="signInAndSave()">🔐 Sign In &amp; Save to Firestore</button>
+  </div>
+</div>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const SUBJECT = 'english';
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+const TOPIC_ID = '500-idioms';
+
+const QUESTIONS = [
+  {
+    "question": "The man threw a sop to Cerberus at the occasion.",
+    "optionA": "he really insulted Cerberus",
+    "optionB": "he confronted danger without consideration for consequences",
+    "optionC": "he threw his personal effects away",
+    "optionD": "he influenced a troublesome person with a bribe",
+    "answer": "D",
+    "explanation": "'To throw a sop to Cerberus' means to influence a troublesome person with a bribe."
+  },
+  {
+    "question": "Teremba ran with the hare and hunted with the hounds in the misunderstanding between Yemi and Tunji. This means Teremba",
+    "optionA": "supported Yemi",
+    "optionB": "supported Tunji",
+    "optionC": "was insincere",
+    "optionD": "was a peacemaker",
+    "answer": "C",
+    "explanation": "'To run with the hare and hunt with the hounds' means to be insincere."
+  },
+  {
+    "question": "To carry coals to Newcastle means",
+    "optionA": "to take things to where they are in abundance already",
+    "optionB": "to dirty a place known to be ever neat",
+    "optionC": "to bring shame to a place and its people",
+    "optionD": "to behave ungratefully to a mentor",
+    "answer": "A",
+    "explanation": "'To carry coals to Newcastle' means to take things to where they are in abundance already or not needed."
+  },
+  {
+    "question": "Sarah's classmates have sent her to the Coventry.",
+    "optionA": "well-loved by her classmates",
+    "optionB": "so gullible a girl that her mates cheat her everytime",
+    "optionC": "ostracized by her classmates",
+    "optionD": "a brilliant representative of her class",
+    "answer": "C",
+    "explanation": "'To send to Coventry' means to ostracise, ignore or remove from others."
+  },
+  {
+    "question": "Raymond said the wristwatch belonged to his old flame. This means the wristwatch was",
+    "optionA": "his father's",
+    "optionB": "his grandfather's",
+    "optionC": "his former classmate's",
+    "optionD": "his former lover's",
+    "answer": "D",
+    "explanation": "'An old flame' means one's former lover."
+  },
+  {
+    "question": "To be in Davy Jones's locker is to be",
+    "optionA": "very secretive",
+    "optionB": "drowned at sea",
+    "optionC": "detailed and meticulous",
+    "optionD": "very rich",
+    "answer": "B",
+    "explanation": "'To be in Davy Jones's locker' means to be drowned at sea."
+  },
+  {
+    "question": "The boy always locks the stable door after the horse has bolted means",
+    "optionA": "he always acts late",
+    "optionB": "he always takes a right action at the right time",
+    "optionC": "he always gives freedom to others",
+    "optionD": "he always depends on luck",
+    "answer": "A",
+    "explanation": "'To lock the stable door after the horse has bolted' means to always act late."
+  },
+  {
+    "question": "My brother left me in the lurch last year. This means my brother",
+    "optionA": "made me learn my lesson in a hard way",
+    "optionB": "did not wait for me",
+    "optionC": "forsook me in time of trouble",
+    "optionD": "set a trap for me",
+    "answer": "C",
+    "explanation": "'To leave someone in the lurch' means to abandon the person."
+  },
+  {
+    "question": "The situation between the two countries at the moment indicates that the fat is in the fire. This means",
+    "optionA": "crisis has been averted",
+    "optionB": "trouble is imminent",
+    "optionC": "war is going on",
+    "optionD": "celebration of peace is going on",
+    "answer": "B",
+    "explanation": "'The fat is in the fire' means that trouble is imminent."
+  },
+  {
+    "question": "David is a person who talks nineteen to the dozen. This means David always",
+    "optionA": "talks nervously",
+    "optionB": "talks politely",
+    "optionC": "talks senselessly",
+    "optionD": "talks continuously",
+    "answer": "D",
+    "explanation": "'To talk nineteen to the dozen' means to talk continuously."
+  },
+  {
+    "question": "We advised the highly educated boy to put his pride in his pocket at the village meeting.",
+    "optionA": "to behave simply and ordinarily",
+    "optionB": "to speak simple and understandable words",
+    "optionC": "to wear traditional dress",
+    "optionD": "not to speak at the meeting",
+    "answer": "A",
+    "explanation": "'To put one's pride in one's pocket' means to behave simply and ordinarily."
+  },
+  {
+    "question": "It is necessary to sift the grain from the chaff. This means to",
+    "optionA": "separate the male from the female",
+    "optionB": "separate the illiterate from the literate",
+    "optionC": "separate the good from the bad",
+    "optionD": "separate the rulers from the governed",
+    "answer": "C",
+    "explanation": "'To sift the grain from the chaff' means to separate the good from the bad."
+  },
+  {
+    "question": "Mensah was obviously born in the purple. This means",
+    "optionA": "he was born in the village",
+    "optionB": "he was born in the city",
+    "optionC": "he was born into a rich family",
+    "optionD": "he was born into a royal family",
+    "answer": "D",
+    "explanation": "'To be born in the purple' means to be born into a royal family."
+  },
+  {
+    "question": "Do you know who got the girl into trouble? This means who",
+    "optionA": "stole her money",
+    "optionB": "reported her to the police",
+    "optionC": "made her pregnant",
+    "optionD": "lied against her",
+    "answer": "C",
+    "explanation": "'To get a girl into trouble' means to get her pregnant."
+  },
+  {
+    "question": "Darego said he would get even with Jingo. This means",
+    "optionA": "play a draw with Jingo",
+    "optionB": "have his revenge on Jingo",
+    "optionC": "give advice to Jingo in a similar manner",
+    "optionD": "take only even numbers from Jingo",
+    "answer": "B",
+    "explanation": "'To get even with someone' means to take revenge on the person."
+  },
+  {
+    "question": "If you are advised to keep something for a rainy day, it means you are to keep the thing",
+    "optionA": "for the day the rain will make you need it",
+    "optionB": "for the day you may need it",
+    "optionC": "for the planting time",
+    "optionD": "for the time the thing will attract a high price",
+    "answer": "B",
+    "explanation": "'To keep something for a rainy day' means to keep it for the day you may need it."
+  },
+  {
+    "question": "To make hay while the sun shines is to",
+    "optionA": "make use of an opportunity promptly",
+    "optionB": "work hard to achieve a purpose during the day",
+    "optionC": "lead a horse out during the day",
+    "optionD": "wait for an opportunity to come one's way",
+    "answer": "A",
+    "explanation": "'To make hay while the sun shines' means to make use of an opportunity promptly."
+  },
+  {
+    "question": "To wish somebody god's speed is to",
+    "optionA": "wish the person speedy recovery from illness",
+    "optionB": "wish the person protection on a journey",
+    "optionC": "wish the person good luck",
+    "optionD": "wish the person a long life",
+    "answer": "B",
+    "explanation": "'To wish somebody god's speed' means to wish the person protection on a journey."
+  },
+  {
+    "question": "Bello's criticism of the biennial football competition was straight from the shoulder.",
+    "optionA": "very destructive",
+    "optionB": "put bluntly",
+    "optionC": "put ambiguously",
+    "optionD": "put in simple terms",
+    "answer": "B",
+    "explanation": "'Straight from the shoulder' means put bluntly."
+  },
+  {
+    "question": "To have the whole bag of tricks for something is to",
+    "optionA": "have everything needed for it",
+    "optionB": "have dubious plans to achieve it",
+    "optionC": "have sufficient money to pay people in-charge",
+    "optionD": "have desperation to realize it",
+    "answer": "A",
+    "explanation": "'To have a whole bag of tricks for something' means to have everything needed for it."
+  },
+  {
+    "question": "Many rulers tilt at windmills these days. This means many rulers",
+    "optionA": "are very timid and nervous nowadays",
+    "optionB": "fight imaginary enemies nowadays",
+    "optionC": "pursue useless projects nowadays",
+    "optionD": "are very ambitious nowadays",
+    "answer": "B",
+    "explanation": "'To tilt at windmills' means to fight imaginary enemies."
+  },
+  {
+    "question": "Your suggestions are on the tapis. This means the suggestions are",
+    "optionA": "being implemented",
+    "optionB": "very relevant",
+    "optionC": "not apposite to issue in hand",
+    "optionD": "under consideration",
+    "answer": "D",
+    "explanation": "'To be on the tapis' means to be under consideration."
+  },
+  {
+    "question": "Felix is putty in Ngozi's hands. This means that Felix",
+    "optionA": "is too tough for Ngozi to handle",
+    "optionB": "is too predictable",
+    "optionC": "is easily influenced by Ngozi",
+    "optionD": "has cold love for Ngozi",
+    "answer": "C",
+    "explanation": "'To be a putty in someone's hand' means to be easily influenced by someone."
+  },
+  {
+    "question": "Natenga seems getting too big for his boots these days. This means Natenga",
+    "optionA": "appears conceited",
+    "optionB": "seems putting on weight",
+    "optionC": "appears feeding well",
+    "optionD": "appears improving appreciably in his trade",
+    "answer": "A",
+    "explanation": "'To be getting too big for one's boots' means to appear conceited or proud."
+  },
+  {
+    "question": "The incident is all grist to Dada's mill.",
+    "optionA": "an incident that is beneficial to Dada's cause",
+    "optionB": "an incident that is destructive to Dada's cause",
+    "optionC": "an incident that Dada has no interest in",
+    "optionD": "an incident that Dada regrets",
+    "answer": "A",
+    "explanation": "'A grist to someone's mill' means an incident that is beneficial to someone's cause."
+  },
+  {
+    "question": "They believe that Rapala is ploughing the sand in the capital city. This means Rapala is",
+    "optionA": "a farmer in the capital city",
+    "optionB": "into a lucrative business in the capital city",
+    "optionC": "doing a useless job in the capital city",
+    "optionD": "a workaholic in the capital city",
+    "answer": "C",
+    "explanation": "'To be ploughing the sand' means to be doing a useless job."
+  },
+  {
+    "question": "The two communities have been advised to turn swords into ploughshares. This means the communities",
+    "optionA": "should encourage their people to plough the land",
+    "optionB": "should substitute peace for hostilities",
+    "optionC": "should replace old equipment with modern equipment",
+    "optionD": "should invest huge money in agriculture",
+    "answer": "B",
+    "explanation": "'To turn swords to ploughshares' means to substitute peace for hostility."
+  },
+  {
+    "question": "The man is really a wolf in sheep's clothing. This means he is",
+    "optionA": "a very gentle person",
+    "optionB": "a religious person",
+    "optionC": "a foe pretending to be a friend",
+    "optionD": "a very generous person",
+    "answer": "C",
+    "explanation": "'To be a wolf in sheep's clothing' means to be a foe (an enemy) pretending to be a friend."
+  },
+  {
+    "question": "You should know that Jack is as good as his master. This means",
+    "optionA": "everybody has equal qualities",
+    "optionB": "Jack has the qualities of his master",
+    "optionC": "a servant is as capable as his master",
+    "optionD": "a girl can do what a boy does",
+    "answer": "C",
+    "explanation": "'To be as good as one's master' means a servant is as capable as his master."
+  },
+  {
+    "question": "The man died in his bed. This means the man",
+    "optionA": "died in his sleep",
+    "optionB": "poisoned himself",
+    "optionC": "died of old age",
+    "optionD": "died from an accident",
+    "answer": "C",
+    "explanation": "'To die in one's bed' means to die of old age."
+  },
+  {
+    "question": "Many people are of the opinion that one swallow does not make a summer. This means that many people think that",
+    "optionA": "a leader should have many supporters",
+    "optionB": "it is foolish to come to conclusion with only one test",
+    "optionC": "one friend does not make a company",
+    "optionD": "one wife does not make a happy home",
+    "answer": "B",
+    "explanation": "'One swallow does not make a summer' means it is foolish to come to a conclusion with only one test."
+  },
+  {
+    "question": "Jackson is really making a noise in the world. This means Jackson is",
+    "optionA": "an international musician",
+    "optionB": "a notorious criminal",
+    "optionC": "an international freedom fighter",
+    "optionD": "a widely popular person",
+    "answer": "D",
+    "explanation": "'To be making a noise in the world' means to be widely known."
+  },
+  {
+    "question": "For my money, Felix is a great actor. This means",
+    "optionA": "In my opinion, Felix is a great actor",
+    "optionB": "In terms of money, Felix is a great actor",
+    "optionC": "I can take the bet that Felix is a great actor",
+    "optionD": "Going by the amount of money I paid to watch him, Felix is a great actor",
+    "answer": "A",
+    "explanation": "'For my money' means 'in my opinion'."
+  },
+  {
+    "question": "Jazebel has married money. This means she",
+    "optionA": "has run into huge money in her trade",
+    "optionB": "has won a huge amount of money in a lottery",
+    "optionC": "has married a rich man",
+    "optionD": "has come by money through the death of her husband",
+    "answer": "C",
+    "explanation": "'To marry money' means to marry a rich spouse."
+  },
+  {
+    "question": "We shall give the visiting football team a good run for their money. This means we shall",
+    "optionA": "make them lose their registration fee",
+    "optionB": "give them challenging competition",
+    "optionC": "make them run away in shame",
+    "optionD": "take the bet with them",
+    "answer": "B",
+    "explanation": "'To give someone a good run for his/her money' means to give them challenging competition."
+  },
+  {
+    "question": "Natanga said it was a run-off-the-mill job he did for six years in Lagos. This means the job was",
+    "optionA": "ordinary",
+    "optionB": "lucrative",
+    "optionC": "demanding",
+    "optionD": "special",
+    "answer": "A",
+    "explanation": "'A run-off-the-mill job' means an ordinary job."
+  },
+  {
+    "question": "That Mohammed played man Friday in the disagreement between his uncle and Serido is little surprise to me.",
+    "optionA": "supported his uncle",
+    "optionB": "betrayed his uncle",
+    "optionC": "went to mosque to pray before he intervened",
+    "optionD": "was fair to the two parties",
+    "answer": "A",
+    "explanation": "'To play man Friday' means to be a loyal and faithful servant or supporter."
+  },
+  {
+    "question": "His mother always advises him to take time by the forelock. This means that he",
+    "optionA": "should watch time always",
+    "optionB": "should act promptly",
+    "optionC": "should be with a wristwatch always",
+    "optionD": "should be conscious of the importance of time",
+    "answer": "B",
+    "explanation": "'To take time by the forelock' means to act promptly."
+  },
+  {
+    "question": "The man died with his boots on. This means the man died",
+    "optionA": "while fighting as a soldier",
+    "optionB": "while participating in a football match",
+    "optionC": "while marching",
+    "optionD": "while he was still active",
+    "answer": "D",
+    "explanation": "'To die with one's boots on' means to die while still in active service."
+  },
+  {
+    "question": "The man died in his bed. This means the man",
+    "optionA": "died in his sleep",
+    "optionB": "poisoned himself",
+    "optionC": "died of old age",
+    "optionD": "died from an accident",
+    "answer": "C",
+    "explanation": "'To die in one's bed' means to die of old age."
+  },
+  {
+    "question": "To be in the doldrums means to be",
+    "optionA": "very happy",
+    "optionB": "inactive or stagnant",
+    "optionC": "very angry",
+    "optionD": "very busy",
+    "answer": "B",
+    "explanation": "'To be in the doldrums' means to be inactive or stagnant (quiet or dull)."
+  }
+];
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.getElementById('countEl').textContent = `${QUESTIONS.length} question${QUESTIONS.length===1?'':'s'} ready to save`;
+
+const prev = document.getElementById('preview');
+prev.innerHTML = QUESTIONS.slice(0,12).map((q,i) =>
+  `<div class="q-item"><span class="q-num">${i+1}.</span> ${q.question.substring(0,45)}${q.question.length>45?'...':''} <span class="q-ans">→ ${q.answer}</span></div>`
+).join('') + (QUESTIONS.length > 12 ? `<div class="q-item" style="color:#3B82F6;text-align:center;padding-top:6px;">... and ${QUESTIONS.length - 12} more</div>` : '');
+
+async function fsAdd(col, data, attempt = 1) {
+  try {
+    await db.collection(col).add({...data, createdAt: new Date().toISOString()});
+  } catch (err) {
+    const isNetworkError = err.code === 'unavailable' || err instanceof TypeError;
+    if (isNetworkError && attempt < 3) {
+      await new Promise(res => setTimeout(res, attempt * 1000));
+      return fsAdd(col, data, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+async function signInAndSave() {
+  const btn = document.getElementById('saveBtn');
+  const area = document.getElementById('mainArea');
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+
+  if (!email || !password) {
+    alert('Enter your admin email and password first.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (cred.user.uid !== ADMIN_UID) {
+      area.innerHTML = `
+        <div class="error">🚫 Signed in, but this account is not the admin account (UID mismatch). Nothing was saved.</div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  } catch (err) {
+    area.innerHTML = `
+      <div class="error">🚫 Sign-in failed: ${err.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  if (navigator.onLine === false) {
+    area.innerHTML = `
+      <div class="error">📡 Your device shows no internet connection right now.</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `<div class="progress-text" id="pText">Checking current highest question number...</div>`;
+
+  let startNumber = 1;
+  try {
+    const col = `studyquestions/${SUBJECT}/questions`;
+    const snap = await db.collection(col).orderBy('number', 'desc').limit(1).get();
+    if (!snap.empty) {
+      startNumber = (snap.docs[0].data().number || 0) + 1;
+    }
+  } catch (e) {
+    area.innerHTML = `
+      <div class="error">❌ Could not check existing question numbers: ${e.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+      <div class="progress-text" id="pText">Saving 0 of ${QUESTIONS.length}... (starting at #${startNumber})</div>
+    </div>`;
+
+  let saved = 0;
+  for (const q of QUESTIONS) {
+    try {
+      const number = startNumber + saved;
+      await fsAdd(`studyquestions/${SUBJECT}/questions`, {...q, number, topicId: TOPIC_ID});
+      saved++;
+      const pct = Math.round((saved / QUESTIONS.length) * 100);
+      document.getElementById('pFill').style.width = pct + '%';
+      document.getElementById('pText').textContent = `Saving ${saved} of ${QUESTIONS.length}... (${pct}%)`;
+    } catch(e) {
+      document.getElementById('mainArea').innerHTML = `
+        <div class="error">❌ Failed at "${q.question.substring(0,40)}...": ${e.message}</div>
+        <div class="error" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:#94A3B8;">
+          ✅ ${saved} questions were saved before the error.
+        </div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  }
+
+  document.getElementById('mainArea').innerHTML = `
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">All ${saved} questions saved!</div>
+      <div class="success-sub">Appended as #${startNumber} through #${startNumber + saved - 1} in studyquestions/${SUBJECT}/questions.</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
