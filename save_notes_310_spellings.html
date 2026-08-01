@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Save Study Notes — Unilorin Most Often Asked Spellings</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:8px;}
+.count{font-size:.82rem;color:#3B82F6;font-weight:700;margin-bottom:28px;}
+.q-preview{background:#1A2640;border-radius:12px;padding:12px 14px;margin-bottom:24px;text-align:left;max-height:180px;overflow-y:auto;}
+.q-preview::-webkit-scrollbar{width:3px;}
+.q-preview::-webkit-scrollbar-thumb{background:#3B82F6;border-radius:100px;}
+.q-item{font-size:.74rem;color:#94A3B8;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.q-item:last-child{border-bottom:none;}
+.q-num{color:#3B82F6;font-weight:700;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field::placeholder{color:#4A5568;}
+.login-note{font-size:.72rem;color:#4A5568;margin-bottom:16px;line-height:1.5;}
+.success{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:20px 16px;}
+.success-icon{font-size:2rem;margin-bottom:8px;}
+.success-title{font-family:'Syne',sans-serif;font-weight:800;color:#22C55E;font-size:1rem;margin-bottom:6px;}
+.success-sub{font-size:.78rem;color:#64748B;line-height:1.6;}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:.8rem;color:#EF4444;font-weight:600;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">📝</div>
+  <div class="title">Unilorin Most Often Asked Spellings</div>
+  <div class="sub">310 commonly tested spellings for UTME, Post-UTME &amp; SSCE</div>
+  <div class="count" id="countEl">310 spellings ready to save</div>
+
+  <div class="q-preview" id="preview"></div>
+
+  <div id="mainArea">
+    <div class="login-note">Sign in with your admin account to save — Firestore rules require it.</div>
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="saveBtn" onclick="signInAndSave()">🔐 Sign In &amp; Save to Firestore</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const SUBJECT = 'english';
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+const TOPIC_ID = 'unilorin-most-often-asked-spellings';
+
+const TOPIC = {
+  title: "Unilorin Most Often Asked Spellings",
+  emoji: "📝",
+  order: 8,
+  subtopics: [
+    {
+      subtitle: "Spellings 1-50",
+      content: [
+        "1. Abattoir",
+        "2. Academic",
+        "3. Access",
+        "4. Accommodation",
+        "5. Acquaintance",
+        "6. Acquire",
+        "7. Alcohol",
+        "8. All right",
+        "9. Alligator",
+        "10. Almighty",
+        "11. Amateur",
+        "12. Ammunition",
+        "13. Architecture",
+        "14. Argument",
+        "15. Assassin",
+        "16. Asthma",
+        "17. Athletics",
+        "18. At times",
+        "19. Attorney",
+        "20. Auxiliary",
+        "21. Available",
+        "22. Baggage",
+        "23. Barbecue",
+        "24. Battalion",
+        "25. Beggar",
+        "26. Beginning",
+        "27. Blouse",
+        "28. Bonanza",
+        "29. Bouquet",
+        "30. Bourgeois",
+        "31. Boycott",
+        "32. Brasserie",
+        "33. Buccaneer",
+        "34. Bureaucracy",
+        "35. Bye-bye",
+        "36. Camouflage",
+        "37. Candid",
+        "38. Cassette",
+        "39. Catapult",
+        "40. Catarrh",
+        "41. Caterpillar",
+        "42. Ceiling",
+        "43. Cemetery",
+        "44. Challenge",
+        "45. Changeable",
+        "46. Chauffeur",
+        "47. Chosen",
+        "48. Christian",
+        "49. Cigarette",
+        "50. Clarity"
+      ],
+      example: null
+    },
+    {
+      subtitle: "Spellings 51-100",
+      content: [
+        "51. Colloquialism",
+        "52. Colonel",
+        "53. Colossal",
+        "54. Colour",
+        "55. Commemorate",
+        "56. Commiserate",
+        "57. Commission",
+        "58. Commitment",
+        "59. Committal",
+        "60. Committee",
+        "61. Commotion",
+        "62. Comparison",
+        "63. Compulsory",
+        "64. Conceive",
+        "65. Conducive",
+        "66. Connoisseur",
+        "67. Consensus",
+        "68. Consequential",
+        "69. Conspicuous",
+        "70. Continuous",
+        "71. Convalescent",
+        "72. Convalesce",
+        "73. Convenient",
+        "74. Councillor",
+        "75. Counterfeit",
+        "76. Counterparts",
+        "77. Curiosity",
+        "78. Curfew",
+        "79. Curtail",
+        "80. Curtain",
+        "81. Cushion",
+        "82. Cutlery",
+        "83. Deceive",
+        "84. Definitely",
+        "85. Delinquency",
+        "86. Denouement",
+        "87. Derogatory",
+        "88. Diarrhoea",
+        "89. Dilemma",
+        "90. Dining",
+        "91. Dinosaur",
+        "92. Discipline",
+        "93. Dodge",
+        "94. Dormitory",
+        "95. Drunkenness",
+        "96. Duly",
+        "97. Dyeing",
+        "98. Dying",
+        "99. Dysentery",
+        "100. Earrings"
+      ],
+      example: null
+    },
+    {
+      subtitle: "Spellings 101-150",
+      content: [
+        "101. Ecstasy",
+        "102. Eczema",
+        "103. Effrontery",
+        "104. Embarrass",
+        "105. Embarrassment",
+        "106. En masse",
+        "107. Enmity",
+        "108. Entrepreneur",
+        "109. Environment",
+        "110. Equipped",
+        "111. Erroneous",
+        "112. Etiquette",
+        "113. Euthanasia",
+        "114. Exaggerate",
+        "115. Excursion",
+        "116. Faithful",
+        "117. Fallacy",
+        "118. Farewell",
+        "119. Fateful",
+        "120. February",
+        "121. Flabbergasted",
+        "122. Fluorescent",
+        "123. Foolscap",
+        "124. For ever",
+        "125. Forefathers",
+        "126. Foreword",
+        "127. Forgotten",
+        "128. Formula",
+        "129. Fortnight",
+        "130. Forty",
+        "131. Fulfil",
+        "132. Generosity",
+        "133. Genuine",
+        "134. Ghanaian",
+        "135. Gonorrhoea",
+        "136. Gorilla",
+        "137. Grammar",
+        "138. Gramophone",
+        "139. Grateful",
+        "140. Grievance",
+        "141. Grievous",
+        "142. Guarantee",
+        "143. Guerrilla / Guerilla",
+        "144. Guitar",
+        "145. Haemoglobin",
+        "146. Handiwork",
+        "147. Handkerchief",
+        "148. Harass",
+        "149. Hiccoughs",
+        "150. Hierarchy"
+      ],
+      example: null
+    },
+    {
+      subtitle: "Spellings 151-200",
+      content: [
+        "151. Hindrance",
+        "152. Hippopotamus",
+        "153. Homogeneous",
+        "154. Hurricane",
+        "155. Idiosyncrasy",
+        "156. Illiterate",
+        "157. Illusion",
+        "158. Impeccable",
+        "159. Immovable",
+        "160. In spite of",
+        "161. Incessant",
+        "162. Inconvenience",
+        "163. Influential",
+        "164. Instalment",
+        "165. Integrity",
+        "166. Interesting",
+        "167. Interfere",
+        "168. Interpret",
+        "169. Invigilator",
+        "170. Jeopardy",
+        "171. Jettison",
+        "172. Juvenile",
+        "173. Kerosene",
+        "174. Khaki",
+        "175. Kindergarten",
+        "176. Knowledge",
+        "177. Labelled",
+        "178. Laboratory",
+        "179. Leisure",
+        "180. Liaison",
+        "181. Library",
+        "182. Lieutenant",
+        "183. Limousine",
+        "184. Literature",
+        "185. Litotes",
+        "186. Livelihood",
+        "187. Lovable",
+        "188. Luggage",
+        "189. Lying",
+        "190. Maintenance",
+        "191. Maintain",
+        "192. Manoeuvre",
+        "193. Marriageable",
+        "194. Martyr",
+        "195. Mattress",
+        "196. Meagre",
+        "197. Mediterranean",
+        "198. Melodious",
+        "199. Messenger",
+        "200. Metre"
+      ],
+      example: null
+    },
+    {
+      subtitle: "Spellings 201-250",
+      content: [
+        "201. Millennium",
+        "202. Miscellaneous",
+        "203. Mischievous",
+        "204. Missile",
+        "205. Misspelled",
+        "206. Neighbour",
+        "207. Necessary",
+        "208. Occasion",
+        "209. Occur",
+        "210. Occurrence",
+        "211. Omission",
+        "212. Omitted",
+        "213. Omnibus",
+        "214. Onomatopoeia",
+        "215. Opulent",
+        "216. Orchestra",
+        "217. Orgasm",
+        "218. Ostrich",
+        "219. Pamphlet",
+        "220. Parlour",
+        "221. Passenger",
+        "222. Pastime",
+        "223. Penicillin",
+        "224. Personnel",
+        "225. Pessimistic",
+        "226. Playwright",
+        "227. Pomposity",
+        "228. Pornography",
+        "229. Possess",
+        "230. Post-mortem",
+        "231. Postpone",
+        "232. Practitioner",
+        "233. Precede",
+        "234. Preferential",
+        "235. Privilege",
+        "236. Profession",
+        "237. Professor",
+        "238. Pronounce",
+        "239. Pronunciation",
+        "240. Pseudonym",
+        "241. Pursuance",
+        "242. Pusillanimous",
+        "243. Pyjamas / Pajamas",
+        "244. Questionnaire",
+        "245. Querulous",
+        "246. Queue",
+        "247. Recession",
+        "248. Referee",
+        "249. Referendum",
+        "250. Renaissance"
+      ],
+      example: null
+    },
+    {
+      subtitle: "Spellings 251-310",
+      content: [
+        "251. Rendezvous",
+        "252. Reservoir",
+        "253. Restaurant",
+        "254. Resurrection",
+        "255. Rheumatism",
+        "256. Sacrilege",
+        "257. Satellite",
+        "258. Sceptic",
+        "259. Secede",
+        "260. Seize",
+        "261. Sellotape",
+        "262. Separate",
+        "263. Sepulchre",
+        "264. Sequential",
+        "265. Sergeant",
+        "266. Shinning",
+        "267. Skilful",
+        "268. Somersault",
+        "269. Souvenir",
+        "270. Squirrel",
+        "271. Strenuous",
+        "272. Stubborn",
+        "273. Supersede",
+        "274. Surprise",
+        "275. Symmetry",
+        "276. Symptom",
+        "277. Synecdoche",
+        "278. Tetanus",
+        "279. Thoroughly",
+        "280. Thwart",
+        "281. Tomorrow",
+        "282. Tortuous",
+        "283. Trafficking",
+        "284. Transferred",
+        "285. Trek",
+        "286. Trekking",
+        "287. Trespass",
+        "288. Truly",
+        "289. Tyrannical",
+        "290. Tyranny",
+        "291. Umbilical",
+        "292. Umbrella",
+        "293. Unbelievable",
+        "294. Unkempt",
+        "295. Until",
+        "296. Usurp",
+        "297. Vacuum",
+        "298. Vaudeville",
+        "299. Venereal",
+        "300. Vengeance",
+        "301. Vernacular",
+        "302. Veterinary",
+        "303. Vicissitudes",
+        "304. Villain",
+        "305. Vying",
+        "306. Welfare",
+        "307. Welcome",
+        "308. Wholly",
+        "309. Wooing",
+        "310. Writing"
+      ],
+      example: null
+    }
+  ]
+};
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const prev = document.getElementById('preview');
+prev.innerHTML = TOPIC.subtopics.map((s,i) =>
+  `<div class="q-item"><span class="q-num">${i+1}.</span> ${s.subtitle}</div>`
+).join('');
+
+async function fsSet(col, docId, data, attempt = 1) {
+  try {
+    await db.collection(col).doc(docId).set({...data, updatedAt: new Date().toISOString()}, {merge: true});
+  } catch (err) {
+    const isNetworkError = err.code === 'unavailable' || err instanceof TypeError;
+    if (isNetworkError && attempt < 3) {
+      await new Promise(res => setTimeout(res, attempt * 1000));
+      return fsSet(col, docId, data, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+async function signInAndSave() {
+  const btn = document.getElementById('saveBtn');
+  const area = document.getElementById('mainArea');
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+
+  if (!email || !password) {
+    alert('Enter your admin email and password first.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (cred.user.uid !== ADMIN_UID) {
+      area.innerHTML = `
+        <div class="error">🚫 Signed in, but this account is not the admin account. Nothing was saved.</div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  } catch (err) {
+    area.innerHTML = `
+      <div class="error">🚫 Sign-in failed: ${err.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  try {
+    await fsSet(`studynotes/${SUBJECT}/topics`, TOPIC_ID, TOPIC);
+    document.getElementById('mainArea').innerHTML = `
+      <div class="success">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Topic saved!</div>
+        <div class="success-sub">"${TOPIC.title}" is now live under studynotes/${SUBJECT}/topics/${TOPIC_ID}, with ${TOPIC.subtopics.length} sub-sections.</div>
+      </div>`;
+  } catch (e) {
+    document.getElementById('mainArea').innerHTML = `
+      <div class="error">❌ Failed to save: ${e.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+  }
+}
+</script>
+</body>
+</html>
