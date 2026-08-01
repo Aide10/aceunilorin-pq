@@ -315,7 +315,7 @@ textarea.ta:focus{border-color:var(--primary);}
 
       <div class="sec" id="sec-mnotes">
         <div class="stitle">🗂️ Manage Notes</div>
-        <div class="ssub">View and delete study notes</div>
+        <div class="ssub">View, edit and delete study notes</div>
         <div class="tabs" id="mnotesTabs">
           <button class="tab active" onclick="loadNotes('english',this)">📖 English</button>
           <button class="tab" onclick="loadNotes('math',this)">🔢 Maths</button>
@@ -326,7 +326,7 @@ textarea.ta:focus{border-color:var(--primary);}
 
       <div class="sec" id="sec-msq">
         <div class="stitle">❓ Manage Study Questions</div>
-        <div class="ssub">View and delete study quiz questions</div>
+        <div class="ssub">View, edit and delete study quiz questions</div>
         <div class="tabs" id="msqTabs">
           <button class="tab active" onclick="loadSQ('english',this)">📖 English</button>
           <button class="tab" onclick="loadSQ('math',this)">🔢 Maths</button>
@@ -721,7 +721,7 @@ async function savePQ(){
   btn.disabled=false;btn.textContent='💾 Save to Firestore';
 }
 
-// MANAGE
+// ══════════════ MANAGE NOTES (now with inline edit, same pattern as Manage PQ) ══════════════
 let mNS='english', mSQS='english';
 async function loadNotes(sub,btn){
   mNS=sub;
@@ -731,9 +731,104 @@ async function loadNotes(sub,btn){
   try{
     const snap=await db.collection('studynotes').doc(sub).collection('topics').orderBy('order').get();
     if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📭</div><p>No notes yet</p></div>';return;}
-    el.innerHTML='<div class="mlist">'+snap.docs.map(d=>{const t=d.data();return`<div class="mi"><div class="mil"><span class="mico">${escapeHtml(t.emoji||'📌')}</span><div class="min2"><div class="mit">${escapeHtml(t.title||'Untitled')}</div><div class="mim">${(t.content||[]).length} points</div></div></div><button class="delbtn" onclick="askDel('note','${d.id}','${escapeHtml(t.title||'Untitled').replace(/'/g,"\\'")}')">Delete</button></div>`;}).join('')+'</div>';
+    let html='<div style="font-size:.73rem;color:var(--muted);margin-bottom:12px;">'+snap.size+' topics — tap any topic to edit</div>';
+    snap.docs.forEach(d=>{
+      const t=d.data(), tid=d.id;
+      const hasSub=Array.isArray(t.subtopics)&&t.subtopics.length;
+      // Build editable sub-section blocks (or a single flat block if no subtopics)
+      let sectionsHtml='';
+      if(hasSub){
+        sectionsHtml=t.subtopics.map((s,si)=>`
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Sub-section ${si+1} — Subtitle</label>
+            <input id="note-${tid}-sub${si}-title" value="${escapeHtml(s.subtitle||'')}" style="width:100%;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;margin-bottom:8px;"/>
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Bullet points (one per line)</label>
+            <textarea id="note-${tid}-sub${si}-content" style="width:100%;min-height:90px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;margin-bottom:8px;">${escapeHtml((s.content||[]).join('\n'))}</textarea>
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Example (optional)</label>
+            <textarea id="note-${tid}-sub${si}-example" style="width:100%;min-height:50px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;">${escapeHtml(s.example||'')}</textarea>
+          </div>`).join('');
+      } else {
+        sectionsHtml=`
+          <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Bullet points (one per line)</label>
+            <textarea id="note-${tid}-flat-content" style="width:100%;min-height:110px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;margin-bottom:8px;">${escapeHtml((t.content||[]).join('\n'))}</textarea>
+            <label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Example (optional)</label>
+            <textarea id="note-${tid}-flat-example" style="width:100%;min-height:50px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;">${escapeHtml(t.example||'')}</textarea>
+          </div>`;
+      }
+      html+=`<div class="qedit-card" id="notecard-${tid}" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
+        <div class="qedit-head" onclick="toggleNoteEdit('${tid}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+            <span class="mico">${escapeHtml(t.emoji||'📌')}</span>
+            <span id="notehead-text-${tid}" style="font-size:.82rem;font-weight:700;font-family:'Syne',sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml(t.title||'Untitled')}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px;">
+            <span style="background:var(--surface2);color:var(--muted);font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:100px;">${hasSub?t.subtopics.length+' sections':(t.content||[]).length+' points'}</span>
+            <span class="qedit-arrow" id="notearrow-${tid}" style="color:var(--muted);font-size:.8rem;transition:transform .2s;">▼</span>
+          </div>
+        </div>
+        <div class="qedit-body" id="notebody-${tid}" style="display:none;padding:0 14px 14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Emoji</label><input id="note-${tid}-emoji" value="${escapeHtml(t.emoji||'')}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem;outline:none;text-align:center;"/></div>
+            <div style="grid-column:span 2;"><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Title</label><input id="note-${tid}-title" value="${escapeHtml(t.title||'')}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Order</label><input type="number" id="note-${tid}-order" value="${t.order||0}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;"/></div>
+            <div><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Video URL (optional)</label><input id="note-${tid}-video" value="${escapeHtml(t.videoUrl||'')}" placeholder="https://..." style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.75rem;outline:none;"/></div>
+          </div>
+          ${sectionsHtml}
+          <div style="display:flex;gap:8px;">
+            <button onclick="saveNote('${tid}','${sub}',${hasSub})" style="flex:1;padding:10px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">💾 Save</button>
+            <button onclick="askDel('note','${tid}','${escapeHtml(t.title||'Untitled').replace(/'/g,"\\'")}')" style="padding:10px 14px;background:transparent;border:1.5px solid var(--danger);color:var(--danger);border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">🗑️</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+escapeHtml(e.message)+'</p></div>';}
 }
+function toggleNoteEdit(tid){
+  const body=document.getElementById('notebody-'+tid);
+  const arrow=document.getElementById('notearrow-'+tid);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(180deg)';
+}
+async function saveNote(tid,sub,hasSub){
+  try{
+    const emoji=document.getElementById('note-'+tid+'-emoji').value;
+    const title=document.getElementById('note-'+tid+'-title').value;
+    const order=parseInt(document.getElementById('note-'+tid+'-order').value)||0;
+    const videoUrl=document.getElementById('note-'+tid+'-video').value.trim();
+    const update={emoji,title,order,updatedAt:new Date().toISOString()};
+    if(videoUrl) update.videoUrl=videoUrl; else update.videoUrl=firebase.firestore.FieldValue.delete();
+
+    if(hasSub){
+      const subtopics=[];
+      let i=0;
+      while(document.getElementById('note-'+tid+'-sub'+i+'-title')){
+        const subtitle=document.getElementById('note-'+tid+'-sub'+i+'-title').value;
+        const content=document.getElementById('note-'+tid+'-sub'+i+'-content').value.split('\n').map(l=>l.trim()).filter(Boolean);
+        const example=document.getElementById('note-'+tid+'-sub'+i+'-example').value.trim();
+        subtopics.push({subtitle,content,example:example||null});
+        i++;
+      }
+      update.subtopics=subtopics;
+    } else {
+      const content=document.getElementById('note-'+tid+'-flat-content').value.split('\n').map(l=>l.trim()).filter(Boolean);
+      const example=document.getElementById('note-'+tid+'-flat-example').value.trim();
+      update.content=content;
+      update.example=example||firebase.firestore.FieldValue.delete();
+    }
+
+    await db.collection('studynotes').doc(sub).collection('topics').doc(tid).update(update);
+    toast('Note saved ✓','ok');
+    const head=document.getElementById('notehead-text-'+tid);
+    if(head) head.textContent=title;
+  }catch(e){toast('Save failed: '+e.message,'err');}
+}
+
+// ══════════════ MANAGE STUDY QUESTIONS (now with inline edit, same pattern as Manage PQ) ══════════════
 async function loadSQ(sub,btn){
   mSQS=sub;
   if(btn){document.querySelectorAll('#msqTabs .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
@@ -742,9 +837,74 @@ async function loadSQ(sub,btn){
   try{
     const snap=await db.collection('studyquestions').doc(sub).collection('questions').orderBy('number').get();
     if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">❓</div><p>No questions yet</p></div>';return;}
-    el.innerHTML='<div class="mlist">'+snap.docs.map(d=>{const q=d.data();return`<div class="mi"><div class="mil"><span class="mnum">${q.number||'?'}</span><div class="min2"><div class="mit">${escapeHtml((q.question||'').substring(0,60))}…</div><div class="mim">Ans: <b style="color:var(--success)">${escapeHtml(q.answer||'?')}</b></div></div></div><button class="delbtn" onclick="askDel('sq','${d.id}','Q${q.number}')">Delete</button></div>`;}).join('')+'</div>';
+    let html='<div style="font-size:.73rem;color:var(--muted);margin-bottom:12px;">'+snap.size+' questions — tap any question to edit</div>';
+    snap.docs.forEach(d=>{
+      const q=d.data(), qid=d.id;
+      const optsHtml=LS.map(l=>{
+        const val=q['option'+l]||'';
+        if(!val&&(l==='D'||l==='E'))return `<div style="margin-bottom:6px;"><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Option ${l} (optional)</label><input id="sq-${qid}-opt${l}" value="" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;"/></div>`;
+        return `<div style="margin-bottom:6px;"><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Option ${l}</label><input id="sq-${qid}-opt${l}" value="${escapeHtml(val)}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;"/></div>`;
+      }).join('');
+      html+=`<div class="qedit-card" id="sqcard-${qid}" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;">
+        <div class="qedit-head" onclick="toggleSQEdit('${qid}')" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+            <span style="background:var(--surface2);color:var(--primary);font-family:'Syne',sans-serif;font-weight:800;font-size:.75rem;padding:4px 9px;border-radius:6px;flex-shrink:0;">Q${q.number||'?'}</span>
+            <span id="sqhead-text-${qid}" style="font-size:.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${escapeHtml((q.question||'').substring(0,55))}${(q.question||'').length>55?'…':''}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:8px;">
+            ${q.topicId?`<span style="background:rgba(59,130,246,.15);color:var(--primary);font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:100px;">${escapeHtml(q.topicId)}</span>`:''}
+            <span style="background:rgba(34,197,94,.15);color:var(--success);font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:100px;">→${escapeHtml(q.answer||'?')}</span>
+            <span class="qedit-arrow" id="sqarrow-${qid}" style="color:var(--muted);font-size:.8rem;transition:transform .2s;">▼</span>
+          </div>
+        </div>
+        <div class="qedit-body" id="sqbody-${qid}" style="display:none;padding:0 14px 14px;">
+          <div style="margin-bottom:6px;"><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Question</label><textarea id="sq-${qid}-q" style="width:100%;min-height:70px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;">${escapeHtml(q.question||'')}</textarea></div>
+          ${optsHtml}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Correct Answer</label><select id="sq-${qid}-ans" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;">${LS.map(l=>`<option value="${l}" ${q.answer===l?'selected':''}>${l}</option>`).join('')}</select></div>
+            <div><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Q Number</label><input type="number" id="sq-${qid}-num" value="${q.number||''}" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;"/></div>
+          </div>
+          <div style="margin-bottom:10px;"><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Topic ID (optional — links this question to a study-notes topic)</label><input id="sq-${qid}-topic" value="${escapeHtml(q.topicId||'')}" placeholder="e.g. articles" style="width:100%;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;outline:none;"/></div>
+          <div style="margin-bottom:10px;"><label style="font-size:.65rem;color:var(--muted);font-weight:700;display:block;margin-bottom:3px;">Explanation</label><textarea id="sq-${qid}-exp" style="width:100%;min-height:60px;padding:8px 10px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.8rem;resize:vertical;outline:none;">${escapeHtml(q.explanation||'')}</textarea></div>
+          <div style="display:flex;gap:8px;">
+            <button onclick="saveSQ('${qid}','${sub}')" style="flex:1;padding:10px;background:var(--success);color:#fff;border:none;border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">💾 Save</button>
+            <button onclick="askDel('sq','${qid}','Q${q.number}')" style="padding:10px 14px;background:transparent;border:1.5px solid var(--danger);color:var(--danger);border-radius:9px;font-family:inherit;font-weight:700;font-size:.8rem;cursor:pointer;">🗑️</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML=html;
   }catch(e){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+escapeHtml(e.message)+'</p></div>';}
 }
+function toggleSQEdit(qid){
+  const body=document.getElementById('sqbody-'+qid);
+  const arrow=document.getElementById('sqarrow-'+qid);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  arrow.style.transform=open?'':'rotate(180deg)';
+}
+async function saveSQ(qid,sub){
+  try{
+    const update={
+      question:document.getElementById('sq-'+qid+'-q').value,
+      number:parseInt(document.getElementById('sq-'+qid+'-num').value)||0,
+      answer:document.getElementById('sq-'+qid+'-ans').value,
+      explanation:document.getElementById('sq-'+qid+'-exp').value,
+      updatedAt:new Date().toISOString()
+    };
+    const topicVal=document.getElementById('sq-'+qid+'-topic').value.trim();
+    update.topicId=topicVal?topicVal:firebase.firestore.FieldValue.delete();
+    LS.forEach(l=>{
+      const el=document.getElementById('sq-'+qid+'-opt'+l);
+      if(el){ const v=el.value.trim(); update['option'+l]=v?v:firebase.firestore.FieldValue.delete(); }
+    });
+    await db.collection('studyquestions').doc(sub).collection('questions').doc(qid).update(update);
+    toast('Question saved ✓','ok');
+    const head=document.getElementById('sqhead-text-'+qid);
+    if(head){const txt=document.getElementById('sq-'+qid+'-q').value;head.textContent=txt.substring(0,55)+(txt.length>55?'…':'');}
+  }catch(e){toast('Save failed: '+e.message,'err');}
+}
+
 async function loadPQ(year){
   const el=document.getElementById('mpq-list');
   el.innerHTML='<div class="loading"><div class="lspin"></div>Loading...</div>';
