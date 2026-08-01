@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Save Quiz Questions — AceUnilorin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#0A0F1E;color:#F1F5F9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#131C2E;border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:32px 24px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.icon{font-size:2.8rem;margin-bottom:14px;}
+.title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:6px;}
+.sub{font-size:.82rem;color:#64748B;line-height:1.6;margin-bottom:8px;}
+.count{font-size:.82rem;color:#3B82F6;font-weight:700;margin-bottom:28px;}
+.q-preview{background:#1A2640;border-radius:12px;padding:12px 14px;margin-bottom:24px;text-align:left;max-height:160px;overflow-y:auto;}
+.q-preview::-webkit-scrollbar{width:3px;}
+.q-preview::-webkit-scrollbar-thumb{background:#3B82F6;border-radius:100px;}
+.q-item{font-size:.72rem;color:#94A3B8;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.q-item:last-child{border-bottom:none;}
+.q-num{color:#3B82F6;font-weight:700;}
+.q-ans{color:#22C55E;font-weight:700;}
+.btn{width:100%;padding:16px;background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;border:none;border-radius:14px;font-family:inherit;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:12px;transition:all .2s;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{background:#1A2640;color:#4A5568;cursor:not-allowed;}
+.field{width:100%;padding:14px 16px;background:#1A2640;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;color:#F1F5F9;font-family:inherit;font-size:.9rem;margin-bottom:12px;}
+.field:focus{outline:none;border-color:#3B82F6;}
+.field::placeholder{color:#4A5568;}
+.login-note{font-size:.72rem;color:#4A5568;margin-bottom:16px;line-height:1.5;}
+.progress-wrap{margin-bottom:16px;}
+.progress-bar{background:#1A2640;border-radius:100px;height:10px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#3B82F6,#6366F1);transition:width .3s;}
+.progress-text{font-size:.8rem;color:#64748B;}
+.success{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:20px 16px;}
+.success-icon{font-size:2rem;margin-bottom:8px;}
+.success-title{font-family:'Syne',sans-serif;font-weight:800;color:#22C55E;font-size:1rem;margin-bottom:6px;}
+.success-sub{font-size:.78rem;color:#64748B;line-height:1.6;}
+.error{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:.8rem;color:#EF4444;font-weight:600;}
+.retry{background:transparent;border:1.5px solid rgba(255,255,255,0.08);color:#64748B;border-radius:10px;padding:10px 20px;font-family:inherit;font-weight:600;font-size:.82rem;cursor:pointer;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="icon">🧠</div>
+  <div class="title" id="titleEl">Question and Answer Tags Quiz</div>
+  <div class="sub" id="subEl">29 questions — tagged to the "question-answer-tags" topic</div>
+  <div class="count" id="countEl">0 questions ready to save</div>
+
+  <div class="q-preview" id="preview"></div>
+
+  <div id="mainArea">
+    <div class="login-note">Sign in with your admin account to save — Firestore rules require it.</div>
+    <input class="field" id="emailInput" type="email" placeholder="Admin email" autocomplete="username"/>
+    <input class="field" id="passInput" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button class="btn" id="saveBtn" onclick="signInAndSave()">🔐 Sign In &amp; Save to Firestore</button>
+  </div>
+</div>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const SUBJECT = 'english';
+const ADMIN_UID = 'KNzxKAqIK7bCXX3YbS8oitSr2wh1';
+const TOPIC_ID = 'question-answer-tags';
+
+const QUESTIONS = [
+  {
+    "question": "You can travel on your own, ______?",
+    "optionA": "isn't it",
+    "optionB": "can't you",
+    "optionC": "won't you",
+    "optionD": "shan't you",
+    "answer": "B",
+    "explanation": "The statement has 'can' as the auxiliary verb. Positive statement → negative question tag → 'can't you'."
+  },
+  {
+    "question": "He does not seem to know how to solve the problem ______?",
+    "optionA": "does not he",
+    "optionB": "does he not",
+    "optionC": "does he",
+    "optionD": "doesn't he",
+    "answer": "C",
+    "explanation": "Negative statement ('does not') → positive question tag → 'does he'."
+  },
+  {
+    "question": "Nowadays, many graduates are not well disposed to teaching ______?",
+    "optionA": "are they",
+    "optionB": "aren't they",
+    "optionC": "do they",
+    "optionD": "don't they",
+    "answer": "A",
+    "explanation": "Negative statement ('are not') → positive question tag → 'are they'."
+  },
+  {
+    "question": "He isn't coming home, is he? _____, he isn't.",
+    "optionA": "Yes",
+    "optionB": "No",
+    "optionC": "Why",
+    "optionD": "Now",
+    "answer": "B",
+    "explanation": "The statement is negative ('isn't') → answer tag should be negative → 'No, he isn't'."
+  },
+  {
+    "question": "You can travel on your own, ____?",
+    "optionA": "isn't it",
+    "optionB": "can't you",
+    "optionC": "won't you",
+    "optionD": "shan't you",
+    "answer": "B",
+    "explanation": "The statement has 'can' as the auxiliary verb. Positive statement → negative question tag → 'can't you'."
+  },
+  {
+    "question": "He wrote to you ____?",
+    "optionA": "hadn't he",
+    "optionB": "didn't he",
+    "optionC": "wasn't he",
+    "optionD": "doesn't he",
+    "answer": "B",
+    "explanation": "No auxiliary verb in statement → past tense → use 'did' → 'didn't he'."
+  },
+  {
+    "question": "You don't like Mathematics ____ you?",
+    "optionA": "do",
+    "optionB": "don't",
+    "optionC": "can't",
+    "optionD": "can",
+    "answer": "A",
+    "explanation": "Negative statement ('don't') → positive question tag → 'do you'."
+  },
+  {
+    "question": "You are just putting the hat on ____ ?",
+    "optionA": "don't you",
+    "optionB": "isn't it",
+    "optionC": "aren't you",
+    "optionD": "not so",
+    "answer": "C",
+    "explanation": "Statement has 'are' as auxiliary verb. Positive statement → negative question tag → 'aren't you'."
+  },
+  {
+    "question": "We stood up when the principal came in, ______?",
+    "optionA": "isn't it",
+    "optionB": "didn't we",
+    "optionC": "not so",
+    "optionD": "did us",
+    "answer": "B",
+    "explanation": "No auxiliary verb in statement → past tense → use 'did' → 'didn't we'."
+  },
+  {
+    "question": "A: You needn't prostrate for everyone in the school. B: ______?",
+    "optionA": "need you",
+    "optionB": "isn't it",
+    "optionC": "do you",
+    "optionD": "don't you",
+    "answer": "A",
+    "explanation": "The statement has 'need' as auxiliary verb (with 'n't') → repeat 'need' → 'need you'."
+  },
+  {
+    "question": "The Managing Director did not pay his staff last month ______?",
+    "optionA": "didn't he",
+    "optionB": "had he not",
+    "optionC": "is not it",
+    "optionD": "did he",
+    "optionE": "has he",
+    "answer": "D",
+    "explanation": "Negative statement ('did not') → positive question tag → 'did he'."
+  },
+  {
+    "question": "Must you say 'Good Morning' to everybody in the street? No ______",
+    "optionA": "I needn't",
+    "optionB": "I mustn't",
+    "optionC": "I can't",
+    "optionD": "I do not need",
+    "optionE": "I'll have to",
+    "answer": "A",
+    "explanation": "For negative answer to 'must', use 'needn't' not 'mustn't' → 'No, I needn't'."
+  },
+  {
+    "question": "We used to go to that club on Saturday night ______?",
+    "optionA": "isn't it",
+    "optionB": "didn't we",
+    "optionC": "don't we",
+    "optionD": "aren't we",
+    "optionE": "is it",
+    "answer": "B",
+    "explanation": "No auxiliary verb in statement → past tense → use 'did' → 'didn't we'."
+  },
+  {
+    "question": "It had been raining before the match started ______?",
+    "optionA": "isn't it",
+    "optionB": "hasn't it",
+    "optionC": "hadn't it",
+    "optionD": "wasn't it",
+    "optionE": "is it",
+    "answer": "C",
+    "explanation": "Statement has 'had' as auxiliary verb. Positive statement → negative question tag → 'hadn't it'."
+  },
+  {
+    "question": "The students haven't come back from the Library ______",
+    "optionA": "have they?",
+    "optionB": "is it?",
+    "optionC": "isn't it?",
+    "optionD": "had they?",
+    "optionE": "haven't they?",
+    "answer": "A",
+    "explanation": "Negative statement ('haven't') → positive question tag → 'have they'."
+  },
+  {
+    "question": "Student: Excuse me sir, must we complete the assignment before lunch? Teacher: No, you ______.",
+    "optionA": "needn't",
+    "optionB": "mustn't",
+    "optionC": "can't",
+    "optionD": "shouldn't",
+    "answer": "A",
+    "explanation": "For negative answer to 'must', use 'needn't' not 'mustn't'."
+  },
+  {
+    "question": "It is clear to me that you won't visit Okoro this holiday, will you? ______.",
+    "optionA": "Yes, I won't",
+    "optionB": "Yes, I will visit",
+    "optionC": "No, I won't",
+    "optionD": "No, I will not visit",
+    "answer": "C",
+    "explanation": "The statement is negative ('won't') → answer tag should be negative → 'No, I won't'."
+  },
+  {
+    "question": "I don't think he can ______?",
+    "optionA": "can't he",
+    "optionB": "isn't it",
+    "optionC": "can he",
+    "optionD": "don't I",
+    "answer": "C",
+    "explanation": "Ignore 'I don't think' → focus on 'he can' → positive question tag → 'can he'."
+  },
+  {
+    "question": "We ought to have visited the Governor, ______?",
+    "optionA": "isn't it",
+    "optionB": "oughtn't we",
+    "optionC": "shouldn't we",
+    "optionD": "wouldn't we",
+    "answer": "B",
+    "explanation": "'Ought' without 'not' → question tag should be 'oughtn't' → 'oughtn't we'."
+  },
+  {
+    "question": "He didn't sense Obi's presence in the room, did he? ______",
+    "optionA": "Yes, he did",
+    "optionB": "No, he did",
+    "optionC": "Yes, he didn't",
+    "optionD": "No, he didn't",
+    "answer": "D",
+    "explanation": "The statement is negative ('didn't') → answer tag should be negative → 'No, he didn't'."
+  },
+  {
+    "question": "Students will always blame their teachers when examination results are unfavourable, ______?",
+    "optionA": "won't they",
+    "optionB": "wouldn't they",
+    "optionC": "isn't it",
+    "optionD": "can't they",
+    "answer": "A",
+    "explanation": "Statement has 'will' as auxiliary verb. Positive statement → negative question tag → 'won't they'."
+  },
+  {
+    "question": "It's been rough so far, ______?",
+    "optionA": "haven't it",
+    "optionB": "hadn't it",
+    "optionC": "isn't it",
+    "optionD": "wasn't it",
+    "optionE": "hasn't it",
+    "answer": "E",
+    "explanation": "Statement has 'has' as auxiliary verb ('It's been' = 'It has been'). Positive → negative tag → 'hasn't it'."
+  },
+  {
+    "question": "The children were all there with him.",
+    "optionA": "No, they weren't",
+    "optionB": "Yes, they were",
+    "optionC": "No, they couldn't",
+    "optionD": "Yes, they weren't",
+    "answer": "B",
+    "explanation": "Positive statement → answer tag should be positive → 'Yes, they were'."
+  },
+  {
+    "question": "They seldom play with their mates.",
+    "optionA": "Yes, they don't",
+    "optionB": "No, they don't",
+    "optionC": "Yes, they do",
+    "optionD": "No, they do",
+    "answer": "B",
+    "explanation": "'Seldom' is a negative particle. The answer tag should be negative → 'No, they don't'."
+  },
+  {
+    "question": "Let's have a cup of coffee, ______ ?",
+    "optionA": "shall we",
+    "optionB": "will you",
+    "optionC": "shouldn't we",
+    "optionD": "could we",
+    "answer": "A",
+    "explanation": "'Let's' is short for 'Let us' → question tag should be 'shall we'."
+  },
+  {
+    "question": "Get out of my office immediately, ______ ?",
+    "optionA": "shall we",
+    "optionB": "can't you",
+    "optionC": "will you",
+    "optionD": "shouldn't you",
+    "answer": "C",
+    "explanation": "Command given, commander not involved → question tag should be 'will you'."
+  },
+  {
+    "question": "She daren't slap a military officer, ______?",
+    "optionA": "should she",
+    "optionB": "can she",
+    "optionC": "dare she",
+    "optionD": "will she",
+    "answer": "C",
+    "explanation": "'Dare' is used with 'not' as auxiliary verb → repeat 'dare' → 'dare she'."
+  },
+  {
+    "question": "He dared to buy a tiger, ______?",
+    "optionA": "didn't he",
+    "optionB": "daren't he",
+    "optionC": "doesn't he",
+    "optionD": "isn't it",
+    "answer": "A",
+    "explanation": "'Dare' used as main verb (with 'to') → past tense → use 'didn't' → 'didn't he'."
+  },
+  {
+    "question": "Hi lady, don't you ever get tired of shouting?",
+    "optionA": "I don't ever",
+    "optionB": "Yes, I don't",
+    "optionC": "No, I do",
+    "optionD": "No, I don't",
+    "answer": "D",
+    "explanation": "The question is negative → answer tag should be negative → 'No, I don't'."
+  }
+];
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",
+  authDomain: "aceunilorin-pq.firebaseapp.com",
+  projectId: "aceunilorin-pq",
+  storageBucket: "aceunilorin-pq.firebasestorage.app",
+  messagingSenderId: "152163357125",
+  appId: "1:152163357125:web:23dc8652f9789197623bac"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+document.getElementById('countEl').textContent = `${QUESTIONS.length} question${QUESTIONS.length===1?'':'s'} ready to save`;
+
+const prev = document.getElementById('preview');
+prev.innerHTML = QUESTIONS.slice(0,12).map((q,i) =>
+  `<div class="q-item"><span class="q-num">${i+1}.</span> ${q.question.substring(0,45)}${q.question.length>45?'...':''} <span class="q-ans">→ ${q.answer}</span></div>`
+).join('') + (QUESTIONS.length > 12 ? `<div class="q-item" style="color:#3B82F6;text-align:center;padding-top:6px;">... and ${QUESTIONS.length - 12} more</div>` : '');
+
+async function fsAdd(col, data, attempt = 1) {
+  try {
+    await db.collection(col).add({...data, createdAt: new Date().toISOString()});
+  } catch (err) {
+    const isNetworkError = err.code === 'unavailable' || err instanceof TypeError;
+    if (isNetworkError && attempt < 3) {
+      await new Promise(res => setTimeout(res, attempt * 1000));
+      return fsAdd(col, data, attempt + 1);
+    }
+    throw err;
+  }
+}
+
+async function signInAndSave() {
+  const btn = document.getElementById('saveBtn');
+  const area = document.getElementById('mainArea');
+  const email = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passInput').value;
+
+  if (!email || !password) {
+    alert('Enter your admin email and password first.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '🔐 Signing in...';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (cred.user.uid !== ADMIN_UID) {
+      area.innerHTML = `
+        <div class="error">🚫 Signed in, but this account is not the admin account (UID mismatch). Nothing was saved.</div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  } catch (err) {
+    area.innerHTML = `
+      <div class="error">🚫 Sign-in failed: ${err.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  if (navigator.onLine === false) {
+    area.innerHTML = `
+      <div class="error">📡 Your device shows no internet connection right now.</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `<div class="progress-text" id="pText">Checking current highest question number...</div>`;
+
+  let startNumber = 1;
+  try {
+    const col = `studyquestions/${SUBJECT}/questions`;
+    const snap = await db.collection(col).orderBy('number', 'desc').limit(1).get();
+    if (!snap.empty) {
+      startNumber = (snap.docs[0].data().number || 0) + 1;
+    }
+  } catch (e) {
+    area.innerHTML = `
+      <div class="error">❌ Could not check existing question numbers: ${e.message}</div>
+      <button class="retry" onclick="location.reload()">Try again</button>`;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="pFill" style="width:0%"></div></div>
+      <div class="progress-text" id="pText">Saving 0 of ${QUESTIONS.length}... (starting at #${startNumber})</div>
+    </div>`;
+
+  let saved = 0;
+  for (const q of QUESTIONS) {
+    try {
+      const number = startNumber + saved;
+      await fsAdd(`studyquestions/${SUBJECT}/questions`, {...q, number, topicId: TOPIC_ID});
+      saved++;
+      const pct = Math.round((saved / QUESTIONS.length) * 100);
+      document.getElementById('pFill').style.width = pct + '%';
+      document.getElementById('pText').textContent = `Saving ${saved} of ${QUESTIONS.length}... (${pct}%)`;
+    } catch(e) {
+      document.getElementById('mainArea').innerHTML = `
+        <div class="error">❌ Failed at "${q.question.substring(0,40)}...": ${e.message}</div>
+        <div class="error" style="background:rgba(59,130,246,0.08);border-color:rgba(59,130,246,0.2);color:#94A3B8;">
+          ✅ ${saved} questions were saved before the error.
+        </div>
+        <button class="retry" onclick="location.reload()">Try again</button>`;
+      return;
+    }
+  }
+
+  document.getElementById('mainArea').innerHTML = `
+    <div class="success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">All ${saved} questions saved!</div>
+      <div class="success-sub">Appended as #${startNumber} through #${startNumber + saved - 1} in studyquestions/${SUBJECT}/questions.</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
