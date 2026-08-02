@@ -108,6 +108,17 @@
     .bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:var(--text-muted);font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;padding:0 14px;}
     .bnav-item.active{color:var(--primary);}
     .bnav-icon{font-size:1.2rem;}
+
+    /* ARRAY-STYLE QUIZ (all questions at once, like mocks/past questions) */
+    .quiz-list{display:flex;flex-direction:column;gap:18px;margin-bottom:18px;}
+    .quiz-item{padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .quiz-item:last-child{border-bottom:none;padding-bottom:0;}
+    .quiz-item .q-counter{margin-bottom:6px;}
+    .quiz-item .q-text{margin-bottom:14px;}
+    .quiz-item .options{margin-bottom:0;}
+    .quiz-submit-wrap{margin-top:4px;}
+    .unanswered-note{font-size:0.74rem;color:#F59E0B;text-align:center;margin-bottom:12px;}
+
     @keyframes spin{to{transform:rotate(360deg);}}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
   </style>
@@ -146,7 +157,7 @@
   firebase.initializeApp(firebaseConfig);
   const auth=firebase.auth(), db=firebase.firestore();
   const SUBJECT='english', BATCH=5;
-  let questions=[],currentIndex=0,userAnswers={},lastDoc=null,hasMore=true,uid=null;
+  let questions=[],userAnswers={},lastDoc=null,hasMore=true,uid=null;
   let currentTopicId=null, currentTopicQuestionCount=0;
 
   function toggleTheme(){const h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.querySelector('.theme-toggle').textContent=d?'🌙':'☀️';localStorage.setItem('theme',d?'light':'dark');}
@@ -268,8 +279,8 @@
       if(snap.empty){ showTopicDone(topicId); return; }
       lastDoc=snap.docs[snap.docs.length-1];
       questions=snap.docs.map(d=>({...d.data(),id:d.id}));
-      currentIndex=0; userAnswers={};
-      renderQuestion(topicId);
+      userAnswers={};
+      renderQuestionList(topicId);
     }catch(e){
       console.error(e);
       let hint='';
@@ -284,32 +295,46 @@
     }
   }
 
-  function renderQuestion(topicId){
+  // Renders ALL questions in the batch at once, array-style (matches mocks/past questions)
+  function renderQuestionList(topicId){
     const engine=document.getElementById('quizEngine-'+topicId);
-    const q=questions[currentIndex],total=questions.length;
-    const opts=['A','B','C','D','E'].map((l,i)=>{
-      const opt=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE][i];
-      if(!opt) return '';
-      const sel=userAnswers[currentIndex]===l?' selected':'';
-      return `<div class="option${sel}" onclick="selectAnswer('${topicId}','${l}')"><div class="option-letter">${l}</div><div class="option-text">${opt}</div></div>`;
+    const total=questions.length;
+
+    const itemsHtml=questions.map((q,i)=>{
+      const opts=['A','B','C','D','E'].map((l,k)=>{
+        const opt=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE][k];
+        if(!opt) return '';
+        const sel=userAnswers[i]===l?' selected':'';
+        return `<div class="option${sel}" onclick="selectAnswer('${topicId}',${i},'${l}')"><div class="option-letter">${l}</div><div class="option-text">${opt}</div></div>`;
+      }).join('');
+
+      return `
+        <div class="quiz-item">
+          <div class="q-counter">Question ${i+1} of ${total}</div>
+          <div class="q-text">${q.question||q.text||''}</div>
+          <div class="options" id="opts-${topicId}-${i}">${opts}</div>
+        </div>`;
     }).join('');
 
     engine.innerHTML=`
-      <div class="qpb-wrap"><div class="qpb-bg"><div class="qpb-fill" style="width:${((currentIndex+1)/total)*100}%"></div></div>
-        <div class="qpb-label">Question ${currentIndex+1} of ${total}</div></div>
-      <div class="q-counter">Question ${currentIndex+1} of ${total}</div>
-      <div class="q-text">${q.question||q.text||''}</div>
-      <div class="options">${opts}</div>
-      <div class="quiz-nav">
-        <button class="nav-btn" onclick="navigate('${topicId}',-1)" ${currentIndex===0?'disabled':''}>← Prev</button>
-        ${currentIndex<total-1
-          ? `<button class="nav-btn" onclick="navigate('${topicId}',1)">Next →</button>`
-          : `<button class="nav-btn submit-btn" onclick="submitBatch('${topicId}')">Submit ✓</button>`}
+      <div class="quiz-list">${itemsHtml}</div>
+      <div class="quiz-submit-wrap">
+        <button class="nav-btn submit-btn" style="width:100%;" onclick="submitBatch('${topicId}')">Submit ✓</button>
       </div>`;
   }
 
-  function selectAnswer(topicId,l){userAnswers[currentIndex]=l;renderQuestion(topicId);}
-  function navigate(topicId,d){currentIndex=Math.max(0,Math.min(questions.length-1,currentIndex+d));renderQuestion(topicId);}
+  // Re-renders just one question's options (so we don't rebuild the whole list on every tap)
+  function selectAnswer(topicId,i,l){
+    userAnswers[i]=l;
+    const q=questions[i];
+    const optsHtml=['A','B','C','D','E'].map((letter,k)=>{
+      const opt=[q.optionA,q.optionB,q.optionC,q.optionD,q.optionE][k];
+      if(!opt) return '';
+      const sel=userAnswers[i]===letter?' selected':'';
+      return `<div class="option${sel}" onclick="selectAnswer('${topicId}',${i},'${letter}')"><div class="option-letter">${letter}</div><div class="option-text">${opt}</div></div>`;
+    }).join('');
+    document.getElementById(`opts-${topicId}-${i}`).innerHTML=optsHtml;
+  }
 
   function submitBatch(topicId){
     let correct=0;const review=[];
