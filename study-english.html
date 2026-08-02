@@ -378,7 +378,7 @@
       <div class="batch-label">${pct===100?'Perfect! 🎉':pct>=80?'Excellent! 🔥':pct>=60?'Good effort 👍':pct>=40?'Keep practising 💪':'Review the notes and try again 📖'}</div>
       <div class="batch-review">${reviewHtml}</div>
       <div class="batch-btns">
-        <button class="btn btn-primary" onclick="nextTopicBatch('${topicId}')">${hasMore?'Next 5 Questions →':'🔁 Restart Topic Quiz'}</button>
+        <button class="btn btn-primary" onclick="nextTopicBatch('${topicId}')">${hasMore?('Next '+BATCH+' Questions →'):'🔁 Restart Topic Quiz'}</button>
         <button class="btn btn-outline" onclick="closeTopicQuiz('${topicId}')">Close</button>
       </div>`;
   }
