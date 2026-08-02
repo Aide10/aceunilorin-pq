@@ -156,7 +156,7 @@
   const firebaseConfig={apiKey:"AIzaSyA8vqQqgQYzSX5qagQz1_8BB87xURMsgPE",authDomain:"aceunilorin-pq.firebaseapp.com",projectId:"aceunilorin-pq",storageBucket:"aceunilorin-pq.firebasestorage.app",messagingSenderId:"152163357125",appId:"1:152163357125:web:23dc8652f9789197623bac"};
   firebase.initializeApp(firebaseConfig);
   const auth=firebase.auth(), db=firebase.firestore();
-  const SUBJECT='math', BATCH=5;
+  const SUBJECT='math', BATCH=10;
   let questions=[],userAnswers={},lastDoc=null,hasMore=true,uid=null;
   let currentTopicId=null, currentTopicQuestionCount=0;
 
