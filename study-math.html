@@ -65,7 +65,7 @@
     .quiz-close{background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;line-height:1;}
     .qpb-wrap{margin-bottom:16px;}
     .qpb-bg{background:var(--surface2);border-radius:100px;height:5px;overflow:hidden;}
-    .qpb-fill{height:100%;background:linear-gradient(90deg,#14B8A6,#06B6D4);border-radius:100px;transition:width 0.3s;}
+    .qpb-fill{height:100%;background:linear-gradient(90deg,#F59E0B,#FBBF24);border-radius:100px;transition:width 0.3s;}
     .qpb-label{font-size:0.7rem;color:var(--text-muted);margin-top:4px;text-align:right;}
     .q-counter{font-size:0.75rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
     .q-text{font-size:0.98rem;font-weight:600;line-height:1.65;margin-bottom:20px;}
@@ -378,7 +378,7 @@
       <div class="batch-label">${pct===100?'Perfect! 🎉':pct>=80?'Excellent! 🔥':pct>=60?'Good effort 👍':pct>=40?'Keep practising 💪':'Review the notes and try again 🔢'}</div>
       <div class="batch-review">${reviewHtml}</div>
       <div class="batch-btns">
-        <button class="btn btn-primary" onclick="nextTopicBatch('${topicId}')">${hasMore?'Next 5 Questions →':'🔁 Restart Topic Quiz'}</button>
+        <button class="btn btn-primary" onclick="nextTopicBatch('${topicId}')">${hasMore?('Next '+BATCH+' Questions →'):'🔁 Restart Topic Quiz'}</button>
         <button class="btn btn-outline" onclick="closeTopicQuiz('${topicId}')">Close</button>
       </div>`;
   }
