@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JAMB Grammar CBT Mock — Structure Part 2</title>
+<style>
+  :root{
+    --navy:#132743; --navy-deep:#0b1a2e; --gold:#c99a2e; --gold-soft:#e8cf8a;
+    --cream:#f6f3ec; --paper:#fffdf9; --ink:#1c1c1c; --muted:#6b6b6b;
+    --good:#2e7d4f; --bad:#a5322c; --line:#e2dccb;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Georgia','Iowan Old Style',serif; background:var(--cream); color:var(--ink); min-height:100vh;}
+  .topbar{background:var(--navy); color:var(--cream); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:3px solid var(--gold); position:sticky; top:0; z-index:20;}
+  .topbar .brand{font-family:'Courier New',monospace; letter-spacing:1px; font-size:12px; text-transform:uppercase; color:var(--gold-soft);}
+  .topbar .brand strong{color:var(--cream); font-size:14.5px; display:block; font-family:Georgia,serif; letter-spacing:0.5px;}
+  .clock{font-family:'Courier New',monospace; background:var(--navy-deep); border:1px solid var(--gold); color:var(--gold-soft); padding:6px 10px; border-radius:3px; font-size:13px; white-space:nowrap;}
+  .clock.warn{color:#f0b0a8; border-color:#a5322c;}
+  .wrap{max-width:920px; margin:0 auto; padding:18px 16px 60px;}
+  .rail{height:6px; background:#e6e0cf; border-radius:4px; overflow:hidden; margin-bottom:18px;}
+  .rail-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-soft)); width:0%; transition:width .3s ease;}
+  .meta-row{display:flex; justify-content:space-between; font-family:'Courier New',monospace; font-size:12px; color:var(--muted); margin-bottom:10px; letter-spacing:0.5px;}
+  .category-tag{display:inline-block; background:var(--navy); color:var(--gold-soft); font-family:'Courier New',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:4px 10px; border-radius:2px; margin-bottom:14px;}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:26px 24px; box-shadow:0 1px 0 var(--line), 0 8px 20px -12px rgba(19,39,67,0.25);}
+  .qnum{font-family:'Courier New',monospace; color:var(--gold); font-size:13px; letter-spacing:1px; margin-bottom:6px;}
+  .qtext{font-size:18.5px; line-height:1.55; color:var(--navy-deep); margin:0 0 22px; font-weight:600;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{display:flex; align-items:flex-start; gap:12px; padding:12px 14px; border:1.5px solid var(--line); border-radius:5px; background:var(--cream); cursor:pointer; transition:border-color .15s, background .15s; text-align:left; font-family:Georgia,serif; font-size:15.5px; color:var(--ink);}
+  .opt:hover{border-color:var(--gold); background:#fbf6e8;}
+  .opt .letter{font-family:'Courier New',monospace; font-weight:700; color:var(--navy); border:1.5px solid var(--navy); border-radius:50%; width:26px;height:26px; min-width:26px; display:flex;align-items:center;justify-content:center; font-size:13px;}
+  .opt.selected{border-color:var(--navy); background:#eef2f7;}
+  .opt.selected .letter{background:var(--navy); color:var(--cream);}
+  .nav-row{display:flex; justify-content:space-between; align-items:center; margin-top:22px; gap:10px; flex-wrap:wrap;}
+  .btn{font-family:'Courier New',monospace; letter-spacing:0.5px; font-size:13px; text-transform:uppercase; padding:10px 16px; border-radius:4px; border:1.5px solid var(--navy); background:var(--navy); color:var(--cream); cursor:pointer; transition:opacity .15s, transform .1s;}
+  .btn:hover{opacity:0.88;} .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:transparent; color:var(--navy);}
+  .btn.gold{background:var(--gold); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .navigator{margin-top:26px; background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:16px;}
+  .navigator-title{font-family:'Courier New',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px;}
+  .grid{display:grid; grid-template-columns:repeat(14,1fr); gap:4px;}
+  @media (max-width:600px){ .grid{grid-template-columns:repeat(9,1fr);} .qtext{font-size:16.5px;} }
+  .cell{aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:'Courier New',monospace; font-size:9px; border-radius:3px; border:1px solid var(--line); background:var(--cream); color:var(--muted); cursor:pointer;}
+  .cell.answered{background:var(--gold-soft); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .cell.current{outline:2px solid var(--navy); outline-offset:1px;}
+  .legend{display:flex; gap:16px; margin-top:10px; font-size:11px; font-family:'Courier New',monospace; color:var(--muted); flex-wrap:wrap;}
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .swatch{width:10px;height:10px;border-radius:2px;display:inline-block;}
+  .hidden{display:none !important;}
+  .score-hero{text-align:center; padding:34px 20px; background:var(--navy); color:var(--cream); border-radius:6px; margin-bottom:22px; border:1px solid var(--gold);}
+  .score-hero .big{font-family:'Courier New',monospace; font-size:44px; color:var(--gold-soft); line-height:1; margin-bottom:6px;}
+  .score-hero .sub{font-size:14px; color:var(--cream); opacity:0.85;}
+  .verdict{display:inline-block; margin-top:14px; padding:6px 14px; border:1px solid var(--gold); border-radius:20px; font-family:'Courier New',monospace; font-size:12px; letter-spacing:1px; color:var(--gold-soft);}
+  .breakdown{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:24px;}
+  .bd-card{background:var(--paper); border:1px solid var(--line); border-radius:5px; padding:12px 14px; text-align:center;}
+  .bd-card .cat{font-family:'Courier New',monospace; font-size:9.5px; letter-spacing:0.3px; color:var(--muted); text-transform:uppercase; margin-bottom:6px;}
+  .bd-card .frac{font-size:20px; font-weight:700; color:var(--navy);}
+  .review-item{background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--bad); border-radius:4px; padding:14px 16px; margin-bottom:10px;}
+  .review-item .rq{font-weight:700; margin-bottom:6px; color:var(--navy-deep);}
+  .review-item .rline{font-size:13.5px; margin:3px 0;}
+  .review-item .ryour{color:var(--bad);}
+  .review-item .rcorrect{color:var(--good);}
+  .section-title{font-family:'Courier New',monospace; font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--navy); border-bottom:1px solid var(--line); padding-bottom:8px; margin:26px 0 14px;}
+  .intro{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:28px 24px; text-align:center;}
+  .intro h1{font-size:21px; color:var(--navy-deep); margin-bottom:4px;}
+  .intro .byline{font-family:'Courier New',monospace; font-size:11.5px; color:var(--gold); letter-spacing:0.5px; margin-bottom:16px;}
+  .intro p{color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:18px;}
+  .intro-stats{display:flex; justify-content:center; gap:22px; margin-bottom:22px; flex-wrap:wrap;}
+  .intro-stats div{text-align:center;}
+  .intro-stats .n{font-family:'Courier New',monospace; font-size:22px; color:var(--gold); font-weight:700;}
+  .intro-stats .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;}
+  .note{font-size:12px; color:var(--muted); margin-top:14px; line-height:1.5;}
+  .lock-screen{max-width:420px; margin:80px auto; background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:34px 28px; text-align:center; box-shadow:0 8px 30px -14px rgba(19,39,67,0.3);}
+  .lock-screen h2{font-size:19px; color:var(--navy-deep); margin-bottom:6px;}
+  .lock-screen .byline{font-family:'Courier New',monospace; font-size:11px; color:var(--gold); margin-bottom:22px;}
+  .lock-screen input{width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:5px; font-family:Georgia,serif; font-size:15px; margin-bottom:14px; text-align:center;}
+  .lock-screen input:focus{outline:none; border-color:var(--navy);}
+  .lock-err{color:var(--bad); font-size:12.5px; margin-bottom:10px; min-height:16px;}
+  .footer-credit{text-align:center; font-family:'Courier New',monospace; font-size:11px; color:var(--muted); margin-top:30px;}
+</style>
+</head>
+<body>
+
+<div id="appRoot">
+<div class="topbar">
+  <div class="brand">JAMB CBT PRACTICE<strong>Structure — Fill in the Gap (Q1386–1660)</strong></div>
+  <div class="clock" id="timerDisplay">100:00</div>
+</div>
+
+<div class="wrap">
+  <div id="introScreen" class="intro">
+    <h1>Structure: Fill in the Gap — Part 2</h1>
+    <div class="byline">Compiled by Ohijei Aidelokhai — UnilorinPQ.site (07036612528)</div>
+    <p>275 questions sourced directly from "The English Tablets," Part III (Structure), numbered 1386–1660, cross-checked against the handwritten answer key including biro corrections. Tap an option to answer, jump around with the navigator grid, then submit for a full category breakdown.</p>
+    <div class="intro-stats">
+      <div><div class="n">275</div><div class="l">Questions</div></div>
+      <div><div class="n">100</div><div class="l">Minutes</div></div>
+      <div><div class="n">8</div><div class="l">Categories</div></div>
+    </div>
+    <button class="btn gold" onclick="startQuiz()" style="font-size:14px; padding:12px 26px;">START PRACTICE</button>
+    <div class="note">Four biro-corrected answers applied: Q1400→C, Q1405→E, Q1443→B, Q1464→D, Q1534→C, Q1537→C. Q1650 kept at C (grammar-checked; marked correction to B did not fit the sentence).</div>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="meta-row">
+      <span id="progressLabel">Question 1 of 275</span>
+      <span id="answeredLabel">0 answered</span>
+    </div>
+    <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+    <div class="category-tag" id="catTag"></div>
+    <div class="card">
+      <div class="qnum" id="qNumLabel"></div>
+      <p class="qtext" id="qText"></p>
+      <div class="options" id="optionsBox"></div>
+      <div class="nav-row">
+        <button class="btn ghost" id="prevBtn" onclick="goPrev()">← Previous</button>
+        <button class="btn" id="nextBtn" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+    <div class="navigator">
+      <div class="navigator-title">Question Navigator</div>
+      <div class="grid" id="navGrid"></div>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--gold-soft); border:1px solid var(--gold);"></span> Answered</span>
+        <span><span class="swatch" style="background:var(--cream); border:1px solid var(--line);"></span> Unanswered</span>
+      </div>
+    </div>
+    <div class="nav-row" style="justify-content:center; margin-top:22px;">
+      <button class="btn gold" id="submitBtn" onclick="submitQuiz()" style="font-size:14px; padding:12px 30px;">SUBMIT TEST</button>
+    </div>
+  </div>
+
+  <div id="resultsScreen" class="hidden">
+    <div class="score-hero">
+      <div class="big" id="scoreBig">0/275</div>
+      <div class="sub" id="scorePct">0%</div>
+      <div class="verdict" id="verdictTag">—</div>
+    </div>
+    <div class="section-title">Score by Category</div>
+    <div class="breakdown" id="breakdownBox"></div>
+    <div class="section-title">Review — Questions Missed</div>
+    <div id="reviewBox"></div>
+    <div class="nav-row" style="justify-content:center; margin-top:10px;">
+      <button class="btn" onclick="restartQuiz()">RESTART PRACTICE</button>
+    </div>
+  </div>
+
+  <div class="footer-credit">Compiled by Ohijei Aidelokhai — UnilorinPQ.site — 07036612528</div>
+</div>
+</div>
+
+<script>
+const QUESTIONS = [
+{n:1386,cat:"Sentence Structure & Grammar",q:"Shakespearian ___ are generally the victims of circumstances",opts:["heros","heres","heroses","hero","heroes"],correct:4},
+{n:1387,cat:"Sentence Structure & Grammar",q:"___ a good film, wasn't it?",opts:["It is","Was it","There is","It was","There was"],correct:3},
+{n:1388,cat:"Sentence Structure & Grammar",q:"We left ___ U.S.A. and crossed ___ Atlantic Ocean to ___ Europe",opts:["the/the/___","---/---","---/---/the","the/---/a","---/an/---"],correct:0},
+{n:1389,cat:"Sentence Structure & Grammar",q:"There was ___ much noise at night that we couldn't sleep",opts:["such a","such","that","very","so"],correct:4},
+{n:1390,cat:"Sentence Structure & Grammar",q:"Have you paid your taxes up to date? The tax collector inquired if ___",opts:["you have paid your taxes up to date","I had paid my taxes up to date","I paid my taxes up to date","have I paid my taxes up to date","I have paid my taxes up to date"],correct:1},
+{n:1391,cat:"Sentence Structure & Grammar",q:"Do you want me to buy her anything? She asked Asman. She asked Asman if ___",opts:["she wants her to buy her anything","you want to buy anything","she wanted to buy anything","I wanted her to buy anything","she wanted her to buy her anything"],correct:4},
+{n:1392,cat:"Verb Patterns",q:"He devoted himself ___ homeless children",opts:["to helping","to help","by helping","with helping","helping"],correct:0},
+{n:1393,cat:"Sentence Structure & Grammar",q:"Although the problem was simple ___ students were able to solve it",opts:["little","small","few","a few","a lot of"],correct:2},
+{n:1394,cat:"Conjunctions & Connectors",q:"We talked quietly ___ wake the baby",opts:["so that not","in order to","so as to","so as not to","so not"],correct:3},
+{n:1395,cat:"Tenses & Aspect",q:"These six employees ___ absent from work since New Year's Day",opts:["are","have been","were","had been","are being"],correct:1},
+{n:1396,cat:"Conditionals & Subjunctive",q:"I wish I ___ to swim when I was younger",opts:["had learnt","learn","learnt","was learning","have learnt"],correct:0},
+{n:1397,cat:"Tenses & Aspect",q:"By the end of June, I ___ six examinations this year",opts:["shall take","have taken","shall have taken","am taking","took"],correct:2},
+{n:1398,cat:"Sentence Structure & Grammar",q:"We used to go to that club on Saturday night, ___?",opts:["isn't it","didn't we","don't we","aren't we","used we not"],correct:1},
+{n:1399,cat:"Sentence Structure & Grammar",q:"It was a blind alley. I could not walk any ___",opts:["far","farthest","furthest","farther","further"],correct:3},
+{n:1400,cat:"Idioms & Phrasal Verbs",q:"After weeks of bargaining, they ___ a deal worth millions",opts:["made up","turned about","brought off","went in","fell through"],correct:2},
+{n:1401,cat:"Idioms & Phrasal Verbs",q:"Maimuna wrote to ask if I could put her ___ for the night",opts:["up","in","out","off","away"],correct:0},
+{n:1402,cat:"Vocabulary & Word Choice",q:"I was in such a hurry, I didn't have time to ___ 'Hello'",opts:["tell","speak","talk","say","utter"],correct:3},
+{n:1403,cat:"Sentence Structure & Grammar",q:"My younger brother looked ill last night, and was evidently ___ this morning",opts:["worse","worst","more ill","learner","brighter"],correct:0},
+{n:1404,cat:"Sentence Structure & Grammar",q:"The schoolboy screamed loudly when he saw a snake ___ looked terrifying",opts:["it","who","and","he","which"],correct:4},
+{n:1405,cat:"Tenses & Aspect",q:"The guests ___ breakfast by the time the bus arrives",opts:["are finishing","have finished","shall have finished","had finished","will have finished"],correct:4},
+{n:1406,cat:"Vocabulary & Word Choice",q:"Eko Bridge, linking Lagos Island to Surulere, has ……",opts:["many traffic","numerous vehicles","uncontrollable traffic","plenty traffic","a lot of traffic"],correct:4},
+{n:1407,cat:"Vocabulary & Word Choice",q:"The passenger waited patiently whilst they transferred his ___ from the taxi to the bus",opts:["properties","baggages","luggage","luggages","property"],correct:2},
+{n:1408,cat:"Tenses & Aspect",q:"Monisola is sure to pass in September, She ___ hard since the beginning of this term",opts:["had been working","was working","is working","would work","has been working"],correct:4},
+{n:1409,cat:"Sentence Structure & Grammar",q:"Will you know if that dog is ___? He has lost a brown and black one",opts:["Adebowale's","Adebowales'","Adebowale's own","the Adebowales","the Adebowale's"],correct:0},
+{n:1410,cat:"Sentence Structure & Grammar",q:"Jane and Jarawa love ___ very much",opts:["themselves","each other","one another","theirselves","each others"],correct:1},
+{n:1411,cat:"Sentence Structure & Grammar",q:"I shall travel to Lagos by ___ next week",opts:["air or with lorry","aircraft or by road","airways or by bus","air or by road","flight or by bus"],correct:3},
+{n:1412,cat:"Idioms & Phrasal Verbs",q:"You can never get ___ with stealing the presidential jet. You will be caught",opts:["by","away","bye","free","scot free"],correct:1},
+{n:1413,cat:"Vocabulary & Word Choice",q:"She got into trouble because she refused to listen to the ___ given by her friends and relatives",opts:["many of advice","series of advices","pieces of advice","advice","lots of advices"],correct:3},
+{n:1414,cat:"Prepositions",q:"The armed robber stabbed the driver ___ the back",opts:["in","on","at","inside","by"],correct:0},
+{n:1415,cat:"Tenses & Aspect",q:"I ___ him before he came into the room",opts:["have seen","have not","used to see","see","had seen"],correct:4},
+{n:1416,cat:"Prepositions",q:"I am disappointed ___ the way you conducted yourself at the party",opts:["by","for","due to","at","according to"],correct:3},
+{n:1417,cat:"Tenses & Aspect",q:"You can go on; I ___ what you are saying",opts:["am understanding","may be understanding","was understanding","will be understanding","understand"],correct:4},
+{n:1418,cat:"Sentence Structure & Grammar",q:"When we were coming back from the picnic last Friday, there ___ on Eko Bridge",opts:["were many traffic","was much traffic","were plenty traffic","were lots of traffic","were a few traffic"],correct:1},
+{n:1419,cat:"Vocabulary & Word Choice",q:"I have refused to give him my pen because I don't want him to ___ it again",opts:["loss","loose","lose","lost","lend"],correct:2},
+{n:1420,cat:"Vocabulary & Word Choice",q:"We were all delighted when the beautiful lady in our house ___ a bouncing baby boy",opts:["delivered","born","brought forth","gave birth to","gave bath to"],correct:3},
+{n:1421,cat:"Idioms & Phrasal Verbs",q:"Always remember to ___ the lights before leaving the room",opts:["put off","blow out","off","put out","switch off"],correct:4},
+{n:1422,cat:"Sentence Structure & Grammar",q:"I'm sorry I can't go to the theatre with you as I have ___ to do",opts:["many works","a work","plenty work","much work","lots and lots of works"],correct:3},
+{n:1423,cat:"Sentence Structure & Grammar",q:"The wicked boy threw a stone at the bird smashing ___ two legs",opts:["its","it's","it","is","its'"],correct:0},
+{n:1424,cat:"Sentence Structure & Grammar",q:"When the policeman received ___ about the hide out of the armed robbers, they went there in full force to arrest them",opts:["full informations","all the necessary informations","some informations","an information","full information"],correct:4},
+{n:1425,cat:"Vocabulary & Word Choice",q:"On such an important ___ al the guests were expected to be at their best",opts:["occassion","ocassion","ocasion","occasion"],correct:3},
+{n:1426,cat:"Prepositions",q:"Chike, who plays in the first eleven, is an expert ___ dribbling",opts:["for","by","at","with","on"],correct:2},
+{n:1427,cat:"Tenses & Aspect",q:"Musa asked Asmau what she ___ since he last saw her",opts:["has been doing","had been doing","has done","was doing","might be doing"],correct:1},
+{n:1428,cat:"Sentence Structure & Grammar",q:"The violent storm that occurred on Easter Monday destroyed many houses and caused ___ in Lagos generally",opts:["heavy damages","much damage","several damages","plenty damage","many damages"],correct:1},
+{n:1429,cat:"Verb Patterns",q:"Would you mind ___ the door, please?",opts:["to shut","to shutting","shutting","to have been shutting","to have shut"],correct:2},
+{n:1430,cat:"Sentence Structure & Grammar",q:"The angry woman shouted and cursed in language ___ shocking for words",opts:["very","far","so","quire","too"],correct:4},
+{n:1431,cat:"Tenses & Aspect",q:"The evidence of all the accused persons ___ by the judge sitting at No. 2 Assizes last week",opts:["were disbelieved","was disbelieved","is disbelieved","are disbelieved","has been disbelieved"],correct:1},
+{n:1432,cat:"Tenses & Aspect",q:"There are puddles in the road. It ___",opts:["rains","will be running","had to rain","must rain","must have been raining"],correct:4},
+{n:1433,cat:"Tenses & Aspect",q:"By next June, he ___ four novels",opts:["will write","is writing","will have written","had written","has written"],correct:2},
+{n:1434,cat:"Tenses & Aspect",q:"Do come tonight, but don't expect me to speak to you because I ___ an interesting programme on television when you arrive",opts:["am watching","watch","watched","shall be watching","have watched"],correct:3},
+{n:1435,cat:"Verb Patterns",q:"His hair needs ___",opts:["to cut","to have cut","being cut","to be cutting","cutting"],correct:4},
+{n:1436,cat:"Tenses & Aspect",q:"___ fewer strikes since the profit-sharing schemes were introduced",opts:["There have been","There are","There were","There are going to be","There was"],correct:0},
+{n:1437,cat:"Verb Patterns",q:"Everybody hates ___ kept waiting",opts:["be","being","to be","for being","in being"],correct:1},
+{n:1438,cat:"Verb Patterns",q:"I am not used to ___ on the left",opts:["drive","having driven","driving","have driven","being driving"],correct:2},
+{n:1439,cat:"Verb Patterns",q:"What made you ___ that?",opts:["have said","to say","saying","said","say"],correct:4},
+{n:1440,cat:"Tenses & Aspect",q:"His English was so good that he ___ for an Englishman",opts:["took","is taken","was taken","has taken","is taking"],correct:2},
+{n:1441,cat:"Conditionals & Subjunctive",q:"If you ___ me that you had run out of petrol, I would have given you some",opts:["were to tell","tell","have told","would tell","had told"],correct:4},
+{n:1442,cat:"Idioms & Phrasal Verbs",q:"Put ___ your watch, it is half an hour fast",opts:["away","up","on","forward","back"],correct:4},
+{n:1443,cat:"Idioms & Phrasal Verbs",q:"You look very tired, a cup of tea will ___ you some good!",opts:["make","do","give","set","put"],correct:1},
+{n:1444,cat:"Vocabulary & Word Choice",q:"When he was knocked on the head, he fell to the ground ___",opts:["collapsed","fainted","unconscious","conscious","nosily"],correct:2},
+{n:1445,cat:"Vocabulary & Word Choice",q:"There was a loud bang ___ we thought it was the television, but it wasn't",opts:["at last","at first","at least","at the moment","at present"],correct:1},
+{n:1446,cat:"Idioms & Phrasal Verbs",q:"Plans for a rise in production ___ through when a strike started",opts:["went","came","set","carried","fell"],correct:0},
+{n:1447,cat:"Sentence Structure & Grammar",q:"___ to your birthday party in September?",opts:["May I come","Will I come","Would I come","Might I come","Shall I come"],correct:0},
+{n:1448,cat:"Vocabulary & Word Choice",q:"After the initial confusion, the Manager's suggestion brought .......... to the depressed investors",opts:["a glitter of hope","a glimmer of hope","a sparkle of hope","a raise of hope","a shower of hope"],correct:1},
+{n:1449,cat:"Vocabulary & Word Choice",q:"The farmer has brought the insecticide because he was bent on ........ the insects in his farm",opts:["exterminating","estimating","extenuating","extinguishing","exemplifying"],correct:0},
+{n:1450,cat:"Vocabulary & Word Choice",q:"The young lady decided to ........",opts:["do away with the many advices given by her relatives","reject all the advices given by her relatives","reject all the advice given by her relations","take to all the advices given by her relations","reject all the advices given by her relatives"],correct:2},
+{n:1451,cat:"Idioms & Phrasal Verbs",q:"Two ministers found it very difficult to get ...... in the Cabinet",opts:["through with each other","by with one another","through with one another","off from each other","on with each other"],correct:0},
+{n:1452,cat:"Sentence Structure & Grammar",q:"The school Board has placed an order for .........",opts:["all the furnitures and equipments required in the new schools","all the furniture and equipment required in the new schools","all of the furniture and equipments required in the new schools","many of the furnitures and equipments required in the new schools"],correct:1},
+{n:1453,cat:"Sentence Structure & Grammar",q:"On his way back the boy ran into a long procession of men, women and children in .........",opts:["white beautiful exceedingly flowing gowns","exceedingly flowing white beautiful gowns","exceedingly beautiful white flowing gowns","white flowing exceedingly beautiful gowns","flowing exceedingly white beautiful gowns"],correct:2},
+{n:1454,cat:"Sentence Structure & Grammar",q:"The proprietors should be blamed for such a deplorable condition in the nursery schools, .......",opts:["isn't it?","shouldn't they?","should they?","is it?","shouldn't it?"],correct:1},
+{n:1455,cat:"Tenses & Aspect",q:"I could not believe that our team ........ the match after being in the lead for most of the match",opts:["to lose","lost","will be losing","losing","loosen"],correct:1},
+{n:1456,cat:"Idioms & Phrasal Verbs",q:"The Head of Department is away to Murtala Mohammed Airport and has asked Dr. Haruna to stand ........ for him",opts:["out","in","on","across","about"],correct:1},
+{n:1457,cat:"Prepositions",q:"The Commission was set up to enquire ........ the general conditions of child abuse in such institutions",opts:["at","from","after","before","into"],correct:4},
+{n:1458,cat:"Sentence Structure & Grammar",q:"We hold that the nation, both in its public and private sectors ......... the best consultancy service and advice in all its endeavours",opts:["deserve","is deserving","deserves","are deserving","richly deserve"],correct:2},
+{n:1459,cat:"Verb Patterns",q:"One of the old men ........ round the lawn three times every evening",opts:["use to run","are use to run","is used to running","are used to run","are used to running"],correct:2},
+{n:1460,cat:"Vocabulary & Word Choice",q:"The problems of Nigeria's worsening economy seem to have ........ an immediate solution",opts:["defined","defied","rejected","rewarded","retained"],correct:1},
+{n:1461,cat:"Verb Patterns",q:"This conference is designed to enable delegates ...... their personal interests with specialists in various fields",opts:["to discuss about","discussing","to discuss","for discussing","by discussing"],correct:2},
+{n:1462,cat:"Vocabulary & Word Choice",q:"The car owner does not think about the ...... of his vehicle and the other payments involved in owning it",opts:["transportation","depreciation","Calculation","appreciation","association"],correct:1},
+{n:1463,cat:"Tenses & Aspect",q:"The very moment she ....... her folly, she will come back to apologize",opts:["realized","is realizing","will realize","has realized","realizes"],correct:4},
+{n:1464,cat:"Conditionals & Subjunctive",q:"The lazy candidates suggested that it .......",opts:["is time we do away with JAMB","was time we do away with JAMB","is time we did away with JAMB","was time we did away with JAMB","is time we are done away with JAMB"],correct:3},
+{n:1465,cat:"Idioms & Phrasal Verbs",q:"I do not want the light in my room ........when I am asleep",opts:["turned off","turn off","to run out","turned out","turned in"],correct:0},
+{n:1466,cat:"Vocabulary & Word Choice",q:"I have applied for .........on the campus and I am almost certain I shall get it",opts:["acommodation","accommondation","accommodation","accomoddation","Accommodation"],correct:2},
+{n:1467,cat:"Vocabulary & Word Choice",q:"The dead body of the armed robber was ....... in the street for three days",opts:["laid","lain","layed","lied","lay"],correct:0},
+{n:1468,cat:"Verb Patterns",q:"Candidates who are not accustomed to ....... fast will find it difficult to finish this paper",opts:["write","have written","be writing","writing","having written"],correct:3},
+{n:1469,cat:"Verb Patterns",q:"Do you mind ...... another minute or two?",opts:["to wait","wait","waiting","having awaited","being awaited"],correct:2},
+{n:1470,cat:"Vocabulary & Word Choice",q:"We shall offer a good job to a ..... to register guests in the Central Hotel",opts:["waiter","watchman","Cashier","receptionist","cleaner"],correct:3},
+{n:1471,cat:"Prepositions",q:"I've lived ...... this street ....... ten years",opts:["at, since","for, during","on, for","on, from","in, for"],correct:2},
+{n:1472,cat:"Sentence Structure & Grammar",q:"North Africa is ......than Northern Europe",opts:["hotter","more hot","more hotter","the hottest","hot"],correct:0},
+{n:1473,cat:"Verb Patterns",q:"I ......a lot when I was a student",opts:["used traveling","was used to travel","used to travel","used travel","was used to traveling"],correct:2},
+{n:1474,cat:"Conditionals & Subjunctive",q:"I wish I ......your age",opts:["to be","were","to have been","would be","could be"],correct:1},
+{n:1475,cat:"Verb Patterns",q:"I am looking forward to ......you",opts:["seeing","see","have seen","will see","be see"],correct:0},
+{n:1476,cat:"Sentence Structure & Grammar",q:"I can't offer you another loan. I have ...... money left in my account",opts:["a few","a little","little","few","some"],correct:2},
+{n:1477,cat:"Prepositions",q:"I always prefer the theatre ...... the cinema",opts:["than","then","on top of","before","to"],correct:4},
+{n:1478,cat:"Conjunctions & Connectors",q:"He acts ...... he were a manager",opts:["like","such as","such","as","as if"],correct:4},
+{n:1479,cat:"Vocabulary & Word Choice",q:"Don't ......the teacher that he...that!",opts:["tell, said","say, tells","talk, spoke","speak, talked","tell, told"],correct:0},
+{n:1480,cat:"Verb Patterns",q:"He is very tired. He really is ........ staying up late",opts:["getting used to","not used to","got used to","used to","being used to"],correct:1},
+{n:1481,cat:"Prepositions",q:"The student who went home without an exeat has apologized ...... his misconduct",opts:["on","at","to","for","about"],correct:3},
+{n:1482,cat:"Prepositions",q:"The man has atoned ....... his sins",opts:["upon","on","for","at","against"],correct:2},
+{n:1483,cat:"Prepositions",q:"The Headmaster was interviewed in connection ............ the expansion project",opts:["to","with","for","about","at"],correct:1},
+{n:1484,cat:"Idioms & Phrasal Verbs",q:"What do you want me to do now? I'm ........ withdrawing and keeping quiet",opts:["for","with","up","off","on"],correct:2},
+{n:1485,cat:"Idioms & Phrasal Verbs",q:"I am looking ....... seeing your family",opts:["ahead at","forward to","forward on","for to","ahead to"],correct:1},
+{n:1486,cat:"Idioms & Phrasal Verbs",q:"These folktales have been handed ....... from generation to generation",opts:["into","over","down","up","across"],correct:2},
+{n:1487,cat:"Idioms & Phrasal Verbs",q:"John arrived at the airport on time but he could not get ....... the plane",opts:["into","over","in","to enter","on"],correct:4},
+{n:1488,cat:"Prepositions",q:"The young lovers first met ....... the University of Ibadan Havana Night dance",opts:["in","at","in course of","on","inside"],correct:1},
+{n:1489,cat:"Prepositions",q:"I have not seen my housemaster ....... the beginning of this session",opts:["from","in","for","at","since"],correct:4},
+{n:1490,cat:"Prepositions",q:"The Chairman of the State School Board has advised students to desist ........ blackmailing college authorities",opts:["from","in","on","against","by"],correct:0},
+{n:1491,cat:"Prepositions",q:"The most stupid boy in the class passed the examination contrary........ the expectation of many people",opts:["upon","from","on","to","with"],correct:3},
+{n:1492,cat:"Prepositions",q:"The Principal remarked that it was the high standard of discipline that was instrumental ....... the high percentage of passes in the school",opts:["upon","to","with","on","in"],correct:1},
+{n:1493,cat:"Prepositions",q:"She wounded the man ....... the back with her knitting needle",opts:["on","in","at","by","upon"],correct:1},
+{n:1494,cat:"Idioms & Phrasal Verbs",q:"It took the father many days to get ...... the untimely death of his son",opts:["off","over","by","through","across"],correct:1},
+{n:1495,cat:"Idioms & Phrasal Verbs",q:"While the worshippers closed their eyes in prayer, a thief made ....... with the collection",opts:["out","away","up","by","through"],correct:1},
+{n:1496,cat:"Prepositions",q:"There is no doubt that every lady takes great pride ......... her appearance",opts:["with","in","at","on","about"],correct:1},
+{n:1497,cat:"Vocabulary & Word Choice",q:"If you keep playing with this door handle, it will get ........",opts:["loose","lose","lost","loosing","loosed"],correct:0},
+{n:1498,cat:"Sentence Structure & Grammar",q:"'Have you given the patient his medicine?' The doctor asked the nurse",opts:["if you have given the patient his medicine","had you given the patient his medicines","have you given the patient his medicine","if she had given the patient his medicine","if the patient is given his medicine"],correct:3},
+{n:1499,cat:"Prepositions",q:"Mary goes to school ___ bus",opts:["in","on","with","through","by"],correct:4},
+{n:1500,cat:"Prepositions",q:"The loud noise in the neighbour hood attracted people who stared ........ the thief",opts:["at","about","with","on","over"],correct:0},
+{n:1501,cat:"Prepositions",q:"The students' unrest resulted... the expulsion of the ringleaders",opts:["to","in","from","with","by"],correct:1},
+{n:1502,cat:"Prepositions",q:"The lawyer insisted ........ the full payment of his charge",opts:["with","in","for","at","on"],correct:4},
+{n:1503,cat:"Prepositions",q:"Little children are usually afraid ........ Thunder",opts:["about","for","of","with","at"],correct:2},
+{n:1504,cat:"Prepositions",q:"On the orders of the steward, the cook rushed ..... the market",opts:["to","at","for","in","against"],correct:0},
+{n:1505,cat:"Idioms & Phrasal Verbs",q:"The principal advised that we pursue this case cautiously, otherwise we are bound to be taken ..... by Ada's lies",opts:["away","out","in","off","on"],correct:2},
+{n:1506,cat:"Verb Patterns",q:"I am very sorry ......... to attend the meeting yesterday",opts:["for failure","in failing","to having failed","to fail","for failing"],correct:4},
+{n:1507,cat:"Prepositions",q:"When you are faced with an examination of this nature, endeavour to keep your mind ....... the job and not be distracted for one moment",opts:["at","in","for","on","to"],correct:3},
+{n:1508,cat:"Sentence Structure & Grammar",q:"It all depended on what...",opts:["does he want","he wants","he does want","he wanted","did he want"],correct:3},
+{n:1509,cat:"Tenses & Aspect",q:"My colleagues ....... before I arrived",opts:["started writing","wrote","had started writing","have written","have been writing"],correct:2},
+{n:1510,cat:"Tenses & Aspect",q:"After the team had conceded two goals, their enthusiasm ...........",opts:["was beginning to wane","was waning","began to wane","had begun to wane","had been waning"],correct:2},
+{n:1511,cat:"Tenses & Aspect",q:"The Government ........the initial value of the hotel complex at ten million Naira",opts:["costed","had cost","had valued","had constructed","has costed"],correct:0},
+{n:1512,cat:"Verb Patterns",q:"James ........ reminding that not all that glitters is gold",opts:["needs","need","needing","needs to","need to"],correct:0},
+{n:1513,cat:"Verb Patterns",q:"The dull student took a correspondence course as a means .......his standard in the class",opts:["to improve","for improving","of improving","by improving","to improving"],correct:2},
+{n:1514,cat:"Vocabulary & Word Choice",q:"I do not want .......from such a friend as Jimoh",opts:["any more advices","no more advice","any advices","no advice","any advice"],correct:4},
+{n:1515,cat:"Vocabulary & Word Choice",q:"Very few students have satisfactory ......... these days because the student population has increased tremendously",opts:["acommondation","accommodation","accomodation","acommoddation","acommodation"],correct:1},
+{n:1516,cat:"Idioms & Phrasal Verbs",q:"The old politicians were discredited because they tried to ........the people's ignorance",opts:["cash in on","catch in with","catch in on","cash in with","cash in by"],correct:0},
+{n:1517,cat:"Vocabulary & Word Choice",q:"That single .......was enough to spoil a whole life time of good living",opts:["occurence","ocurence","occurrence","occurrense","ocurrence"],correct:2},
+{n:1518,cat:"Idioms & Phrasal Verbs",q:"The thief ran ........ luck when the policeman running after him caught up with him and knocked him down",opts:["into","with","of","out of","off"],correct:3},
+{n:1519,cat:"Sentence Structure & Grammar",q:"Whilst the thief was ......... the passengers, he kept apologizing for the inconvenience he was causing them",opts:["robbing","rubbing","robing","rubing","robbed"],correct:0},
+{n:1520,cat:"Prepositions",q:"Your brigade would be the better for it, if you desisted .......... rumor-mongering, observed the Chief of Staff",opts:["from","away","into","away from","on"],correct:0},
+{n:1521,cat:"Vocabulary & Word Choice",q:"The court ordered the lorry driver to pay for the ....... to my car",opts:["damages","heavy damages","destroy","many damages","damage"],correct:4},
+{n:1522,cat:"Vocabulary & Word Choice",q:"Journalists always collect and publish .........",opts:["informations","an information","some informations","information","much informations"],correct:3},
+{n:1523,cat:"Sentence Structure & Grammar",q:"I have received the answer scripts of Peter and John. What about ........?",opts:["Ngozi","Ngozi's own","Ngozis","Ngozis'","Ngozi's"],correct:4},
+{n:1524,cat:"Prepositions",q:"He received a pat ........ the back for his brilliant success in the examination",opts:["by","at","in","on","for"],correct:3},
+{n:1525,cat:"Vocabulary & Word Choice",q:"Jibril found that thieves had entered his house in his absence. He went to the police to report the .........",opts:["break out","break up","break in","break into"],correct:2},
+{n:1526,cat:"Vocabulary & Word Choice",q:"After the accused was found guilty by the court, his counsel.... before sentence was passed",opts:["begged for mercy","made a plea for mitigation","made an ovation","made a plea for migation"],correct:1},
+{n:1527,cat:"Vocabulary & Word Choice",q:"Four persons accused of currency .......... are being held by the security agents",opts:["traficking","traviking","trafficking","traffiking"],correct:2},
+{n:1528,cat:"Sentence Structure & Grammar",q:"You had to stand in the corridor all the way? Poor you. I don't suppose you enjoyed the journey...?",opts:["don't you","did you","didn't you","don't I"],correct:1},
+{n:1529,cat:"Sentence Structure & Grammar",q:"'I'm sorry I can't give you any of the oranges, I have ......... left'",opts:["few","little","only a little","a few"],correct:0},
+{n:1530,cat:"Tenses & Aspect",q:"No wonder those plants are dying. They ....... any water for ages!",opts:["didn't have","hadn't","haven't had","haven't"],correct:2},
+{n:1531,cat:"Idioms & Phrasal Verbs",q:"Darling, do send the children to bed. I can't .......their noise any longer', he said to his wife",opts:["make do with","makeup","deal with","put up with"],correct:3},
+{n:1532,cat:"Sentence Structure & Grammar",q:"My wife and I met .......on a shop going to Liberia",opts:["ourselves","one another","each other","ourself"],correct:2},
+{n:1533,cat:"Sentence Structure & Grammar",q:"........ yet about the Principal?",opts:["Are there any news","Are there some news","Is there any news","Is their any news"],correct:2},
+{n:1534,cat:"Vocabulary & Word Choice",q:"I am ........ to another week's holiday this year after such a tedious job",opts:["due","qualified","looking","entitled"],correct:2},
+{n:1535,cat:"Idioms & Phrasal Verbs",q:"I can quickly recite the National Anthem ........ now",opts:["off head","off by heart","at hand","off hand"],correct:3},
+{n:1536,cat:"Vocabulary & Word Choice",q:"The committee was frustrated because the Chief withheld his .......",opts:["accent","access","assent","ascent"],correct:2},
+{n:1537,cat:"Verb Patterns",q:"Gone are the days when the ...... Enjoy patronage",opts:["would","will","used to","could"],correct:2},
+{n:1538,cat:"Vocabulary & Word Choice",q:"He did not attend the final burial .........",opts:["rite","rights","rites","Right"],correct:2},
+{n:1539,cat:"Vocabulary & Word Choice",q:"The officer was compelled to ....... the suspect's car",opts:["seize","cease","sieze","sease"],correct:0},
+{n:1540,cat:"Vocabulary & Word Choice",q:"He missed the point because he took the statement .......",opts:["literally","literarily","literacy","uniliterally"],correct:0},
+{n:1541,cat:"Vocabulary & Word Choice",q:"Their high ........was an advantage",opts:["moral","morality","morale","morals"],correct:2},
+{n:1542,cat:"Vocabulary & Word Choice",q:"The brave officer ....... the time bomb",opts:["diffused","devused","defused","difused"],correct:2},
+{n:1543,cat:"Prepositions",q:"A number of suspects were paraded ..... the victim of the robbery",opts:["in front of","before","for","to"],correct:1},
+{n:1544,cat:"Idioms & Phrasal Verbs",q:"If you want peace, you ...... prepared for war",opts:["had better","have better","had better got","had better get"],correct:3},
+{n:1545,cat:"Conditionals & Subjunctive",q:"If only we ......,we could have overcome the difficulty",opts:["had persevered","have persevered","had persevere","persevered"],correct:0},
+{n:1546,cat:"Vocabulary & Word Choice",q:"We are gradually .......to the end of the programme this afternoon, remarked the chairman of the wedding reception",opts:["arriving","getting","approaching","going"],correct:1},
+{n:1547,cat:"Sentence Structure & Grammar",q:"We saw him ......over a wall as the police approached",opts:["leaped","leap","leapt","leaping"],correct:1},
+{n:1548,cat:"Sentence Structure & Grammar",q:"A number of doctors are not so well disposed to ...... in government hospitals these days .......they?",opts:["working/do","work/are","working/are","Work/aren't"],correct:2},
+{n:1549,cat:"Tenses & Aspect",q:"The only set of loud speakers available .....to be connected according to the instruction",opts:["is","are","were","have"],correct:0},
+{n:1550,cat:"Tenses & Aspect",q:"We later on discovered that some members ....... another meeting before the one advertised",opts:["were holding","have held","have been holding","had held"],correct:3},
+{n:1551,cat:"Vocabulary & Word Choice",q:"He decided to wait for the bus because he had .......",opts:["too many luggage","many luggages","a lot of luggage","plenty luggages"],correct:2},
+{n:1552,cat:"Sentence Structure & Grammar",q:"Thank you for the party, we really....",opts:["enjoyed ourselves","enjoyed it","enjoyed very much","enjoyed to much"],correct:1},
+{n:1553,cat:"Idioms & Phrasal Verbs",q:"We were trying to study for the examinations last night when the lights ......",opts:["were taken away","came off","quenched","went off"],correct:3},
+{n:1554,cat:"Vocabulary & Word Choice",q:"When he had arranged the furniture, he ......the picture on the wall",opts:["hanged","hung","hang","hunged"],correct:1},
+{n:1555,cat:"Vocabulary & Word Choice",q:"I forgot to bring a pen with me. Would you please ...... me yours?",opts:["borrow","loan","provide","lend"],correct:3},
+{n:1556,cat:"Idioms & Phrasal Verbs",q:"If you are going to the market, may I .......please?",opts:["follow you","come with you","come by you","come as your second"],correct:1},
+{n:1557,cat:"Vocabulary & Word Choice",q:"Wada said that two of his chickens ....... eggs yesterday morning",opts:["layed","lied","laid","laid"],correct:2},
+{n:1558,cat:"Idioms & Phrasal Verbs",q:"I was ...... hearing distance of the speaker",opts:["on","at","within","in"],correct:2},
+{n:1559,cat:"Idioms & Phrasal Verbs",q:"Peter was such a skilfull boxer that he was not afraid to take ...... anybody",opts:["to","upon","on","in"],correct:2},
+{n:1560,cat:"Idioms & Phrasal Verbs",q:"Owing to the constant harassment of the populace by armed robbers, all night guards have been instructed to shoot ...... every moving things",opts:["at sight","by sight","in sight","off sight"],correct:0},
+{n:1561,cat:"Vocabulary & Word Choice",q:"My wife and I were to celebrate our silver wedding anniversary last Sunday. Unfortunately on that .......day, my father-in-law died mysteriously",opts:["fruitless","faithful","futile","fateful"],correct:3},
+{n:1562,cat:"Vocabulary & Word Choice",q:"The first graduation ceremony of the university was attended by men from all ....... of life",opts:["works","areas","walks","parts"],correct:2},
+{n:1563,cat:"Sentence Structure & Grammar",q:"......... guests enjoyed Joy's birthday party",opts:["The whole","All the","Every","Those very"],correct:1},
+{n:1564,cat:"Verb Patterns",q:"One would wish ....... missed that opportunity to be present at the graduation hall",opts:["to have not","for having not","to having","not to have"],correct:3},
+{n:1565,cat:"Idioms & Phrasal Verbs",q:"The ceremony was rounded .......very late",opts:["up","off","of","out"],correct:1},
+{n:1566,cat:"Vocabulary & Word Choice",q:"My........brother intends to get married in December",opts:["senior","elder","older","oldest"],correct:1},
+{n:1567,cat:"Sentence Structure & Grammar",q:"The...Affairs Officer is expecting all of us in the dining room",opts:["Student","Student's","Students","Students'"],correct:0},
+{n:1568,cat:"Sentence Structure & Grammar",q:"Many a candidate .......to realise the difference between written and spoken English",opts:["fails","fail","have failed","is failing"],correct:0},
+{n:1569,cat:"Vocabulary & Word Choice",q:"Chinyere has not really described the Cabinet as irresponsible; she only......it in her speech",opts:["alluded to","implied","applied","suggested"],correct:1},
+{n:1570,cat:"Idioms & Phrasal Verbs",q:"....... at 9.30 for more news, said the announcer",opts:["Switch on","Tune in","Hook on","Channel in"],correct:1},
+{n:1571,cat:"Vocabulary & Word Choice",q:"The way that big boy bullied his sister with relish makes me think he could be a .......",opts:["bully","sadist","pugilist","tyrant"],correct:1},
+{n:1572,cat:"Sentence Structure & Grammar",q:"All .......well with Peter",opts:["are not","have not been","were not","is not"],correct:3},
+{n:1573,cat:"Conditionals & Subjunctive",q:"One ....... so if she had thought it necessary",opts:["would have said","would say","may have said","could say"],correct:0},
+{n:1574,cat:"Sentence Structure & Grammar",q:"We have done three quarters of the journey already, we ........ as well see the end of it",opts:["can","might","could","may"],correct:1},
+{n:1575,cat:"Vocabulary & Word Choice",q:"My little daughter has ...... sight, hence, she now wears glasses",opts:["dimunitive","blurred","painful","defective"],correct:3},
+{n:1576,cat:"Idioms & Phrasal Verbs",q:"Bassey's evidence led ...... Okon being imprisoned for life",opts:["at","into","in","to"],correct:3},
+{n:1577,cat:"Vocabulary & Word Choice",q:"My boss is usually a charming man but ...... he can be very irritable",opts:["atimes","at times","those times","with times"],correct:1},
+{n:1578,cat:"Vocabulary & Word Choice",q:"We surely ought to have an ...... arrangement in case somebody discovers the present strategy",opts:["alternate","alternating","alternative","alternant"],correct:2},
+{n:1579,cat:"Prepositions",q:"The nurse kept apologizing to mothers as she stuck her needle ......every baby at the clinic",opts:["in","onto","on to","into"],correct:3},
+{n:1580,cat:"Sentence Structure & Grammar",q:"One of the ladies who .......in the premises ......been asked to withdraw",opts:["sells/have","sell/have","sells/has","sell/has"],correct:3},
+{n:1581,cat:"Sentence Structure & Grammar",q:"A Tale of Two Cities .......the .......we are studying for the examination",opts:["are/novels","was/novel","were/novels","is/novel"],correct:3},
+{n:1582,cat:"Sentence Structure & Grammar",q:"We must not take with us the feelings of inadequacy ......experienced during our preparations for the debate",opts:["that were","those were","that was","that is"],correct:0},
+{n:1583,cat:"Tenses & Aspect",q:"Omogbai reported that the examinations ......before he arrived in the hall",opts:["started","have started","had started","are started"],correct:2},
+{n:1584,cat:"Sentence Structure & Grammar",q:"In my opinion, neither the players nor the coach .......praise for the result of the match",opts:["deserves","deserve","are deserving","is deserving"],correct:0},
+{n:1585,cat:"Sentence Structure & Grammar",q:"No one has said anything yet, but I think I .......be getting a salary increase next month",opts:["must","can","would","may"],correct:2},
+{n:1586,cat:"Sentence Structure & Grammar",q:"Student: Excuse me sir, must we complete the assignment before lunch? Teacher: No you .......",opts:["needn't","mustn't","can't","shouldn't"],correct:0},
+{n:1587,cat:"Idioms & Phrasal Verbs",q:"During the demonstration, the mobile police were instructed to break ....... the students' defense line",opts:["off","open","through","down"],correct:2},
+{n:1588,cat:"Sentence Structure & Grammar",q:"Roli failed because the examination was ....... difficult for her",opts:["so","very","highly","too"],correct:3},
+{n:1589,cat:"Prepositions",q:"My brother does not have a flair .........Mathematics",opts:["for","in","at","of"],correct:0},
+{n:1590,cat:"Prepositions",q:"The poor little kid has been down .....fever these few days",opts:["with","from","in","For"],correct:0},
+{n:1591,cat:"Sentence Structure & Grammar",q:"He did not stop to ask himself why.......such thing",opts:["should he do","he should do","should he have done","did he do"],correct:1},
+{n:1592,cat:"Vocabulary & Word Choice",q:"The quarrel has got to a stage where someone has to ........",opts:["interrupt","interfere","intrude","intervene"],correct:3},
+{n:1593,cat:"Idioms & Phrasal Verbs",q:"The villages looked .......their leader for good examples",opts:["up to","on to","up at","forward to"],correct:0},
+{n:1594,cat:"Sentence Structure & Grammar",q:"The hunter brought home ......antelope",opts:["alive","a life","a live","a living"],correct:2},
+{n:1595,cat:"Tenses & Aspect",q:"Do not take my books out of this office unless you ......my permission to do so",opts:["get","have","had got","are having"],correct:1},
+{n:1596,cat:"Vocabulary & Word Choice",q:"The man insisted on giving unsolicited ......",opts:["advice","advices","advise","Advises"],correct:0},
+{n:1597,cat:"Vocabulary & Word Choice",q:"Cultural patterns are modified as they are .......from one generation to the next",opts:["transported","transposed","translated","transmitted"],correct:3},
+{n:1598,cat:"Sentence Structure & Grammar",q:"We discovered at the end of last term that we had to read ....... books before we could confidently sit for our final examination",opts:["more of many","very many more","very much more","more very many"],correct:1},
+{n:1599,cat:"Conditionals & Subjunctive",q:"Chinedu took his umbrella with him in case it .......",opts:["rain","rained","would rain","is raining"],correct:1},
+{n:1600,cat:"Idioms & Phrasal Verbs",q:"The train was too slow so I decided to .......at the next stop",opts:["get by","get bye","get off","get of"],correct:2},
+{n:1601,cat:"Vocabulary & Word Choice",q:"Dapo has made good use of some useful .......on the chemical composition of chalk",opts:["information","piece of information","informations","pieces of informations"],correct:0},
+{n:1602,cat:"Vocabulary & Word Choice",q:"Tonye said that he was going to bed because he was ....... to do anymore work",opts:["tired out","very tired","too tired","extremely tired"],correct:2},
+{n:1603,cat:"Vocabulary & Word Choice",q:"The child's recent training has not been very effective, he is likely to ......to his old habits",opts:["revert","convert","reverse","revise"],correct:0},
+{n:1604,cat:"Vocabulary & Word Choice",q:"The students went on whispering in .......of the teacher",opts:["dishonour","disagreement","defiance","disobedience"],correct:2},
+{n:1605,cat:"Vocabulary & Word Choice",q:"You can never find Okwu; he is a very ......person",opts:["delusive","elusive","illusive","disceptive"],correct:1},
+{n:1606,cat:"Sentence Structure & Grammar",q:"You could see that Akpan did not give the evidence .........",opts:["honestly completely","complete honestly","honest completely","completely honestly"],correct:3},
+{n:1607,cat:"Vocabulary & Word Choice",q:"The suspect defrauded his ......victims of large sums of money",opts:["unsuspected","unsuspecting","unexpecting","unexpected"],correct:1},
+{n:1608,cat:"Sentence Structure & Grammar",q:"The .......of the participating countries will hold a preconference on the eve of the conference",opts:["Auditor Generals","Auditor General","Auditors General","Auditors Generals"],correct:2},
+{n:1609,cat:"Vocabulary & Word Choice",q:"The chairman's laughter was with no .......to ridicule the applicant",opts:["intention","intend","intendment","intent"],correct:3},
+{n:1610,cat:"Vocabulary & Word Choice",q:"The water is not good for drinking; it's been ........ by the dead rabbit",opts:["contaminated","infested","spoilt","diseased"],correct:0},
+{n:1611,cat:"Vocabulary & Word Choice",q:"The austerity of the times has made people to be more ...... in their spending",opts:["watchful","circumspect","miserly","hesitant"],correct:1},
+{n:1612,cat:"Sentence Structure & Grammar",q:"Are you sure he prefers a horse ride .......a walk?",opts:["than to take","to taking","instead of take","than"],correct:1},
+{n:1613,cat:"Vocabulary & Word Choice",q:"...... to your request, we have decided to provide the necessary information",opts:["As regards","With regards","With regard","Regarding"],correct:2},
+{n:1614,cat:"Vocabulary & Word Choice",q:"The price of everything seems to have ......up in the last few months",opts:["climbed","shot","risen","flared"],correct:2},
+{n:1615,cat:"Idioms & Phrasal Verbs",q:"Just to convince you about my commitment to the project. I shall ......at the office before I leave for Kano tomorrow",opts:["put up an appearance","put in an appearance","put up appearance","put an appearance"],correct:1},
+{n:1616,cat:"Vocabulary & Word Choice",q:"There was a ....... of steps",opts:["stair","height","flight","climb"],correct:2},
+{n:1617,cat:"Vocabulary & Word Choice",q:"Many young men of nowadays do not know how to properly ....... their clothes",opts:["press","iron","smoothen","stretch"],correct:1},
+{n:1618,cat:"Vocabulary & Word Choice",q:"The dancers were all in ......before their departure",opts:["good spirits","good spirit","high spirit","high spirits"],correct:3},
+{n:1619,cat:"Idioms & Phrasal Verbs",q:"Ebun ......the edge of the cliff after his shoes had failed to grip",opts:["fell down","fell off","fell away","fell from"],correct:1},
+{n:1620,cat:"Verb Patterns",q:"That old lady prefers ......bread ......clothes",opts:["to bake/than making","to bake/to making","baking/to making","baking/than to make"],correct:2},
+{n:1621,cat:"Sentence Structure & Grammar",q:"I wonder how much ......",opts:["cost these earrings","do these earrings cost","are these earrings costing","these earrings cost"],correct:3},
+{n:1622,cat:"Idioms & Phrasal Verbs",q:"The college authorities have ...... the students to end the strike",opts:["called for","called on","called","called at"],correct:1},
+{n:1623,cat:"Prepositions",q:"I have been trying to locate you ......",opts:["since five days","five days now","since five days now","for five days"],correct:3},
+{n:1624,cat:"Verb Patterns",q:"The host insisted on ......what he called 'a little gift.'",opts:["me to accept","me accepting","my accepting","my acceptance"],correct:2},
+{n:1625,cat:"Verb Patterns",q:"The whole class looked forward to ...... Kainji Dam at Christmas",opts:["visiting","visit","be visiting","a visit"],correct:0},
+{n:1626,cat:"Prepositions",q:"A government spokesman announced that efforts ......the release of the hostages are continuing",opts:["to obtain","in obtaining","for obtaining","of obtaining"],correct:0},
+{n:1627,cat:"Vocabulary & Word Choice",q:"I know you think I'm talking nonsense, Shehu, but ...... you'll realize that I was right",opts:["at one time","on time","in time","at times"],correct:2},
+{n:1628,cat:"Vocabulary & Word Choice",q:"The Inspector of Education who made several trips on the bad roads returned yesterday completely ......by fever",opts:["brought down","put down","worn out","worn off"],correct:2},
+{n:1629,cat:"Idioms & Phrasal Verbs",q:"The vice principal asked the students to always ......their answers only from the textbooks recommended for the course",opts:["look out","search out","look up","bring up"],correct:2},
+{n:1630,cat:"Sentence Structure & Grammar",q:"I know that your friend will not accept the proposal ......",opts:["and you neither","and neither you","neither do you","neither will you"],correct:3},
+{n:1631,cat:"Idioms & Phrasal Verbs",q:"Mark is a very handsome fellow who informs me that he has ......for pretty girls",opts:["a heart","a lip","an eye","a check"],correct:2},
+{n:1632,cat:"Prepositions",q:"Wale Agun, in creating his characters, draws freely ... his experience in life",opts:["by","in","on","of"],correct:2},
+{n:1633,cat:"Verb Patterns",q:"When I have an appointment with someone, I hate ...... waiting",opts:["to be keeping","for being kept","being kept","in being kept"],correct:2},
+{n:1634,cat:"Verb Patterns",q:"It's no good .......about the result until you have sat for the examination",opts:["to worry","for worrying","worrying","to have worried"],correct:2},
+{n:1635,cat:"Vocabulary & Word Choice",q:"If you don't want to ...... your car to robbers, then don't travel in the night",opts:["loose","loss","lose","lost"],correct:2},
+{n:1636,cat:"Idioms & Phrasal Verbs",q:"The beautiful plan made for the expansion of the business fell ......as soon as the manager died",opts:["down","out","in","through"],correct:3},
+{n:1637,cat:"Vocabulary & Word Choice",q:"The events reported in the newspaper did not happen years ago; they .......",opts:["are of recent","had happened recently","are recent","recently happened"],correct:2},
+{n:1638,cat:"Idioms & Phrasal Verbs",q:"There is no point getting upset by problems; I take them ......",opts:["in my stride","on the spur of the moment","by leaps and bounds","in a jiffy"],correct:0},
+{n:1639,cat:"Idioms & Phrasal Verbs",q:"There is no need to stand ......ceremony in matters of this nature",opts:["by","to","on","for"],correct:2},
+{n:1640,cat:"Idioms & Phrasal Verbs",q:"The driver will ......all the students interested in going to Lagos tomorrow at 7.am outside the main buildings",opts:["lift","lift up","pick","pick up"],correct:3},
+{n:1641,cat:"Vocabulary & Word Choice",q:"What bothered me about the lecture was that the speaker ...... too many irrelevant words",opts:["slighted","sighted","sited","cited"],correct:3},
+{n:1642,cat:"Vocabulary & Word Choice",q:"The students were suspended because they were .......",opts:["indisciplined","undisciplined","undiscipled","disciplinary"],correct:1},
+{n:1643,cat:"Vocabulary & Word Choice",q:"We heard the ....... of brakes which was followed by a crashing noise",opts:["screaming","screeching","scrapping","streaking"],correct:1},
+{n:1644,cat:"Vocabulary & Word Choice",q:"I had not given the question a thought before; my answer came .......",opts:["momentarily","in an instant","on the spur of the moment","just like that"],correct:2},
+{n:1645,cat:"Sentence Structure & Grammar",q:"The small girl is ......than her elder sister",opts:["more cleverer","very cleverer","much cleverer","much more cleverer"],correct:2},
+{n:1646,cat:"Sentence Structure & Grammar",q:".......are good friends",opts:["He and I","I and him","I and he","He and me"],correct:0},
+{n:1647,cat:"Tenses & Aspect",q:"When I met Amadi yesterday, it was the first time I .......him for six months",opts:["had seen","saw","have seen","have been seeing"],correct:0},
+{n:1648,cat:"Vocabulary & Word Choice",q:"A student's natural ability should be a ......factor in his choosing a course of study at the university",opts:["determined","determining","determinant","determinate"],correct:1},
+{n:1649,cat:"Vocabulary & Word Choice",q:"Many unrelated issues were touched upon in the .........of the discussion",opts:["cause","course","coarse","Curse"],correct:1},
+{n:1650,cat:"Vocabulary & Word Choice",q:"The traveller had to run ......in order to...the train",opts:["first/catch","fast/cash","fast/catch","first/cash"],correct:2},
+{n:1651,cat:"Vocabulary & Word Choice",q:"When the driver lost control of his vehicle, the pedestrians began to run for ......",opts:["their dear lives","their dear life","dear lives","dear life"],correct:3},
+{n:1652,cat:"Vocabulary & Word Choice",q:"My uncle is one of the ......of the society",opts:["elitists","elites","elite","elitist"],correct:2},
+{n:1653,cat:"Vocabulary & Word Choice",q:"The new singlet factory is built on the ......of Aba township",opts:["outstretch","outskates","outskirts","outskirt"],correct:2},
+{n:1654,cat:"Conditionals & Subjunctive",q:"If Kaka hadn't tried to stand up in the boat, he ......into the lake",opts:["wouldn't have fallen","will not have fell","will not have fallen","wouldn't have fell"],correct:0},
+{n:1655,cat:"Vocabulary & Word Choice",q:"The soldiers were sufficiently equipped with ......",opts:["arms and ammunition","arms and ammunitions","arm and ammunitions","arm and ammunition"],correct:0},
+{n:1656,cat:"Sentence Structure & Grammar",q:"My younger brother is going to the stream with ......boys",opts:["two other little","other little two","two little other","other two little"],correct:0},
+{n:1657,cat:"Sentence Structure & Grammar",q:"Okoro intends to wear his ......dress to the zoo this afternoon",opts:["white cotton new","white new cotton","new white cotton","cotton white new"],correct:2},
+{n:1658,cat:"Sentence Structure & Grammar",q:"Sociologists are concerned with the problem of man in .......",opts:["a society","the society","society","some society"],correct:2},
+{n:1659,cat:"Prepositions",q:"The contractors were short ......cash even before the project was completed",opts:["in","for","with","of"],correct:3},
+{n:1660,cat:"Prepositions",q:"The judge acquitted the accused ......all the eight counts",opts:["of","on","from","upon"],correct:0}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let timeRemaining = 100 * 60;
+let timerInterval = null;
+const LETTERS = ['A','B','C','D','E'];
+
+function startQuiz(){
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildNavigator();
+  renderQuestion();
+  timerInterval = setInterval(()=>{
+    timeRemaining--;
+    const m = String(Math.floor(timeRemaining/60)).padStart(2,'0');
+    const s = String(timeRemaining%60).padStart(2,'0');
+    const disp = document.getElementById('timerDisplay');
+    disp.textContent = m+':'+s;
+    if(timeRemaining <= 300) disp.classList.add('warn');
+    if(timeRemaining <= 0){
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting your test now.');
+      showResults();
+    }
+  },1000);
+}
+
+function buildNavigator(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'cell-'+i;
+    cell.textContent = q.n;
+    cell.onclick = ()=>{ current = i; renderQuestion(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('catTag').textContent = q.cat.toUpperCase();
+  document.getElementById('qNumLabel').textContent = 'QUESTION ' + q.n;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('answeredLabel').textContent = `${answeredCount} answered`;
+  document.getElementById('railFill').style.width = (answeredCount/QUESTIONS.length*100)+'%';
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[current]===i ? ' selected' : '');
+    div.innerHTML = `<span class="letter">${LETTERS[i]}</span><span>${opt}</span>`;
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavigator(); };
+    box.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').textContent = current===QUESTIONS.length-1 ? 'Last Question' : 'Next →';
+  document.getElementById('nextBtn').disabled = current===QUESTIONS.length-1;
+
+  updateNavigator();
+}
+
+function updateNavigator(){
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.getElementById('cell-'+i);
+    cell.classList.toggle('answered', answers[i]!==null);
+    cell.classList.toggle('current', i===current);
+  });
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<QUESTIONS.length-1){ current++; renderQuestion(); } }
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if(!proceed) return;
+  }
+  clearInterval(timerInterval);
+  showResults();
+}
+
+function showResults(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+
+  let score = 0;
+  const catStats = {};
+  QUESTIONS.forEach(q=>{ if(!catStats[q.cat]) catStats[q.cat]={correct:0,total:0}; catStats[q.cat].total++; });
+
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===q.correct){ score++; catStats[q.cat].correct++; }
+  });
+
+  const pct = Math.round(score/QUESTIONS.length*100);
+  document.getElementById('scoreBig').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+
+  let verdict = 'KEEP DRILLING';
+  if(pct>=90) verdict = 'EXCELLENT — EXAM READY';
+  else if(pct>=75) verdict = 'VERY GOOD';
+  else if(pct>=60) verdict = 'GOOD — CLOSE THE GAPS';
+  else verdict = 'NEEDS MORE REVISION';
+  document.getElementById('verdictTag').textContent = verdict;
+
+  const bdBox = document.getElementById('breakdownBox');
+  bdBox.innerHTML = '';
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const div = document.createElement('div');
+    div.className = 'bd-card';
+    div.innerHTML = `<div class="cat">${cat}</div><div class="frac">${s.correct}/${s.total}</div>`;
+    bdBox.appendChild(div);
+  });
+
+  const reviewBox = document.getElementById('reviewBox');
+  reviewBox.innerHTML = '';
+  let missedCount = 0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]!==q.correct){
+      missedCount++;
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      const yourAns = answers[i]===null ? 'Not answered' : `${LETTERS[answers[i]]}. ${q.opts[answers[i]]}`;
+      div.innerHTML = `
+        <div class="rq">Q${q.n}. ${q.q}</div>
+        <div class="rline ryour">Your answer: ${yourAns}</div>
+        <div class="rline rcorrect">Correct answer: ${LETTERS[q.correct]}. ${q.opts[q.correct]}</div>
+      `;
+      reviewBox.appendChild(div);
+    }
+  });
+  if(missedCount===0){
+    reviewBox.innerHTML = '<p style="color:var(--good); font-weight:700;">Perfect score — nothing missed. 🔥</p>';
+  }
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  timeRemaining = 100 * 60;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '100:00';
+  disp.classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('introScreen').classList.remove('hidden');
+}
+</script>
+</body>
+                                                                 </html>
