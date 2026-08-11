@@ -515,27 +515,42 @@
         const data = doc.data();
         if (data.whatsappLink) document.getElementById('whatsappBtn').href = data.whatsappLink;
         const freebies = data.freebies || [];
-        if (freebies.length === 0) {
-          document.getElementById('freebiesLoading').innerHTML = '<p>No resources yet. Check back soon!</p>';
-          return;
-        }
-        const icons = ['📄','📕','📗','📘','📙','📃','🗂️','📋','📑','🧾'];
-        let html = '';
-        freebies.forEach((item) => {
-          const entries = Object.entries(item);
-          entries.forEach(([title, link], i) => {
-            const icon = icons[i % icons.length];
-            html += `
-              <a href="${link}" target="_blank" class="freebie-card">
-                <div class="freebie-icon">${icon}</div>
-                <div class="freebie-info">
-                  <div class="freebie-title">${title}</div>
-                  <div class="freebie-desc">Tap to open in Google Drive</div>
-                </div>
-                <div class="freebie-arrow">→</div>
-              </a>`;
-          });
-        });
+const icons = ['📄','📕','📗','📘','📙','📃','🗂️','📋','📑','🧾'];
+let html = '';
+
+// ADD YOUR LEXIS & STRUCTURE LINK HERE (always first)
+html += `
+  <a href="https://www.unilorinpq.site/Lexis_And_StructurePIV.html" target="_blank" class="freebie-card" style="border-color:#3B82F6;">
+    <div class="freebie-icon">📘</div>
+    <div class="freebie-info">
+      <div class="freebie-title">Lexis & Structure</div>
+      <div class="freebie-desc">Tap to open study material</div>
+    </div>
+    <div class="freebie-arrow">→</div>
+  </a>`;
+
+if (freebies.length === 0) {
+  document.getElementById('freebiesLoading').style.display = 'none';
+  document.getElementById('freebiesGrid').style.display = 'flex';
+  document.getElementById('freebiesGrid').innerHTML = html;
+  return;
+}
+
+freebies.forEach((item) => {
+  const entries = Object.entries(item);
+  entries.forEach(([title, link], i) => {
+    const icon = icons[i % icons.length];
+    html += `
+      <a href="${link}" target="_blank" class="freebie-card">
+        <div class="freebie-icon">${icon}</div>
+        <div class="freebie-info">
+          <div class="freebie-title">${title}</div>
+          <div class="freebie-desc">Tap to open in Google Drive</div>
+        </div>
+        <div class="freebie-arrow">→</div>
+      </a>`;
+  });
+});
         document.getElementById('freebiesLoading').style.display = 'none';
         document.getElementById('freebiesGrid').style.display = 'flex';
         document.getElementById('freebiesGrid').innerHTML = html;
