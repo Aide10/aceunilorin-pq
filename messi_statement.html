@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AceUnilorin PQ — Statement Interpretation</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#131a2c; --panel2:#0f1626;
+    --blue:#3b82f6; --blue-soft:#60a5fa; --blue-dim:#1e3a5f;
+    --text:#e8ecf5; --muted:#8b93a7; --line:#232c42;
+    --good:#22c55e; --bad:#ef4444;
+    --gold:#f5a623;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--line);
+    position:sticky; top:0; background:var(--bg); z-index:20;
+  }
+  .brand{font-size:22px; font-weight:800; letter-spacing:-0.3px;}
+  .brand .ace{color:var(--blue-soft);}
+  .brand .uni{color:var(--text);}
+  .brand .pq{color:var(--blue-soft);}
+  .theme-dot{width:34px; height:34px; border-radius:50%; background:var(--panel); display:flex; align-items:center; justify-content:center; font-size:16px; border:1px solid var(--line);}
+
+  .wrap{max-width:640px; margin:0 auto; padding:16px 16px 60px;}
+
+  .meta-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; background:var(--panel); border-radius:12px; margin-bottom:14px;
+  }
+  .timer{font-size:22px; font-weight:800; color:var(--blue-soft); display:flex; align-items:center; gap:8px;}
+  .timer.warn{color:#fca5a5;}
+  .answered-count{font-size:13px; color:var(--muted);}
+
+  .rail{height:5px; background:var(--panel2); border-radius:4px; overflow:hidden; margin-bottom:16px;}
+  .rail-fill{height:100%; background:var(--blue); width:0%; transition:width .3s ease;}
+
+  .qhead{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .qcounter{color:var(--blue-soft); font-weight:700; font-size:14px;}
+  .pill{
+    display:inline-block; padding:4px 12px; border:1px solid var(--blue-dim);
+    border-radius:20px; font-size:12px; color:var(--blue-soft); background:rgba(59,130,246,0.08);
+  }
+
+  .card{background:var(--panel); border-radius:16px; padding:22px 18px; margin-bottom:16px;}
+  .qtext{font-size:17px; font-weight:700; line-height:1.6; margin:0 0 20px; color:var(--text);}
+
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    display:flex; align-items:flex-start; gap:14px;
+    padding:16px; border-radius:12px; background:var(--panel2);
+    border:1.5px solid transparent; cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--blue-dim);}
+  .opt.selected{border-color:var(--blue); background:rgba(59,130,246,0.12);}
+  .opt .badge{
+    min-width:34px; height:34px; border-radius:9px; background:#1c2540;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:var(--text);
+  }
+  .opt.selected .badge{background:var(--blue); color:#fff;}
+  .opt .otext{font-size:14.5px; line-height:1.4; color:var(--text); padding-top:6px;}
+
+  .nav-row{display:flex; gap:10px; margin-top:18px;}
+  .btn{
+    flex:1; padding:14px; border-radius:12px; border:none; font-weight:700; font-size:15px;
+    cursor:pointer; transition:opacity .15s, transform .1s; text-align:center;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.prev{background:var(--panel2); color:var(--muted);}
+  .btn.prev:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.next{background:var(--panel2); color:var(--text);}
+  .btn.submit{background:var(--blue); color:#fff;}
+
+  .navigator{background:var(--panel); border-radius:16px; padding:18px; margin-top:16px;}
+  .navigator-title{font-size:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; font-weight:700;}
+  .grid{display:grid; grid-template-columns:repeat(8,1fr); gap:8px;}
+  @media (max-width:420px){ .grid{grid-template-columns:repeat(6,1fr);} }
+  .cell{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:9px; background:var(--panel2); color:var(--muted); font-size:11px; font-weight:600; cursor:pointer;
+  }
+  .cell.answered{background:var(--blue); color:#fff;}
+  .cell.current{outline:2px solid var(--blue-soft); outline-offset:1px;}
+
+  .hidden{display:none !important;}
+
+  .intro{background:var(--panel); border-radius:16px; padding:24px 20px; text-align:center;}
+  .intro h1{font-size:21px; margin-bottom:6px; color:var(--text);}
+  .intro .subtitle{color:var(--muted); font-size:13px; margin-bottom:16px;}
+  .intro-stats{display:flex; justify-content:center; gap:24px; margin-bottom:20px; flex-wrap:wrap;}
+  .intro-stats div{text-align:center;}
+  .intro-stats .n{font-size:24px; font-weight:800; color:var(--blue-soft);}
+  .intro-stats .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;}
+
+  .advert-banner{
+    background:linear-gradient(135deg, #0f1626, #1a2a4a);
+    border:1px solid var(--blue-dim);
+    border-radius:12px;
+    padding:18px 16px;
+    margin-bottom:20px;
+    text-align:center;
+  }
+  .advert-banner .main-title{
+    font-size:22px; font-weight:900; letter-spacing:-0.5px;
+    background:linear-gradient(90deg, var(--gold), #f9d976);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .advert-banner .sub-title{
+    font-size:15px; font-weight:700; color:var(--text); margin-top:2px;
+  }
+  .advert-banner .date{
+    font-size:13px; color:var(--blue-soft); font-weight:600; margin:6px 0 10px;
+  }
+  .advert-banner .highlight{
+    font-size:12px; color:var(--muted); line-height:1.6;
+  }
+  .advert-banner .highlight strong{color:var(--gold);}
+  .advert-banner .score-row{
+    display:flex; justify-content:center; gap:16px; margin:8px 0 10px; flex-wrap:wrap;
+  }
+  .advert-banner .score-item{
+    font-size:12px; color:var(--muted);
+  }
+  .advert-banner .score-item .pct{
+    color:var(--gold); font-weight:800; font-size:15px; display:block;
+  }
+  .advert-banner .what-you-get{
+    font-size:12px; color:var(--muted); margin:6px 0;
+  }
+  .advert-banner .what-you-get span{
+    display:inline-block; background:rgba(59,130,246,0.15); color:var(--blue-soft);
+    padding:2px 10px; border-radius:12px; margin:2px; font-size:11px;
+  }
+  .advert-banner .investment{
+    font-size:14px; font-weight:700; color:var(--gold); margin:6px 0;
+  }
+  .advert-banner .investment small{
+    font-weight:400; color:var(--muted); font-size:11px;
+  }
+  .advert-banner .pay-details{
+    font-size:12px; color:var(--muted); background:var(--panel2); padding:8px; border-radius:8px; margin:6px 0;
+  }
+  .advert-banner .pay-details strong{color:var(--text);}
+  .advert-banner .cta{
+    font-size:13px; font-weight:700; color:var(--gold); margin-top:6px;
+  }
+
+  .start-btn{background:var(--blue); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;}
+
+  .score-hero{text-align:center; padding:36px 20px; background:var(--panel); border-radius:16px; margin-bottom:20px;}
+  .score-hero .big{font-size:46px; font-weight:800; color:var(--blue-soft); line-height:1; margin-bottom:8px;}
+  .score-hero .sub{font-size:14px; color:var(--muted);}
+  .verdict{display:inline-block; margin-top:14px; padding:6px 16px; border:1px solid var(--blue-dim); border-radius:20px; font-size:12px; color:var(--blue-soft); background:rgba(59,130,246,0.08); font-weight:700;}
+
+  .breakdown{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:22px;}
+  .bd-card{background:var(--panel); border-radius:12px; padding:14px; text-align:center;}
+  .bd-card .cat{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px; font-weight:700;}
+  .bd-card .frac{font-size:19px; font-weight:800; color:var(--blue-soft);}
+
+  .review-item{background:var(--panel); border-radius:12px; border-left:3px solid var(--bad); padding:16px; margin-bottom:10px;}
+  .review-item .rq{font-weight:700; margin-bottom:8px; color:var(--text); font-size:14.5px;}
+  .review-item .rline{font-size:13px; margin:4px 0;}
+  .review-item .ryour{color:#fca5a5;}
+  .review-item .rcorrect{color:#86efac;}
+
+  .section-title{font-size:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); font-weight:700; margin:26px 0 12px;}
+
+  .lock-screen{max-width:420px; margin:80px auto; background:var(--panel); border-radius:16px; padding:34px 28px; text-align:center; border:1px solid var(--line);}
+  .lock-screen h2{font-size:19px; color:var(--text); margin-bottom:6px;}
+  .lock-screen .sub{font-family:monospace; font-size:11px; color:var(--muted); margin-bottom:22px;}
+  .lock-screen input{width:100%; padding:12px 16px; border:1.5px solid var(--line); border-radius:10px; background:var(--panel2); color:var(--text); font-size:15px; margin-bottom:14px; text-align:center; outline:none;}
+  .lock-screen input:focus{border-color:var(--blue);}
+  .lock-screen input::placeholder{color:var(--muted);}
+  .lock-err{color:var(--bad); font-size:12.5px; margin-bottom:10px; min-height:18px;}
+  .lock-btn{background:var(--blue); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer; width:100%;}
+  .lock-btn:hover{opacity:0.88;}
+
+  .made-by{font-size:11px; color:var(--muted); margin-top:14px; text-align:center;}
+
+  .results-advert{
+    background:linear-gradient(135deg, #0f1626, #1a2a4a);
+    border:1px solid var(--gold);
+    border-radius:12px;
+    padding:16px 14px;
+    margin-top:18px;
+    text-align:center;
+  }
+  .results-advert .tagline{font-size:14px; font-weight:700; color:var(--gold);}
+  .results-advert .details{font-size:12px; color:var(--muted); margin-top:4px;}
+  .results-advert .details strong{color:var(--text);}
+  .results-advert .cta-btn{
+    display:inline-block; margin-top:8px; padding:6px 20px;
+    background:var(--gold); color:#0a0e1a; border-radius:20px;
+    font-weight:700; font-size:12px; text-decoration:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ace">Ace</span><span class="uni">Unilorin</span> <span class="pq">PQ</span></div>
+  <div class="theme-dot">☀️</div>
+</div>
+
+<div class="wrap">
+  <div id="lockScreen" class="lock-screen">
+    <h2>🔒 Enter Password</h2>
+    <div class="sub">This mock test is password protected</div>
+    <input type="password" id="passwordInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter') checkPassword()">
+    <div class="lock-err" id="lockError"></div>
+    <button class="lock-btn" onclick="checkPassword()">UNLOCK</button>
+  </div>
+
+  <div id="introScreen" class="intro hidden">
+    <h1>Statement Interpretation — Exercise Five</h1>
+    <div class="subtitle">Practice Questions on Statement Interpretation</div>
+    <div class="intro-stats">
+      <div><div class="n">17</div><div class="l">Questions</div></div>
+      <div><div class="n">10</div><div class="l">Minutes</div></div>
+      <div><div class="n">1</div><div class="l">Category</div></div>
+    </div>
+
+    <div class="advert-banner">
+      <div class="main-title">★ STUDYPAEDIA ★</div>
+      <div class="sub-title">UNILORIN PUTME REVISION PROGRAM</div>
+      <div class="date">📅 AUGUST 10TH – 13TH 2026</div>
+
+      <div class="highlight"><strong>SURE 4.0</strong> — YOUR 4-DAY POWER BOOST TO ACE UNILORIN PUTME 2026!</div>
+
+      <div class="score-row">
+        <div class="score-item"><span class="pct">92%</span> Qowiyu Muhammed • 2023</div>
+        <div class="score-item"><span class="pct">93%</span> Akinola Boluwatife • 2024</div>
+        <div class="score-item"><span class="pct">89%</span> Hanifat Muhammed • 2025</div>
+      </div>
+
+      <div class="what-you-get">
+        <span>Mentorship</span>
+        <span>Daily Tutorials 4hrs+</span>
+        <span>Materials</span>
+        <span>Multiple CBT Quizzes</span>
+        <span>Past Questions 2006-2025</span>
+        <span>High-Yield Mock</span>
+      </div>
+
+      <div class="highlight" style="font-size:12px; margin:4px 0;">
+        <strong>Convener/Tutor:</strong> Ohijei Aidelokhai — Two-time scorer of 88% • Author of Ace Unilorin Past Questions • Founder, UnilorinPQ.site
+      </div>
+
+      <div class="investment">🔥 #1,999 <small>(was #15,000) — First 25 persons only!</small></div>
+      <div class="pay-details">💳 Pay to: <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)</div>
+      <div class="cta">⚡ FOCUS. PREPARE. PERFORM. YOU CAN BE NEXT! ⚡</div>
+    </div>
+
+    <button class="start-btn" onclick="startQuiz()">START PRACTICE</button>
+    <div class="made-by">Made by Aide Ohijei (07036612528)</div>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="meta-bar">
+      <div class="timer" id="timerDisplay">⏱️ 10:00</div>
+      <div class="answered-count" id="answeredLabel">0 / 17 answered</div>
+    </div>
+    <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+
+    <div class="qhead">
+      <span class="qcounter" id="progressLabel">Question 1 of 17</span>
+      <span class="pill" id="catTag">INTERPRETATION</span>
+    </div>
+
+    <div class="card">
+      <p class="qtext" id="qText"></p>
+      <div class="options" id="optionsBox"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn prev" id="prevBtn" onclick="goPrev()">← Prev</button>
+      <button class="btn next" id="nextBtn" onclick="goNext()">Next →</button>
+      <button class="btn submit" id="submitBtn" onclick="submitQuiz()">Submit ✓</button>
+    </div>
+
+    <div class="navigator">
+      <div class="navigator-title">Question Navigator</div>
+      <div class="grid" id="navGrid"></div>
+    </div>
+  </div>
+
+  <div id="resultsScreen" class="hidden">
+    <div class="score-hero">
+      <div class="big" id="scoreBig">0/17</div>
+      <div class="sub" id="scorePct">0%</div>
+      <div class="verdict" id="verdictTag">—</div>
+    </div>
+    <div class="section-title">Score by Category</div>
+    <div class="breakdown" id="breakdownBox"></div>
+    <div class="section-title">Review — Questions Missed</div>
+    <div id="reviewBox"></div>
+
+    <div class="results-advert">
+      <div class="tagline">🎯 READY FOR UNILORIN PUTME 2026?</div>
+      <div class="details">
+        Join <strong>STUDYPAEDIA</strong> — SURE 4.0 Revision Program<br>
+        📅 August 10th – 13th, 2026 • 💳 #1,999 (First 25 persons)<br>
+        <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)
+      </div>
+      <div class="cta-btn">⚡ FOCUS. PREPARE. PERFORM. ⚡</div>
+    </div>
+
+    <div class="nav-row" style="margin-top:12px;">
+      <button class="btn submit" style="flex:none; padding:12px 28px;" onclick="restartQuiz()">RESTART PRACTICE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PASSWORD = 'LIONEL MESSI';
+
+const QUESTIONS = [
+  {n:1,cat:"Interpretation",q:"Ade told George that if he were as rich as him, he would have travelled overseas. This means that",opts:["Ade is not as rich as George therefore he did not travel overseas.","Ade is not as rich as George but he travelled overseas.","Ade is not rich therefore he stole money to travel.","George is rich but did not travel overseas."],correct:0},
+  {n:2,cat:"Interpretation",q:"Had her father not died, Ede would have left for London. This means that",opts:["Ede went to London after the death of her father.","Ede did not go to London because her father had died.","Ede would like to go to London when her father dies.","Ede would like to go to London after her father dies."],correct:1},
+  {n:3,cat:"Interpretation",q:"Would you have helped him if he had asked you? This implies that",opts:["He did not ask you so you didn't help him.","He asked you and you helped him.","He asked you but you didn't help me.","He didn't ask you but you helped him."],correct:0},
+  {n:4,cat:"Interpretation",q:"If Mr. Opuku had not changed the manager, his business would have been ruined. This means that",opts:["Mr. Opuku changed his manager and his business was not ruined.","The new manager ruined Mr. Opuku's business.","The new manager almost ruined Mr. Opuku's business.","Mr. Opuku changed his manager after his business had been ruined."],correct:0},
+  {n:5,cat:"Interpretation",q:"Jide is being forced to go to Lagos. This means that",opts:["Jide will go to Lagos","Jide must go to Lagos","Jide wishes to go to Lagos","Jide is going to Lagos"],correct:0},
+  {n:6,cat:"Interpretation",q:"If Musa applies for scholarship, he will be able to go to Law school. This tells us that",opts:["Musa is attending Law school.","Musa has the opportunity of attending Law school.","Musa could not attend Law school.","Musa has applied for scholarship to attend Law school."],correct:1},
+  {n:7,cat:"Interpretation",q:"Had she known he was a highway robber, she would not have married him. This means that",opts:["She married him before she knew he was a robber.","She knew he was a robber when she married him.","She did marry him because he was a robber.","She refused to marry the man when she knew he was a robber."],correct:0},
+  {n:8,cat:"Interpretation",q:"You must not attend the end of year party. This means that",opts:["it is not necessary that you attend the party","it is necessary that you do not attend the party","you do not have to decide whether to attend the party or not","you have to decide whether to attend the party or not"],correct:1},
+  {n:9,cat:"Interpretation",q:"He had travelled the length and breadth of Africa. This implies that",opts:["he must have travelled to some big cities in Africa","he had travelled to many parts of Africa","he had travelled to all parts of Africa","he had travelled to all the villages and towns of Africa"],correct:2},
+  {n:10,cat:"Interpretation",q:"In all ramifications, Chief Adeyemi was a successful principal of the school. This means that",opts:["He was partly a failure and partly a success.","Everyone admitted that he was largely successful during his tenure.","He was not totally successful in the school.","His tenure experienced a huge success."],correct:3},
+  {n:11,cat:"Interpretation",q:"You could have heard the sound, if you weren't asleep. This means that",opts:["you were not asleep so you heard the sound","you were asleep so you didn't hear the sound","you heard the sound though you were asleep","you did not hear the sound though you weren't asleep"],correct:1},
+  {n:12,cat:"Interpretation",q:"Kola visits us on occasions, and I don't like that. This means that",opts:["I do not like Kola because he visits us only when an event is being celebrated.","I hate the fact that Kola only visits us when something is being celebrated","that Kola does not visit us often is something I object to","Kola seldom visits us and that is because he is a fair-weather guy."],correct:2},
+  {n:13,cat:"Interpretation",q:"At the time I arrived, Olu was lying in third place. This implies that",opts:["Olu's third position coincided with my arrival","when I arrived, Olu was sleeping in the space reserved for him","it was a competition and Olu was in third position when I arrived","on my arrival at the competition, Olu went to sleep"],correct:2},
+  {n:14,cat:"Interpretation",q:"The vice chancellor is riding the crest of the last quarter of his administration. This means that",opts:["the vice chancellor enjoys the acknowledgment of the success of his administration","the vice chancellor does not enjoy the people's criticism of his administration","the vice chancellor hopes to overcome soon, the poor comments on his administration","the vice chancellor does not talk of his success in office"],correct:0},
+  {n:15,cat:"Interpretation",q:"The company ought to have issued warrants for one billion shares. This implies that",opts:["the company has issued one billion shares","the management expected the company to issue more than one billion shares","members of the company bought less than one billion shares","the company did not issue one billion shares"],correct:3},
+  {n:16,cat:"Interpretation",q:"I wouldn't have responded to his rude talk, if I were you. This means that",opts:["the advice was taken by the respondent so he did not respond","the adviser put himself in the respondent's position, so he did not respond to the talk","the respondent replied to the speaker's talk, though he ought not to have done so","what was advisable was that the respondent gave it back to the speaker"],correct:2},
+  {n:17,cat:"Interpretation",q:"If he had come early, the party would have been more fun. This implies that",opts:["he came early and the party was fun","the party was still fun despite his coming late","he didn't come early and the party wasn't fun","he came early but the party was not fun"],correct:2}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let timeRemaining = 10 * 60;
+let timerInterval = null;
+let isUnlocked = false;
+const LETTERS = ['A','B','C','D'];
+
+function checkPassword(){
+  const input = document.getElementById('passwordInput').value.trim();
+  const err = document.getElementById('lockError');
+  if(input === PASSWORD){
+    isUnlocked = true;
+    document.getElementById('lockScreen').classList.add('hidden');
+    document.getElementById('introScreen').classList.remove('hidden');
+    err.textContent = '';
+    document.getElementById('passwordInput').value = '';
+  } else {
+    err.textContent = '❌ Incorrect password. Try again.';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
+}
+
+function startQuiz(){
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildNavigator();
+  renderQuestion();
+  timerInterval = setInterval(()=>{
+    timeRemaining--;
+    const m = String(Math.floor(timeRemaining/60)).padStart(2,'0');
+    const s = String(timeRemaining%60).padStart(2,'0');
+    const disp = document.getElementById('timerDisplay');
+    disp.textContent = '⏱️ ' + m + ':' + s;
+    if(timeRemaining <= 300) disp.classList.add('warn');
+    if(timeRemaining <= 0){
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting your test now.');
+      showResults();
+    }
+  },1000);
+}
+
+function buildNavigator(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'cell-'+i;
+    cell.textContent = q.n;
+    cell.onclick = ()=>{ current = i; renderQuestion(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('catTag').textContent = q.cat.toUpperCase();
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('answeredLabel').textContent = `${answeredCount} / ${QUESTIONS.length} answered`;
+  document.getElementById('railFill').style.width = (answeredCount/QUESTIONS.length*100)+'%';
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[current]===i ? ' selected' : '');
+    div.innerHTML = `<span class="badge">${LETTERS[i]}</span><span class="otext">${opt}</span>`;
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavigator(); };
+    box.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').textContent = current===QUESTIONS.length-1 ? 'Last Question' : 'Next →';
+  document.getElementById('nextBtn').disabled = current===QUESTIONS.length-1;
+
+  updateNavigator();
+}
+
+function updateNavigator(){
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.getElementById('cell-'+i);
+    cell.classList.toggle('answered', answers[i]!==null);
+    cell.classList.toggle('current', i===current);
+  });
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<QUESTIONS.length-1){ current++; renderQuestion(); } }
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if(!proceed) return;
+  }
+  clearInterval(timerInterval);
+  showResults();
+}
+
+function showResults(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+
+  let score = 0;
+  const catStats = {};
+  QUESTIONS.forEach(q=>{ if(!catStats[q.cat]) catStats[q.cat]={correct:0,total:0}; catStats[q.cat].total++; });
+
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===q.correct){ score++; catStats[q.cat].correct++; }
+  });
+
+  const pct = Math.round(score/QUESTIONS.length*100);
+  document.getElementById('scoreBig').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+
+  let verdict = 'KEEP DRILLING';
+  if(pct>=90) verdict = 'EXCELLENT — MASTERED!';
+  else if(pct>=75) verdict = 'VERY GOOD';
+  else if(pct>=60) verdict = 'GOOD — CLOSE THE GAPS';
+  else verdict = 'NEEDS MORE REVISION';
+  document.getElementById('verdictTag').textContent = verdict;
+
+  const bdBox = document.getElementById('breakdownBox');
+  bdBox.innerHTML = '';
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const div = document.createElement('div');
+    div.className = 'bd-card';
+    div.innerHTML = `<div class="cat">${cat}</div><div class="frac">${s.correct}/${s.total}</div>`;
+    bdBox.appendChild(div);
+  });
+
+  const reviewBox = document.getElementById('reviewBox');
+  reviewBox.innerHTML = '';
+  let missedCount = 0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]!==q.correct){
+      missedCount++;
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      const yourAns = answers[i]===null ? 'Not answered' : `${LETTERS[answers[i]]}. ${q.opts[answers[i]]}`;
+      div.innerHTML = `
+        <div class="rq">Q${q.n}. ${q.q}</div>
+        <div class="rline ryour">Your answer: ${yourAns}</div>
+        <div class="rline rcorrect">Correct answer: ${LETTERS[q.correct]}. ${q.opts[q.correct]}</div>
+      `;
+      reviewBox.appendChild(div);
+    }
+  });
+  if(missedCount===0){
+    reviewBox.innerHTML = '<p style="color:#86efac; font-weight:700; font-size:16px;">🎉 Perfect score — nothing missed! 🔥</p>';
+  }
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  timeRemaining = 10 * 60;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '⏱️ 10:00';
+  disp.classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('introScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
