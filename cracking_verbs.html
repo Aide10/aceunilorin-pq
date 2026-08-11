@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Grammar CBT — Verbs Chapter</title>
+<style>
+  :root{
+    --navy:#132743; --navy-deep:#0b1a2e; --gold:#c99a2e; --gold-soft:#e8cf8a;
+    --cream:#f6f3ec; --paper:#fffdf9; --ink:#1c1c1c; --muted:#6b6b6b;
+    --good:#2e7d4f; --bad:#a5322c; --line:#e2dccb;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Georgia','Iowan Old Style',serif; background:var(--cream); color:var(--ink); min-height:100vh;}
+  .topbar{background:var(--navy); color:var(--cream); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; border-bottom:3px solid var(--gold); position:sticky; top:0; z-index:20;}
+  .topbar .brand{font-family:'Courier New',monospace; letter-spacing:1px; font-size:12px; text-transform:uppercase; color:var(--gold-soft);}
+  .topbar .brand strong{color:var(--cream); font-size:14.5px; display:block; font-family:Georgia,serif; letter-spacing:0.5px;}
+  .clock{font-family:'Courier New',monospace; background:var(--navy-deep); border:1px solid var(--gold); color:var(--gold-soft); padding:6px 10px; border-radius:3px; font-size:13px; white-space:nowrap;}
+  .clock.warn{color:#f0b0a8; border-color:#a5322c;}
+  .wrap{max-width:920px; margin:0 auto; padding:18px 16px 60px;}
+  .rail{height:6px; background:#e6e0cf; border-radius:4px; overflow:hidden; margin-bottom:18px;}
+  .rail-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-soft)); width:0%; transition:width .3s ease;}
+  .meta-row{display:flex; justify-content:space-between; font-family:'Courier New',monospace; font-size:12px; color:var(--muted); margin-bottom:10px; letter-spacing:0.5px;}
+  .category-tag{display:inline-block; background:var(--navy); color:var(--gold-soft); font-family:'Courier New',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; padding:4px 10px; border-radius:2px; margin-bottom:14px;}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:26px 24px; box-shadow:0 1px 0 var(--line), 0 8px 20px -12px rgba(19,39,67,0.25);}
+  .qnum{font-family:'Courier New',monospace; color:var(--gold); font-size:13px; letter-spacing:1px; margin-bottom:6px;}
+  .qtext{font-size:18.5px; line-height:1.55; color:var(--navy-deep); margin:0 0 22px; font-weight:600;}
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{display:flex; align-items:flex-start; gap:12px; padding:12px 14px; border:1.5px solid var(--line); border-radius:5px; background:var(--cream); cursor:pointer; transition:border-color .15s, background .15s; text-align:left; font-family:Georgia,serif; font-size:15.5px; color:var(--ink);}
+  .opt:hover{border-color:var(--gold); background:#fbf6e8;}
+  .opt .letter{font-family:'Courier New',monospace; font-weight:700; color:var(--navy); border:1.5px solid var(--navy); border-radius:50%; width:26px;height:26px; min-width:26px; display:flex;align-items:center;justify-content:center; font-size:13px;}
+  .opt.selected{border-color:var(--navy); background:#eef2f7;}
+  .opt.selected .letter{background:var(--navy); color:var(--cream);}
+  .opt.correct-reveal{border-color:var(--good); background:#e8f5ed;}
+  .opt.correct-reveal .letter{background:var(--good); color:white;}
+  .opt.wrong-reveal{border-color:var(--bad); background:#fde8e6;}
+  .opt.wrong-reveal .letter{background:var(--bad); color:white;}
+  .nav-row{display:flex; justify-content:space-between; align-items:center; margin-top:22px; gap:10px; flex-wrap:wrap;}
+  .btn{font-family:'Courier New',monospace; letter-spacing:0.5px; font-size:13px; text-transform:uppercase; padding:10px 16px; border-radius:4px; border:1.5px solid var(--navy); background:var(--navy); color:var(--cream); cursor:pointer; transition:opacity .15s, transform .1s;}
+  .btn:hover{opacity:0.88;} .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:transparent; color:var(--navy);}
+  .btn.gold{background:var(--gold); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .navigator{margin-top:26px; background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:16px;}
+  .navigator-title{font-family:'Courier New',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:10px;}
+  .grid{display:grid; grid-template-columns:repeat(10,1fr); gap:4px;}
+  @media (max-width:600px){ .grid{grid-template-columns:repeat(6,1fr);} .qtext{font-size:16.5px;} }
+  .cell{aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-family:'Courier New',monospace; font-size:9px; border-radius:3px; border:1px solid var(--line); background:var(--cream); color:var(--muted); cursor:pointer;}
+  .cell.answered{background:var(--gold-soft); border-color:var(--gold); color:var(--navy-deep); font-weight:700;}
+  .cell.current{outline:2px solid var(--navy); outline-offset:1px;}
+  .legend{display:flex; gap:16px; margin-top:10px; font-size:11px; font-family:'Courier New',monospace; color:var(--muted); flex-wrap:wrap;}
+  .legend span{display:flex; align-items:center; gap:6px;}
+  .swatch{width:10px;height:10px;border-radius:2px;display:inline-block;}
+  .hidden{display:none !important;}
+  .score-hero{text-align:center; padding:34px 20px; background:var(--navy); color:var(--cream); border-radius:6px; margin-bottom:22px; border:1px solid var(--gold);}
+  .score-hero .big{font-family:'Courier New',monospace; font-size:44px; color:var(--gold-soft); line-height:1; margin-bottom:6px;}
+  .score-hero .sub{font-size:14px; color:var(--cream); opacity:0.85;}
+  .verdict{display:inline-block; margin-top:14px; padding:6px 14px; border:1px solid var(--gold); border-radius:20px; font-family:'Courier New',monospace; font-size:12px; letter-spacing:1px; color:var(--gold-soft);}
+  .breakdown{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:24px;}
+  .bd-card{background:var(--paper); border:1px solid var(--line); border-radius:5px; padding:12px 14px; text-align:center;}
+  .bd-card .cat{font-family:'Courier New',monospace; font-size:9.5px; letter-spacing:0.3px; color:var(--muted); text-transform:uppercase; margin-bottom:6px;}
+  .bd-card .frac{font-size:20px; font-weight:700; color:var(--navy);}
+  .review-item{background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--bad); border-radius:4px; padding:14px 16px; margin-bottom:10px;}
+  .review-item .rq{font-weight:700; margin-bottom:6px; color:var(--navy-deep);}
+  .review-item .rline{font-size:13.5px; margin:3px 0;}
+  .review-item .ryour{color:var(--bad);}
+  .review-item .rcorrect{color:var(--good);}
+  .section-title{font-family:'Courier New',monospace; font-size:13px; letter-spacing:1px; text-transform:uppercase; color:var(--navy); border-bottom:1px solid var(--line); padding-bottom:8px; margin:26px 0 14px;}
+  .intro{background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:28px 24px; text-align:center;}
+  .intro h1{font-size:21px; color:var(--navy-deep); margin-bottom:4px;}
+  .intro .byline{font-family:'Courier New',monospace; font-size:11.5px; color:var(--gold); letter-spacing:0.5px; margin-bottom:16px;}
+  .intro p{color:var(--muted); font-size:14px; line-height:1.6; margin-bottom:18px;}
+  .intro-stats{display:flex; justify-content:center; gap:22px; margin-bottom:22px; flex-wrap:wrap;}
+  .intro-stats div{text-align:center;}
+  .intro-stats .n{font-family:'Courier New',monospace; font-size:22px; color:var(--gold); font-weight:700;}
+  .intro-stats .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;}
+  .note{font-size:12px; color:var(--muted); margin-top:14px; line-height:1.5;}
+  .footer-credit{text-align:center; font-family:'Courier New',monospace; font-size:11px; color:var(--muted); margin-top:30px;}
+  .show-answer-btn{margin-left:10px; font-size:11px; padding:4px 10px; background:var(--gold); color:var(--navy-deep); border:none; border-radius:3px; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div id="appRoot">
+<div class="topbar">
+  <div class="brand">ENGLISH GRAMMAR CBT<strong>Verbs Chapter — 38 Questions</strong></div>
+  <div class="clock" id="timerDisplay">15:00</div>
+</div>
+
+<div class="wrap">
+  <div id="introScreen" class="intro">
+    <h1>Verbs — Fill in the Gap</h1>
+    <div class="byline">Extracted from CamScanner — Chapter 1: Verbs</div>
+    <p>38 questions on verb forms, tenses, and usage. Select the correct option for each question. You can navigate using the grid and review your answers before submitting.</p>
+    <div class="intro-stats">
+      <div><div class="n">38</div><div class="l">Questions</div></div>
+      <div><div class="n">15</div><div class="l">Minutes</div></div>
+      <div><div class="n">1</div><div class="l">Category</div></div>
+    </div>
+    <button class="btn gold" onclick="startQuiz()" style="font-size:14px; padding:12px 26px;">START PRACTICE</button>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="meta-row">
+      <span id="progressLabel">Question 1 of 38</span>
+      <span id="answeredLabel">0 answered</span>
+    </div>
+    <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+    <div class="category-tag" id="catTag">VERBS</div>
+    <div class="card">
+      <div class="qnum" id="qNumLabel"></div>
+      <p class="qtext" id="qText"></p>
+      <div class="options" id="optionsBox"></div>
+      <div class="nav-row">
+        <button class="btn ghost" id="prevBtn" onclick="goPrev()">← Previous</button>
+        <button class="btn" id="nextBtn" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+    <div class="navigator">
+      <div class="navigator-title">Question Navigator</div>
+      <div class="grid" id="navGrid"></div>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--gold-soft); border:1px solid var(--gold);"></span> Answered</span>
+        <span><span class="swatch" style="background:var(--cream); border:1px solid var(--line);"></span> Unanswered</span>
+      </div>
+    </div>
+    <div class="nav-row" style="justify-content:center; margin-top:22px;">
+      <button class="btn gold" id="submitBtn" onclick="submitQuiz()" style="font-size:14px; padding:12px 30px;">SUBMIT TEST</button>
+    </div>
+  </div>
+
+  <div id="resultsScreen" class="hidden">
+    <div class="score-hero">
+      <div class="big" id="scoreBig">0/38</div>
+      <div class="sub" id="scorePct">0%</div>
+      <div class="verdict" id="verdictTag">—</div>
+    </div>
+    <div class="section-title">Score by Category</div>
+    <div class="breakdown" id="breakdownBox"></div>
+    <div class="section-title">Review — Questions Missed</div>
+    <div id="reviewBox"></div>
+    <div class="nav-row" style="justify-content:center; margin-top:10px;">
+      <button class="btn" onclick="restartQuiz()">RESTART PRACTICE</button>
+    </div>
+  </div>
+
+  <div class="footer-credit">Extracted from CamScanner — Chapter 1: Verbs</div>
+</div>
+</div>
+
+<script>
+const QUESTIONS = [
+{n:1,cat:"Verbs",q:"I am looking forward to ______ you at the reception hall",opts:["meet","meeting","met","have met"],correct:1},
+{n:2,cat:"Verbs",q:"Tunde and Osazuwa used to ______ together when they were small",opts:["ate","eat","eating","eats"],correct:1},
+{n:3,cat:"Verbs",q:"Let the boy ______ in the way he likes",opts:["behave","behaves","behaved","behaving"],correct:0},
+{n:4,cat:"Verbs",q:"Thomson ______ Funke's feelings last night",opts:["hurt","hurts","hurted","had hurted"],correct:0},
+{n:5,cat:"Verbs",q:"The young girl had better ______ her language",opts:["minds","minded","mind","minding"],correct:2},
+{n:6,cat:"Verbs",q:"______ your grandmother died before your father died?",opts:["Has","Had","Was","Have"],correct:1},
+{n:7,cat:"Verbs",q:"The only student who failed the test ______ away without the knowledge of the teacher",opts:["slank","slink","slunk","slinked"],correct:2},
+{n:8,cat:"Verbs",q:"Go on, we ______ you",opts:["are understanding","will be understanding","understand","can be understanding"],correct:2},
+{n:9,cat:"Verbs",q:"Yemi's mother had already ______ the pepper before we got home",opts:["grinded","ground","grind","grounded"],correct:1},
+{n:10,cat:"Verbs",q:"I am used to ______ by air",opts:["traveling","travel","travelled","travels"],correct:0},
+{n:11,cat:"Verbs",q:"I prefer ______ to ______",opts:["dance/read","dancing/reading","dancing/read","dance/reading"],correct:1},
+{n:12,cat:"Verbs",q:"We saw the boy ______ through the window when the armed robber shot in the air",opts:["jumping","jumps","jumped","jump"],correct:3},
+{n:13,cat:"Verbs",q:"My father does not mind ______ me to school everyday",opts:["to drive","driving","to have driven","to drove"],correct:1},
+{n:14,cat:"Verbs",q:"Emmanuel travelled abroad with a view to ______ a business partner",opts:["find","have found","finding","finds"],correct:2},
+{n:15,cat:"Verbs",q:"When the car tyre ______ on the way, he did not know what to do",opts:["burst","bursted","bursts","had burst"],correct:0},
+{n:16,cat:"Verbs",q:"By the end of June, I ______ my building",opts:["will complete","shall have completed","will be completing","shall be completing"],correct:1},
+{n:17,cat:"Verbs",q:"He ______ the scene before the accident occurred",opts:["leaves","has left","had left","left"],correct:2},
+{n:18,cat:"Verbs",q:"The President ______ to the nation last week",opts:["broadcasted","broadcast","had broadcasted","has broadcasted"],correct:1},
+{n:19,cat:"Verbs",q:"She was so angry with her mom and ______ her food for two days",opts:["forwent","forgone","forgoes","forgo"],correct:0},
+{n:20,cat:"Verbs",q:"Peter said he saw Nkechi's mother ______ the clothes",opts:["wash","washing","washes","washed"],correct:1},
+{n:21,cat:"Verbs",q:"The teacher made us ______ the truth",opts:["told","tells","tell","telling"],correct:2},
+{n:22,cat:"Verbs",q:"This is obviously the first time ______ to the woman",opts:["I am talking","of my talking","I have talked","I will be talking"],correct:2},
+{n:23,cat:"Verbs",q:"Ebuka's hair needs ______",opts:["combed","combs","comb","combing"],correct:3},
+{n:24,cat:"Verbs",q:"The man asked if I ______ my race",opts:["have run","had ran","have ran","had run"],correct:3},
+{n:25,cat:"Verbs",q:"The girls ______ expelled by the principal",opts:["are been","have being","had being","have been"],correct:3},
+{n:26,cat:"Verbs",q:"I saw them when they ______ caved for lateness",opts:["are being","have being","were being","were been"],correct:2},
+{n:27,cat:"Verbs",q:"I saw Yebah ______ Yaro yesterday",opts:["slaps","slapped","slap","slapping"],correct:2},
+{n:28,cat:"Verbs",q:"By the end of this year, grandmother ______ with us for eight years",opts:["is living","shall have lived","will have lived","has lived"],correct:2},
+{n:29,cat:"Verbs",q:"He ______ up the side glass of the taxi on the instruction of the driver",opts:["wind","winded","wound","wounded"],correct:2},
+{n:30,cat:"Verbs",q:"The class ______ into two before the teacher was transferred to another school",opts:["had been splitted","has been splitted","was split","had been split"],correct:3},
+{n:31,cat:"Verbs",q:"I ______ the wet clothes and then I ______ them on the line",opts:["wrung/spread","wringed/spreaded","wrang/spreaded","wrung/spreaded"],correct:0},
+{n:32,cat:"Verbs",q:"By the time school opens, I ______ here for eight weeks",opts:["worked","will work","will be working","will have worked"],correct:3},
+{n:33,cat:"Verbs",q:"The teacher made us ______ the work again",opts:["do","to do","to be doing","doing"],correct:0},
+{n:34,cat:"Verbs",q:"We saw Ifueko ______ an egg on the wall",opts:["smashed","smash","smashing","smashes"],correct:1},
+{n:35,cat:"Verbs",q:"My mom said she once saw a snake ______ a chicken",opts:["swallowed","swallow","being swallowed","swallowing"],correct:3},
+{n:36,cat:"Verbs",q:"I can now understand that I ___ spoofed",opts:["have been","has been","am been","have been"],correct:3},
+{n:37,cat:"Verbs",q:"Litoba said he was ___ by Kamala",opts:["smitted","smoten","smitten","smote"],correct:2},
+{n:38,cat:"Verbs",q:"We ___ the meeting before a policeman rushed into the hall to stop it",opts:["had began","have begun","had begun","have started"],correct:2}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let timeRemaining = 15 * 60;
+let timerInterval = null;
+const LETTERS = ['A','B','C','D'];
+
+function startQuiz(){
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildNavigator();
+  renderQuestion();
+  timerInterval = setInterval(()=>{
+    timeRemaining--;
+    const m = String(Math.floor(timeRemaining/60)).padStart(2,'0');
+    const s = String(timeRemaining%60).padStart(2,'0');
+    const disp = document.getElementById('timerDisplay');
+    disp.textContent = m+':'+s;
+    if(timeRemaining <= 300) disp.classList.add('warn');
+    if(timeRemaining <= 0){
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting your test now.');
+      showResults();
+    }
+  },1000);
+}
+
+function buildNavigator(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'cell-'+i;
+    cell.textContent = q.n;
+    cell.onclick = ()=>{ current = i; renderQuestion(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('catTag').textContent = q.cat.toUpperCase();
+  document.getElementById('qNumLabel').textContent = 'QUESTION ' + q.n;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('answeredLabel').textContent = `${answeredCount} answered`;
+  document.getElementById('railFill').style.width = (answeredCount/QUESTIONS.length*100)+'%';
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[current]===i ? ' selected' : '');
+    div.innerHTML = `<span class="letter">${LETTERS[i]}</span><span>${opt}</span>`;
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavigator(); };
+    box.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').textContent = current===QUESTIONS.length-1 ? 'Last Question' : 'Next →';
+  document.getElementById('nextBtn').disabled = current===QUESTIONS.length-1;
+
+  updateNavigator();
+}
+
+function updateNavigator(){
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.getElementById('cell-'+i);
+    cell.classList.toggle('answered', answers[i]!==null);
+    cell.classList.toggle('current', i===current);
+  });
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<QUESTIONS.length-1){ current++; renderQuestion(); } }
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if(!proceed) return;
+  }
+  clearInterval(timerInterval);
+  showResults();
+}
+
+function showResults(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+
+  let score = 0;
+  const catStats = {};
+  QUESTIONS.forEach(q=>{ if(!catStats[q.cat]) catStats[q.cat]={correct:0,total:0}; catStats[q.cat].total++; });
+
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===q.correct){ score++; catStats[q.cat].correct++; }
+  });
+
+  const pct = Math.round(score/QUESTIONS.length*100);
+  document.getElementById('scoreBig').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+
+  let verdict = 'KEEP DRILLING';
+  if(pct>=90) verdict = 'EXCELLENT — MASTERED!';
+  else if(pct>=75) verdict = 'VERY GOOD';
+  else if(pct>=60) verdict = 'GOOD — CLOSE THE GAPS';
+  else verdict = 'NEEDS MORE REVISION';
+  document.getElementById('verdictTag').textContent = verdict;
+
+  const bdBox = document.getElementById('breakdownBox');
+  bdBox.innerHTML = '';
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const div = document.createElement('div');
+    div.className = 'bd-card';
+    div.innerHTML = `<div class="cat">${cat}</div><div class="frac">${s.correct}/${s.total}</div>`;
+    bdBox.appendChild(div);
+  });
+
+  const reviewBox = document.getElementById('reviewBox');
+  reviewBox.innerHTML = '';
+  let missedCount = 0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]!==q.correct){
+      missedCount++;
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      const yourAns = answers[i]===null ? 'Not answered' : `${LETTERS[answers[i]]}. ${q.opts[answers[i]]}`;
+      div.innerHTML = `
+        <div class="rq">Q${q.n}. ${q.q}</div>
+        <div class="rline ryour">Your answer: ${yourAns}</div>
+        <div class="rline rcorrect">Correct answer: ${LETTERS[q.correct]}. ${q.opts[q.correct]}</div>
+      `;
+      reviewBox.appendChild(div);
+    }
+  });
+  if(missedCount===0){
+    reviewBox.innerHTML = '<p style="color:var(--good); font-weight:700;">Perfect score — nothing missed! 🔥</p>';
+  }
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  timeRemaining = 15 * 60;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '15:00';
+  disp.classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('introScreen').classList.remove('hidden');
+}
+</script>
+</body>
+                                                                                                              </html>
