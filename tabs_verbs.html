@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verbs Exercise Nine — CBT Practice</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0b1a2e 0%, #1a3a5c 40%, #2d5a7a 70%, #4a8aaa 100%);
+    color: #1c1c1c;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Sun decoration */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -80px;
+    right: -80px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, #f9d976 0%, #f8c84a 30%, #f5a623 60%, rgba(245, 166, 35, 0.3) 80%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 120px 60px rgba(249, 217, 118, 0.3);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Additional sun rays */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -50px;
+    right: -50px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(249, 217, 118, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .app-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  .topbar {
+    background: rgba(19, 39, 67, 0.92);
+    backdrop-filter: blur(10px);
+    color: #f6f3ec;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 3px solid #f5a623;
+    border-radius: 12px 12px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .topbar .brand {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #e8cf8a;
+  }
+
+  .topbar .brand strong {
+    color: #f6f3ec;
+    font-size: 15px;
+    display: block;
+    font-family: Georgia, serif;
+    letter-spacing: 0.5px;
+  }
+
+  .clock {
+    font-family: 'Courier New', monospace;
+    background: rgba(11, 26, 46, 0.8);
+    border: 1px solid #f5a623;
+    color: #e8cf8a;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .clock.warn {
+    color: #f0b0a8;
+    border-color: #a5322c;
+    animation: pulse-warn 1s infinite;
+  }
+
+  @keyframes pulse-warn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .wrap {
+    background: rgba(255, 253, 249, 0.93);
+    backdrop-filter: blur(10px);
+    border-radius: 0 0 16px 16px;
+    padding: 24px 24px 40px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .rail {
+    height: 6px;
+    background: rgba(230, 224, 207, 0.6);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .rail-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f5a623, #f9d976);
+    width: 0%;
+    transition: width .3s ease;
+    border-radius: 4px;
+  }
+
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #6b6b6b;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .category-tag {
+    display: inline-block;
+    background: rgba(19, 39, 67, 0.9);
+    color: #e8cf8a;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(5px);
+  }
+
+  .card {
+    background: rgba(255, 253, 249, 0.95);
+    border: 1px solid #e2dccb;
+    border-radius: 10px;
+    padding: 28px 26px;
+    box-shadow: 0 2px 0 #e2dccb, 0 8px 24px -12px rgba(19, 39, 67, 0.3);
+    transition: box-shadow 0.3s;
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 0 #e2dccb, 0 12px 32px -12px rgba(19, 39, 67, 0.4);
+  }
+
+  .qnum {
+    font-family: 'Courier New', monospace;
+    color: #f5a623;
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .qtext {
+    font-size: 19px;
+    line-height: 1.6;
+    color: #0b1a2e;
+    margin: 0 0 22px;
+    font-weight: 600;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border: 2px solid rgba(226, 220, 203, 0.6);
+    border-radius: 8px;
+    background: rgba(246, 243, 236, 0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: Georgia, serif;
+    font-size: 15.5px;
+    color: #1c1c1c;
+  }
+
+  .opt:hover {
+    border-color: #f5a623;
+    background: rgba(251, 246, 232, 0.9);
+    transform: translateX(4px);
+  }
+
+  .opt .letter {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: #0b1a2e;
+    border: 2px solid #0b1a2e;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .opt.selected {
+    border-color: #132743;
+    background: rgba(238, 242, 247, 0.9);
+  }
+
+  .opt.selected .letter {
+    background: #132743;
+    color: #f6f3ec;
+  }
+
+  .opt.correct-reveal {
+    border-color: #2e7d4f;
+    background: rgba(232, 245, 237, 0.9);
+  }
+
+  .opt.correct-reveal .letter {
+    background: #2e7d4f;
+    color: white;
+  }
+
+  .opt.wrong-reveal {
+    border-color: #a5322c;
+    background: rgba(253, 232, 230, 0.9);
+  }
+
+  .opt.wrong-reveal .letter {
+    background: #a5322c;
+    color: white;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 22px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 2px solid #132743;
+    background: #132743;
+    color: #f6f3ec;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(19, 39, 67, 0.25);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn.ghost {
+    background: transparent;
+    color: #132743;
+  }
+
+  .btn.ghost:hover {
+    background: rgba(19, 39, 67, 0.05);
+  }
+
+  .btn.gold {
+    background: linear-gradient(135deg, #f5a623, #f9d976);
+    border-color: #f5a623;
+    color: #0b1a2e;
+    font-weight: 700;
+  }
+
+  .btn.gold:hover {
+    box-shadow: 0 4px 20px rgba(245, 166, 35, 0.4);
+  }
+
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .navigator {
+    margin-top: 26px;
+    background: rgba(255, 253, 249, 0.95);
+    border: 1px solid #e2dccb;
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .navigator-title {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    margin-bottom: 12px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 5px;
+  }
+
+  @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+    .qtext {
+      font-size: 17px;
+    }
+    .wrap {
+      padding: 16px;
+    }
+    .card {
+      padding: 18px 16px;
+    }
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    border: 1.5px solid rgba(226, 220, 203, 0.6);
+    background: rgba(246, 243, 236, 0.7);
+    color: #6b6b6b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .cell:hover {
+    border-color: #f5a623;
+    transform: scale(1.05);
+  }
+
+  .cell.answered {
+    background: rgba(232, 207, 138, 0.6);
+    border-color: #f5a623;
+    color: #0b1a2e;
+    font-weight: 700;
+  }
+
+  .cell.current {
+    outline: 3px solid #132743;
+    outline-offset: 1px;
+    background: rgba(19, 39, 67, 0.08);
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    color: #6b6b6b;
+    flex-wrap: wrap;
+  }
+
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .score-hero {
+    text-align: center;
+    padding: 40px 24px;
+    background: linear-gradient(135deg, #0b1a2e, #1a3a5c);
+    color: #f6f3ec;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    border: 1px solid #f5a623;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(249, 217, 118, 0.1), transparent 70%);
+    border-radius: 50%;
+  }
+
+  .score-hero .big {
+    font-family: 'Courier New', monospace;
+    font-size: 48px;
+    color: #f9d976;
+    line-height: 1;
+    margin-bottom: 6px;
+    position: relative;
+  }
+
+  .score-hero .sub {
+    font-size: 15px;
+    color: #f6f3ec;
+    opacity: 0.85;
+  }
+
+  .verdict {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 20px;
+    border: 1.5px solid #f5a623;
+    border-radius: 24px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: #f9d976;
+  }
+
+  .breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .bd-card {
+    background: rgba(255, 253, 249, 0.95);
+    border: 1px solid #e2dccb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+
+  .bd-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .bd-card .cat {
+    font-family: 'Courier New', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.3px;
+    color: #6b6b6b;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .bd-card .frac {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0b1a2e;
+  }
+
+  .section-title {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #132743;
+    border-bottom: 2px solid #e2dccb;
+    padding-bottom: 8px;
+    margin: 28px 0 16px;
+  }
+
+  .review-item {
+    background: rgba(255, 253, 249, 0.95);
+    border: 1px solid #e2dccb;
+    border-left: 4px solid #a5322c;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    transition: transform 0.2s;
+  }
+
+  .review-item:hover {
+    transform: translateX(4px);
+  }
+
+  .review-item .rq {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #0b1a2e;
+  }
+
+  .review-item .rline {
+    font-size: 13.5px;
+    margin: 3px 0;
+  }
+
+  .review-item .ryour {
+    color: #a5322c;
+  }
+
+  .review-item .rcorrect {
+    color: #2e7d4f;
+  }
+
+  .intro {
+    background: rgba(255, 253, 249, 0.95);
+    border: 1px solid #e2dccb;
+    border-radius: 12px;
+    padding: 32px 28px;
+    text-align: center;
+  }
+
+  .intro h1 {
+    font-size: 24px;
+    color: #0b1a2e;
+    margin-bottom: 4px;
+  }
+
+  .intro .byline {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #f5a623;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+
+  .intro p {
+    color: #6b6b6b;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .intro-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .intro-stats div {
+    text-align: center;
+  }
+
+  .intro-stats .n {
+    font-family: 'Courier New', monospace;
+    font-size: 26px;
+    color: #f5a623;
+    font-weight: 700;
+  }
+
+  .intro-stats .l {
+    font-size: 10.5px;
+    color: #6b6b6b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .footer-credit {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: rgba(255, 253, 249, 0.6);
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Bonus decorative elements */
+  .glow-text {
+    color: #f9d976;
+    text-shadow: 0 0 20px rgba(249, 217, 118, 0.3);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <div class="topbar">
+    <div class="brand">ENGLISH GRAMMAR CBT<strong>Verbs — Exercise Nine</strong></div>
+    <div class="clock" id="timerDisplay">15:00</div>
+  </div>
+
+  <div class="wrap">
+    <div id="introScreen" class="intro">
+      <h1>Verbs — Exercise Nine</h1>
+      <div class="byline">Extracted from CamScanner — Practice Questions on Verbs</div>
+      <p>34 questions on verb forms, tenses, and usage. Select the correct option for each question. Navigate using the grid and review your answers before submitting.</p>
+      <div class="intro-stats">
+        <div><div class="n">34</div><div class="l">Questions</div></div>
+        <div><div class="n">15</div><div class="l">Minutes</div></div>
+        <div><div class="n">1</div><div class="l">Category</div></div>
+      </div>
+      <button class="btn gold" onclick="startQuiz()" style="font-size:15px; padding:14px 32px;">START PRACTICE</button>
+      <div class="note" style="font-size:12px; color:#6b6b6b; margin-top:16px; line-height:1.5;">
+        Corrections applied: Q17 → C, Q21 → B
+      </div>
+    </div>
+
+    <div id="quizScreen" class="hidden">
+      <div class="meta-row">
+        <span id="progressLabel">Question 1 of 34</span>
+        <span id="answeredLabel">0 answered</span>
+      </div>
+      <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+      <div class="category-tag" id="catTag">VERBS</div>
+      <div class="card">
+        <div class="qnum" id="qNumLabel"></div>
+        <p class="qtext" id="qText"></p>
+        <div class="options" id="optionsBox"></div>
+        <div class="nav-row">
+          <button class="btn ghost" id="prevBtn" onclick="goPrev()">← Previous</button>
+          <button class="btn" id="nextBtn" onclick="goNext()">Next →</button>
+        </div>
+      </div>
+      <div class="navigator">
+        <div class="navigator-title">Question Navigator</div>
+        <div class="grid" id="navGrid"></div>
+        <div class="legend">
+          <span><span class="swatch" style="background:rgba(232,207,138,0.6); border:1px solid #f5a623;"></span> Answered</span>
+          <span><span class="swatch" style="background:rgba(246,243,236,0.7); border:1px solid #e2dccb;"></span> Unanswered</span>
+        </div>
+      </div>
+      <div class="nav-row" style="justify-content:center; margin-top:22px;">
+        <button class="btn gold" id="submitBtn" onclick="submitQuiz()" style="font-size:14px; padding:12px 32px;">SUBMIT TEST</button>
+      </div>
+    </div>
+
+    <div id="resultsScreen" class="hidden">
+      <div class="score-hero">
+        <div class="big" id="scoreBig">0/34</div>
+        <div class="sub" id="scorePct">0% correct</div>
+        <div class="verdict" id="verdictTag">—</div>
+      </div>
+      <div class="section-title">Score by Category</div>
+      <div class="breakdown" id="breakdownBox"></div>
+      <div class="section-title">Review — Questions Missed</div>
+      <div id="reviewBox"></div>
+      <div class="nav-row" style="justify-content:center; margin-top:10px;">
+        <button class="btn" onclick="restartQuiz()">RESTART PRACTICE</button>
+      </div>
+    </div>
+
+    <div class="footer-credit">Extracted from CamScanner — Exercise Nine: Verbs</div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {n:1,cat:"Verbs",q:"Let the boy ______ in the way he likes",opts:["behaves","behave","behaved","behaving"],correct:1},
+  {n:2,cat:"Verbs",q:"Tomson ______ Funke's feelings last night",opts:["hurt","hurts","hurted","had hurted"],correct:0},
+  {n:3,cat:"Verbs",q:"The young girl had better ______ her language",opts:["minds","minded","mind","minding"],correct:2},
+  {n:4,cat:"Verbs",q:"______ your grandfather died before your father died?",opts:["Has","Had","Was","Have"],correct:1},
+  {n:5,cat:"Verbs",q:"The only student who failed the test ______ away without the knowledge of the teacher",opts:["slank","slink","slunk","slinked"],correct:2},
+  {n:6,cat:"Verbs",q:"Go on, we ______ you",opts:["understand","are understanding","can understand","will be understanding"],correct:0},
+  {n:7,cat:"Verbs",q:"Peter's mother had already ______ the pepper before we got home",opts:["grinded","grind","ground","grounded"],correct:2},
+  {n:8,cat:"Verbs",q:"I am used to ______ by air",opts:["travel","traveling","travels","travelled"],correct:1},
+  {n:9,cat:"Verbs",q:"I prefer ______ to ______",opts:["dancing/reading","dance/read","dancing/read","dance/reading"],correct:0},
+  {n:10,cat:"Verbs",q:"I am looking forward to ______ you at the reception hall",opts:["meet","meeting","met","have met"],correct:1},
+  {n:11,cat:"Verbs",q:"My father does not mind ______ me to school everyday",opts:["to drive","driving","to drove","to have driven"],correct:1},
+  {n:12,cat:"Verbs",q:"\"______?\", asked the pastor",opts:["are you hearing me","are you not hearing me","can you hear me","have you not been hearing me"],correct:2},
+  {n:13,cat:"Verbs",q:"Tunde and Osazuwa used to ______ together when they were small",opts:["ate","eating","eat","eats"],correct:2},
+  {n:14,cat:"Verbs",q:"I started writing this test at 8:00am. It is ______ 10:00am now. By 11:00am, I ______ it for three hours.",opts:["shall be writing","shall have been writing","am writing","as writing"],correct:1},
+  {n:15,cat:"Verbs",q:"When his car tyre ______ on the way, he did not know what to do",opts:["has burst","had burst","bursted","burst"],correct:3},
+  {n:16,cat:"Verbs",q:"Instead of ______, she lied",opts:["pleading","her to plead","plead","her to have a lie"],correct:0},
+  {n:17,cat:"Verbs",q:"Whenever Yemi is cooking, she ______",opts:["tasting the food","tasted the food","tests the taste of the food","tastes the food"],correct:2},
+  {n:18,cat:"Verbs",q:"You had better ______ reading for the examination now",opts:["started","be starting","starts","start"],correct:3},
+  {n:19,cat:"Verbs",q:"By the end of June, I ______ my building",opts:["will have completed","will complete","shall be completing","shall have completed"],correct:3},
+  {n:20,cat:"Verbs",q:"I would rather ______ the food now",opts:["cooked","cook","cooking","cooks"],correct:1},
+  {n:21,cat:"Verbs",q:"Imade came to my house with a view to ______ the money from me",opts:["collect","collecting","have collected","collect"],correct:1},
+  {n:22,cat:"Verbs",q:"He ______ the scene before the accident occurred",opts:["leaves","has left","had left","left"],correct:2},
+  {n:23,cat:"Verbs",q:"The president has ______ to the nation",opts:["broadcast","broadcasted","broadcasted","broadcasten"],correct:0},
+  {n:24,cat:"Verbs",q:"My friend has ______ a song",opts:["singe","sang","sung","sing"],correct:2},
+  {n:25,cat:"Verbs",q:"That was the first time ______ with me",opts:["of her eating","she had eaten","she was eating","she would be eating"],correct:1},
+  {n:26,cat:"Verbs",q:"She was angry with her mum and ______ her food for two days",opts:["forgone","forwent","forgo","forgoes"],correct:1},
+  {n:27,cat:"Verbs",q:"We saw the young girl ______ the tarred road",opts:["cross","crossing","crosses","crossed"],correct:0},
+  {n:28,cat:"Verbs",q:"We saw the boy ______ the money",opts:["takes","took","taking","take"],correct:3},
+  {n:29,cat:"Verbs",q:"Emmanuel said he once saw a snake ______ a lizard",opts:["swallow","swallowing","swallows","swallowed"],correct:1},
+  {n:30,cat:"Verbs",q:"The head boy has ______ the bell",opts:["ringed","rang","rung","ring"],correct:2},
+  {n:31,cat:"Verbs",q:"The man said that he saw his wife ______ another man",opts:["kiss","kissed","kissing","kisses"],correct:2},
+  {n:32,cat:"Verbs",q:"The teacher made me ______ the truth",opts:["told","tell","tells","telling"],correct:1},
+  {n:33,cat:"Verbs",q:"The young boy ______ the food before we came",opts:["ate","has eaten","was eating","had eaten"],correct:3},
+  {n:34,cat:"Verbs",q:"Before we got home, my sister ______ the water",opts:["had drunk","drank","had drank","was drinking"],correct:0}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let timeRemaining = 15 * 60;
+let timerInterval = null;
+const LETTERS = ['A','B','C','D'];
+
+function startQuiz(){
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildNavigator();
+  renderQuestion();
+  timerInterval = setInterval(()=>{
+    timeRemaining--;
+    const m = String(Math.floor(timeRemaining/60)).padStart(2,'0');
+    const s = String(timeRemaining%60).padStart(2,'0');
+    const disp = document.getElementById('timerDisplay');
+    disp.textContent = m+':'+s;
+    if(timeRemaining <= 300) disp.classList.add('warn');
+    if(timeRemaining <= 0){
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting your test now.');
+      showResults();
+    }
+  },1000);
+}
+
+function buildNavigator(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'cell-'+i;
+    cell.textContent = q.n;
+    cell.onclick = ()=>{ current = i; renderQuestion(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('catTag').textContent = q.cat.toUpperCase();
+  document.getElementById('qNumLabel').textContent = 'QUESTION ' + q.n;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('answeredLabel').textContent = `${answeredCount} answered`;
+  document.getElementById('railFill').style.width = (answeredCount/QUESTIONS.length*100)+'%';
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[current]===i ? ' selected' : '');
+    div.innerHTML = `<span class="letter">${LETTERS[i]}</span><span>${opt}</span>`;
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavigator(); };
+    box.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').textContent = current===QUESTIONS.length-1 ? 'Last Question' : 'Next →';
+  document.getElementById('nextBtn').disabled = current===QUESTIONS.length-1;
+
+  updateNavigator();
+}
+
+function updateNavigator(){
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.getElementById('cell-'+i);
+    cell.classList.toggle('answered', answers[i]!==null);
+    cell.classList.toggle('current', i===current);
+  });
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<QUESTIONS.length-1){ current++; renderQuestion(); } }
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if(!proceed) return;
+  }
+  clearInterval(timerInterval);
+  showResults();
+}
+
+function showResults(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+
+  let score = 0;
+  const catStats = {};
+  QUESTIONS.forEach(q=>{ if(!catStats[q.cat]) catStats[q.cat]={correct:0,total:0}; catStats[q.cat].total++; });
+
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===q.correct){ score++; catStats[q.cat].correct++; }
+  });
+
+  const pct = Math.round(score/QUESTIONS.length*100);
+  document.getElementById('scoreBig').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+
+  let verdict = 'KEEP DRILLING';
+  if(pct>=90) verdict = 'EXCELLENT — MASTERED!';
+  else if(pct>=75) verdict = 'VERY GOOD';
+  else if(pct>=60) verdict = 'GOOD — CLOSE THE GAPS';
+  else verdict = 'NEEDS MORE REVISION';
+  document.getElementById('verdictTag').textContent = verdict;
+
+  const bdBox = document.getElementById('breakdownBox');
+  bdBox.innerHTML = '';
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const div = document.createElement('div');
+    div.className = 'bd-card';
+    div.innerHTML = `<div class="cat">${cat}</div><div class="frac">${s.correct}/${s.total}</div>`;
+    bdBox.appendChild(div);
+  });
+
+  const reviewBox = document.getElementById('reviewBox');
+  reviewBox.innerHTML = '';
+  let missedCount = 0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]!==q.correct){
+      missedCount++;
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      const yourAns = answers[i]===null ? 'Not answered' : `${LETTERS[answers[i]]}. ${q.opts[answers[i]]}`;
+      div.innerHTML = `
+        <div class="rq">Q${q.n}. ${q.q}</div>
+        <div class="rline ryour">Your answer: ${yourAns}</div>
+        <div class="rline rcorrect">Correct answer: ${LETTERS[q.correct]}. ${q.opts[q.correct]}</div>
+      `;
+      reviewBox.appendChild(div);
+    }
+  });
+  if(missedCount===0){
+    reviewBox.innerHTML = '<p style="color:#2e7d4f; font-weight:700; font-size:16px;">🎉 Perfect score — nothing missed! 🔥</p>';
+  }
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  timeRemaining = 15 * 60;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '15:00';
+  disp.classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('introScreen').classList.remove('hidden');
+}
+</script>
+</body>
+  </html>
