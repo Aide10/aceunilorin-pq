@@ -226,7 +226,7 @@
     <div class="subtitle">Practice Questions on Nouns</div>
     <div class="intro-stats">
       <div><div class="n">29</div><div class="l">Questions</div></div>
-      <div><div class="n">15</div><div class="l">Minutes</div></div>
+      <div><div class="n">10</div><div class="l">Minutes</div></div>
       <div><div class="n">1</div><div class="l">Category</div></div>
     </div>
 
@@ -258,7 +258,7 @@
       </div>
 
       <div class="investment">🔥 #1,999 <small>(was #15,000) — First 25 persons only!</small></div>
-      <div class="pay-details">💳 Pay to: <strong>3062568945</strong> — Ohijei Aidelokhai</div>
+      <div class="pay-details">💳 Pay to: <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)</div>
       <div class="cta">⚡ FOCUS. PREPARE. PERFORM. YOU CAN BE NEXT! ⚡</div>
     </div>
 
@@ -268,7 +268,7 @@
 
   <div id="quizScreen" class="hidden">
     <div class="meta-bar">
-      <div class="timer" id="timerDisplay">⏱️ 15:00</div>
+      <div class="timer" id="timerDisplay">⏱️ 10:00</div>
       <div class="answered-count" id="answeredLabel">0 / 29 answered</div>
     </div>
     <div class="rail"><div class="rail-fill" id="railFill"></div></div>
@@ -312,7 +312,7 @@
       <div class="details">
         Join <strong>STUDYPAEDIA</strong> — SURE 4.0 Revision Program<br>
         📅 August 10th – 13th, 2026 • 💳 #1,999 (First 25 persons)<br>
-        <strong>3062568945</strong> — Ohijei Aidelokhai
+        <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)
       </div>
       <div class="cta-btn">⚡ FOCUS. PREPARE. PERFORM. ⚡</div>
     </div>
@@ -360,7 +360,7 @@ const QUESTIONS = [
 
 let current = 0;
 let answers = new Array(QUESTIONS.length).fill(null);
-let timeRemaining = 15 * 60;
+let timeRemaining = 10 * 60;
 let timerInterval = null;
 let isUnlocked = false;
 const LETTERS = ['A','B','C','D','E'];
@@ -520,9 +520,9 @@ function showResults(){
 function restartQuiz(){
   current = 0;
   answers = new Array(QUESTIONS.length).fill(null);
-  timeRemaining = 15 * 60;
+  timeRemaining = 10 * 60;
   const disp = document.getElementById('timerDisplay');
-  disp.textContent = '⏱️ 15:00';
+  disp.textContent = '⏱️ 10:00';
   disp.classList.remove('warn');
   document.getElementById('resultsScreen').classList.add('hidden');
   document.getElementById('introScreen').classList.remove('hidden');
