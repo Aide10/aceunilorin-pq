@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AceUnilorin PQ — Ratio, Proportion & Averages</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#131a2c; --panel2:#0f1626;
+    --blue:#3b82f6; --blue-soft:#60a5fa; --blue-dim:#1e3a5f;
+    --text:#e8ecf5; --muted:#8b93a7; --line:#232c42;
+    --good:#22c55e; --bad:#ef4444;
+    --gold:#f5a623;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--line);
+    position:sticky; top:0; background:var(--bg); z-index:20;
+  }
+  .brand{font-size:22px; font-weight:800; letter-spacing:-0.3px;}
+  .brand .ace{color:var(--blue-soft);}
+  .brand .uni{color:var(--text);}
+  .brand .pq{color:var(--blue-soft);}
+  .theme-dot{width:34px; height:34px; border-radius:50%; background:var(--panel); display:flex; align-items:center; justify-content:center; font-size:16px; border:1px solid var(--line);}
+
+  .wrap{max-width:640px; margin:0 auto; padding:16px 16px 60px;}
+
+  .meta-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; background:var(--panel); border-radius:12px; margin-bottom:14px;
+  }
+  .timer{font-size:22px; font-weight:800; color:var(--blue-soft); display:flex; align-items:center; gap:8px;}
+  .timer.warn{color:#fca5a5;}
+  .answered-count{font-size:13px; color:var(--muted);}
+
+  .rail{height:5px; background:var(--panel2); border-radius:4px; overflow:hidden; margin-bottom:16px;}
+  .rail-fill{height:100%; background:var(--blue); width:0%; transition:width .3s ease;}
+
+  .qhead{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .qcounter{color:var(--blue-soft); font-weight:700; font-size:14px;}
+  .pill{
+    display:inline-block; padding:4px 12px; border:1px solid var(--blue-dim);
+    border-radius:20px; font-size:12px; color:var(--blue-soft); background:rgba(59,130,246,0.08);
+  }
+
+  .card{background:var(--panel); border-radius:16px; padding:22px 18px; margin-bottom:16px;}
+  .qtext{font-size:17px; font-weight:700; line-height:1.6; margin:0 0 20px; color:var(--text);}
+
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    display:flex; align-items:flex-start; gap:14px;
+    padding:16px; border-radius:12px; background:var(--panel2);
+    border:1.5px solid transparent; cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--blue-dim);}
+  .opt.selected{border-color:var(--blue); background:rgba(59,130,246,0.12);}
+  .opt .badge{
+    min-width:34px; height:34px; border-radius:9px; background:#1c2540;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:var(--text);
+  }
+  .opt.selected .badge{background:var(--blue); color:#fff;}
+  .opt .otext{font-size:14.5px; line-height:1.4; color:var(--text); padding-top:6px;}
+
+  .nav-row{display:flex; gap:10px; margin-top:18px;}
+  .btn{
+    flex:1; padding:14px; border-radius:12px; border:none; font-weight:700; font-size:15px;
+    cursor:pointer; transition:opacity .15s, transform .1s; text-align:center;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.prev{background:var(--panel2); color:var(--muted);}
+  .btn.prev:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.next{background:var(--panel2); color:var(--text);}
+  .btn.submit{background:var(--blue); color:#fff;}
+
+  .navigator{background:var(--panel); border-radius:16px; padding:18px; margin-top:16px;}
+  .navigator-title{font-size:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; font-weight:700;}
+  .grid{display:grid; grid-template-columns:repeat(8,1fr); gap:8px;}
+  @media (max-width:420px){ .grid{grid-template-columns:repeat(6,1fr);} }
+  .cell{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:9px; background:var(--panel2); color:var(--muted); font-size:11px; font-weight:600; cursor:pointer;
+  }
+  .cell.answered{background:var(--blue); color:#fff;}
+  .cell.current{outline:2px solid var(--blue-soft); outline-offset:1px;}
+
+  .hidden{display:none !important;}
+
+  .intro{background:var(--panel); border-radius:16px; padding:24px 20px; text-align:center;}
+  .intro h1{font-size:21px; margin-bottom:6px; color:var(--text);}
+  .intro .subtitle{color:var(--muted); font-size:13px; margin-bottom:16px;}
+  .intro-stats{display:flex; justify-content:center; gap:24px; margin-bottom:20px; flex-wrap:wrap;}
+  .intro-stats div{text-align:center;}
+  .intro-stats .n{font-size:24px; font-weight:800; color:var(--blue-soft);}
+  .intro-stats .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;}
+
+  .advert-banner{
+    background:linear-gradient(135deg, #0f1626, #1a2a4a);
+    border:1px solid var(--blue-dim);
+    border-radius:12px;
+    padding:18px 16px;
+    margin-bottom:20px;
+    text-align:center;
+  }
+  .advert-banner .main-title{
+    font-size:22px; font-weight:900; letter-spacing:-0.5px;
+    background:linear-gradient(90deg, var(--gold), #f9d976);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .advert-banner .sub-title{
+    font-size:15px; font-weight:700; color:var(--text); margin-top:2px;
+  }
+  .advert-banner .date{
+    font-size:13px; color:var(--blue-soft); font-weight:600; margin:6px 0 10px;
+  }
+  .advert-banner .highlight{
+    font-size:12px; color:var(--muted); line-height:1.6;
+  }
+  .advert-banner .highlight strong{color:var(--gold);}
+  .advert-banner .score-row{
+    display:flex; justify-content:center; gap:16px; margin:8px 0 10px; flex-wrap:wrap;
+  }
+  .advert-banner .score-item{
+    font-size:12px; color:var(--muted);
+  }
+  .advert-banner .score-item .pct{
+    color:var(--gold); font-weight:800; font-size:15px; display:block;
+  }
+  .advert-banner .what-you-get{
+    font-size:12px; color:var(--muted); margin:6px 0;
+  }
+  .advert-banner .what-you-get span{
+    display:inline-block; background:rgba(59,130,246,0.15); color:var(--blue-soft);
+    padding:2px 10px; border-radius:12px; margin:2px; font-size:11px;
+  }
+  .advert-banner .investment{
+    font-size:14px; font-weight:700; color:var(--gold); margin:6px 0;
+  }
+  .advert-banner .investment small{
+    font-weight:400; color:var(--muted); font-size:11px;
+  }
+  .advert-banner .pay-details{
+    font-size:12px; color:var(--muted); background:var(--panel2); padding:8px; border-radius:8px; margin:6px 0;
+  }
+  .advert-banner .pay-details strong{color:var(--text);}
+  .advert-banner .cta{
+    font-size:13px; font-weight:700; color:var(--gold); margin-top:6px;
+  }
+
+  .start-btn{background:var(--blue); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;}
+
+  .score-hero{text-align:center; padding:36px 20px; background:var(--panel); border-radius:16px; margin-bottom:20px;}
+  .score-hero .big{font-size:46px; font-weight:800; color:var(--blue-soft); line-height:1; margin-bottom:8px;}
+  .score-hero .sub{font-size:14px; color:var(--muted);}
+  .verdict{display:inline-block; margin-top:14px; padding:6px 16px; border:1px solid var(--blue-dim); border-radius:20px; font-size:12px; color:var(--blue-soft); background:rgba(59,130,246,0.08); font-weight:700;}
+
+  .breakdown{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:22px;}
+  .bd-card{background:var(--panel); border-radius:12px; padding:14px; text-align:center;}
+  .bd-card .cat{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px; font-weight:700;}
+  .bd-card .frac{font-size:19px; font-weight:800; color:var(--blue-soft);}
+
+  .review-item{background:var(--panel); border-radius:12px; border-left:3px solid var(--bad); padding:16px; margin-bottom:10px;}
+  .review-item .rq{font-weight:700; margin-bottom:8px; color:var(--text); font-size:14.5px;}
+  .review-item .rline{font-size:13px; margin:4px 0;}
+  .review-item .ryour{color:#fca5a5;}
+  .review-item .rcorrect{color:#86efac;}
+
+  .section-title{font-size:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); font-weight:700; margin:26px 0 12px;}
+
+  .lock-screen{max-width:420px; margin:80px auto; background:var(--panel); border-radius:16px; padding:34px 28px; text-align:center; border:1px solid var(--line);}
+  .lock-screen h2{font-size:19px; color:var(--text); margin-bottom:6px;}
+  .lock-screen .sub{font-family:monospace; font-size:11px; color:var(--muted); margin-bottom:22px;}
+  .lock-screen input{width:100%; padding:12px 16px; border:1.5px solid var(--line); border-radius:10px; background:var(--panel2); color:var(--text); font-size:15px; margin-bottom:14px; text-align:center; outline:none;}
+  .lock-screen input:focus{border-color:var(--blue);}
+  .lock-screen input::placeholder{color:var(--muted);}
+  .lock-err{color:var(--bad); font-size:12.5px; margin-bottom:10px; min-height:18px;}
+  .lock-btn{background:var(--blue); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer; width:100%;}
+  .lock-btn:hover{opacity:0.88;}
+
+  .made-by{font-size:11px; color:var(--muted); margin-top:14px; text-align:center;}
+
+  .results-advert{
+    background:linear-gradient(135deg, #0f1626, #1a2a4a);
+    border:1px solid var(--gold);
+    border-radius:12px;
+    padding:16px 14px;
+    margin-top:18px;
+    text-align:center;
+  }
+  .results-advert .tagline{font-size:14px; font-weight:700; color:var(--gold);}
+  .results-advert .details{font-size:12px; color:var(--muted); margin-top:4px;}
+  .results-advert .details strong{color:var(--text);}
+  .results-advert .cta-btn{
+    display:inline-block; margin-top:8px; padding:6px 20px;
+    background:var(--gold); color:#0a0e1a; border-radius:20px;
+    font-weight:700; font-size:12px; text-decoration:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ace">Ace</span><span class="uni">Unilorin</span> <span class="pq">PQ</span></div>
+  <div class="theme-dot">☀️</div>
+</div>
+
+<div class="wrap">
+  <div id="lockScreen" class="lock-screen">
+    <h2>🔒 Enter Password</h2>
+    <div class="sub">This mock test is password protected</div>
+    <input type="password" id="passwordInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter') checkPassword()">
+    <div class="lock-err" id="lockError"></div>
+    <button class="lock-btn" onclick="checkPassword()">UNLOCK</button>
+  </div>
+
+  <div id="introScreen" class="intro hidden">
+    <h1>Ratio, Proportion & Averages</h1>
+    <div class="subtitle">Practice Questions on Ratio, Proportion & Averages</div>
+    <div class="intro-stats">
+      <div><div class="n">40</div><div class="l">Questions</div></div>
+      <div><div class="n">30</div><div class="l">Minutes</div></div>
+      <div><div class="n">1</div><div class="l">Category</div></div>
+    </div>
+
+    <div class="advert-banner">
+      <div class="main-title">★ STUDYPAEDIA ★</div>
+      <div class="sub-title">UNILORIN PUTME REVISION PROGRAM</div>
+      <div class="date">📅 AUGUST 10TH – 13TH 2026</div>
+
+      <div class="highlight"><strong>SURE 4.0</strong> — YOUR 4-DAY POWER BOOST TO ACE UNILORIN PUTME 2026!</div>
+
+      <div class="score-row">
+        <div class="score-item"><span class="pct">92%</span> Qowiyu Muhammed • 2023</div>
+        <div class="score-item"><span class="pct">93%</span> Akinola Boluwatife • 2024</div>
+        <div class="score-item"><span class="pct">89%</span> Hanifat Muhammed • 2025</div>
+      </div>
+
+      <div class="what-you-get">
+        <span>Mentorship</span>
+        <span>Daily Tutorials 4hrs+</span>
+        <span>Materials</span>
+        <span>Multiple CBT Quizzes</span>
+        <span>Past Questions 2006-2025</span>
+        <span>High-Yield Mock</span>
+      </div>
+
+      <div class="highlight" style="font-size:12px; margin:4px 0;">
+        <strong>Convener/Tutor:</strong> Ohijei Aidelokhai — Two-time scorer of 88% • Author of Ace Unilorin Past Questions • Founder, UnilorinPQ.site
+      </div>
+
+      <div class="investment">🔥 #1,999 <small>(was #15,000) — First 25 persons only!</small></div>
+      <div class="pay-details">💳 Pay to: <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)</div>
+      <div class="cta">⚡ FOCUS. PREPARE. PERFORM. YOU CAN BE NEXT! ⚡</div>
+    </div>
+
+    <button class="start-btn" onclick="startQuiz()">START PRACTICE</button>
+    <div class="made-by">Made by Aide Ohijei (07036612528)</div>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="meta-bar">
+      <div class="timer" id="timerDisplay">⏱️ 30:00</div>
+      <div class="answered-count" id="answeredLabel">0 / 40 answered</div>
+    </div>
+    <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+
+    <div class="qhead">
+      <span class="qcounter" id="progressLabel">Question 1 of 40</span>
+      <span class="pill" id="catTag">MATHEMATICS</span>
+    </div>
+
+    <div class="card">
+      <p class="qtext" id="qText"></p>
+      <div class="options" id="optionsBox"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn prev" id="prevBtn" onclick="goPrev()">← Prev</button>
+      <button class="btn next" id="nextBtn" onclick="goNext()">Next →</button>
+      <button class="btn submit" id="submitBtn" onclick="submitQuiz()">Submit ✓</button>
+    </div>
+
+    <div class="navigator">
+      <div class="navigator-title">Question Navigator</div>
+      <div class="grid" id="navGrid"></div>
+    </div>
+  </div>
+
+  <div id="resultsScreen" class="hidden">
+    <div class="score-hero">
+      <div class="big" id="scoreBig">0/40</div>
+      <div class="sub" id="scorePct">0%</div>
+      <div class="verdict" id="verdictTag">—</div>
+    </div>
+    <div class="section-title">Score by Category</div>
+    <div class="breakdown" id="breakdownBox"></div>
+    <div class="section-title">Review — Questions Missed</div>
+    <div id="reviewBox"></div>
+
+    <div class="results-advert">
+      <div class="tagline">🎯 READY FOR UNILORIN PUTME 2026?</div>
+      <div class="details">
+        Join <strong>STUDYPAEDIA</strong> — SURE 4.0 Revision Program<br>
+        📅 August 10th – 13th, 2026 • 💳 #1,999 (First 25 persons)<br>
+        <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)
+      </div>
+      <div class="cta-btn">⚡ FOCUS. PREPARE. PERFORM. ⚡</div>
+    </div>
+
+    <div class="nav-row" style="margin-top:12px;">
+      <button class="btn submit" style="flex:none; padding:12px 28px;" onclick="restartQuiz()">RESTART PRACTICE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PASSWORD = 'SUCCESS';
+
+const QUESTIONS = [
+  {n:1,cat:"Mathematics",q:'If a = 1/4, b = 1/3, and c = 1/2, then a : c is',opts:["8 : 9","9 : 8","1 : 2","3 : 8"],correct:2},
+  {n:2,cat:"Mathematics",q:"A number of sweets were shared out among three children X, Y and Z in the ratio 2 : 3 : 4 respectively. If Z got 8, how many sweets were shared out?",opts:["12","18","24","36"],correct:1},
+  {n:3,cat:"Mathematics",q:"If a : b = 3 : 4 and m : n = 2 : 5, find a/m : b/n.",opts:["3 : 10","10 : 3","8 : 15","15 : 8"],correct:3},
+  {n:4,cat:"Mathematics",q:"A bag contains white, blue and red ping-pong balls in the ratio 8 : 3 : 2. There are 10 red balls. If 10 white and 10 blue balls are removed from the bag, the new ratio is",opts:["7 : 2 : 1","6 : 1 : 2","6 : 1 : 1","7 : 1 : 2"],correct:1},
+  {n:5,cat:"Mathematics",q:"A sum of N50,000 was invested by two partners in a project which yielded N90,000. If the profit was shared in the ratio 3 : 5, the difference between the amounts received by the partners is",opts:["N10,000","N15,000","N25,000","N40,000"],correct:0},
+  {n:6,cat:"Mathematics",q:"Two brothers X and Y owned a business in which the ratio of shares was 3 : 2 respectively. Y later sold 1/2 of his share to X for N12,000. The value of the business was",opts:["N24,000","N48,000","N60,000","N84,000"],correct:2},
+  {n:7,cat:"Mathematics",q:"A sum of N420 is shared among three children in the ratio 6 : 7 : 8. The largest share is",opts:["N120","N140","N160","N180"],correct:2},
+  {n:8,cat:"Mathematics",q:"The ratio of the age of a father to that of his son is 9 : 2. If the son is now 8 years old, the ratio of their ages in 4 years' time will be",opts:["9 : 4","5 : 1","3 : 1","10 : 3"],correct:3},
+  {n:9,cat:"Mathematics",q:"The profit on a business was shared between two partners P and Q in the ratio 3 : 4. If Q received N8,000 more than P, the profit was",opts:["N56,000","N42,000","N32,000","N24,000"],correct:0},
+  {n:10,cat:"Mathematics",q:"Three numbers a, b and c are in the ratio 3 : 2 : 5. The value of (4a - c)/(a + 2b) is",opts:["1/2","2/3","3/7","1"],correct:3},
+  {n:11,cat:"Mathematics",q:"A rectangle is formed from a square by increasing the latter's length by 50% while reducing its width by 50%. The ratio of the area of the rectangle to that of the square is",opts:["4 : 3","3 : 4","3 : 2","2 : 3"],correct:1},
+  {n:12,cat:"Mathematics",q:"The ratio of the price of a tin of milk to that of a packet of sugar is m : p. If the price of milk now goes up by 25% while that of sugar goes up by 15%, the new ratio of the prices is",opts:["25m : 23p","23m : 25p","5p : 3m","3p : 5m"],correct:0},
+  {n:13,cat:"Mathematics",q:"The baking recipe for a piece of cake is given as 1.5 cups of sugar and 3.5 cups of flour. If a cake is baked, based on this recipe with a total of 40 cups of sugar and flour, the number of cups of sugar used is",opts:["20","15","12","8"],correct:2},
+  {n:14,cat:"Mathematics",q:"The speed of 144 kilometres per hour, expressed in metres per second is",opts:["72","40","36","20"],correct:2},
+  {n:15,cat:"Mathematics",q:"A school has 43 students in class 3A and 47 students in 3B. The average score in a test is 55 for class 3A and 60 for class 3B. The average score for both classes, correct to one decimal place, is",opts:["57.5","57.6","57.8","58.1"],correct:1},
+  {n:16,cat:"Mathematics",q:"If 45% of the Nigerian naira (N) is equal to 35% of a foreign currency S, the conversion rate of S to N is S1 =",opts:["N1/7","N1/2","N2/7","N2/6"],correct:1},
+  {n:17,cat:"Mathematics",q:"In a test taken by 40 boys and x girls, the mean scores were 5.5 and 6 respectively for the boys and girls. If the total score was 412, the value of x is",opts:["38","36","34","32"],correct:3},
+  {n:18,cat:"Mathematics",q:"The journey from Lagos to Ibadan usually takes a motorist 1 hour 30 minutes. By increasing his average speed by 20 km/hr., the motorist saves 15 minutes. His usual speed, in km/hr is",opts:["100","90","85","80"],correct:0},
+  {n:19,cat:"Mathematics",q:"A labourer's daily wage is N80 for the first 10 days and N100 for the next 9 days. Find the daily wage for the remaining 6 working days of the month, if his average daily wage for the month is N90.80.",opts:["N110","N105","N95","N92.50"],correct:2},
+  {n:20,cat:"Mathematics",q:"Two men and six boys can cut a field in 3 hours. If the men work at 1½ times that of the boys, how many men are required to cut the field in 2 hrs?",opts:["4","6","8","9"],correct:3},
+  {n:21,cat:"Mathematics",q:"A motorist drives from P to Q at an average speed of 80 km/hr and immediately returns from Q to P through the same route at an average speed of 50 km/hr. The average speed for the round-trip journey is",opts:["53.3 km/hr","60.0 km/hr","62.5 km/hr","65.0 km/hr"],correct:0},
+  {n:22,cat:"Mathematics",q:"A trader sold an article for N660.00 at a profit of 20%. In order to make a profit of 30%, the article should have been sold for",opts:["N990","N858","N792","N715"],correct:3},
+  {n:23,cat:"Mathematics",q:"X sold a radio set to Y at a profit of 10% and Y sold it for N2612.50 at a loss of 5%. The cost of the radio to X was",opts:["N2500","N2488","N2375","N2272"],correct:0},
+  {n:24,cat:"Mathematics",q:"A grocer sells an article for N54 at a profit of 8%. What is her percentage profit or loss if she sells the same article for N44?",opts:["12% profit","12% loss","18.5% profit","18.5% loss"],correct:1},
+  {n:25,cat:"Mathematics",q:"A dealer makes a profit of 20% by selling a crate of soft drinks for N600.00. The cost of the crate of soft drinks to the dealer was",opts:["N480.00","N500.00","N520.00","N540.00"],correct:1},
+  {n:26,cat:"Mathematics",q:"A man bought a wrist watch for N750 and re-sold it for N600. His percentage loss was",opts:["25%","22.5%","20%","15%"],correct:2},
+  {n:27,cat:"Mathematics",q:"A businessman invested a total of N200,000 in two companies which paid dividends of 5% and 7% respectively. If he received a total of N11,600, how much did he invest at 7%?",opts:["N160,000","N140,000","N100,000","N80,000"],correct:3},
+  {n:28,cat:"Mathematics",q:"A worker is allowed 10% of his income tax-free and pays 15% on the remainder. If his tax amounts to N2,970, his income is",opts:["N28,000","N25,000","N22,000","N20,000"],correct:2},
+  {n:29,cat:"Mathematics",q:"A worker's salary on appointment is N30,000 per annum. At an annual increment rate of 10%, his salary at the beginning of the third year is",opts:["N36,000","N39,000","N39,000","N39,930"],correct:1},
+  {n:30,cat:"Mathematics",q:"After getting a pay rise of 20%, a man's new annual salary is N21,600. His salary before the pay rise was",opts:["N18,000","N17,700","N17,280","N16,680"],correct:0},
+  {n:31,cat:"Mathematics",q:"A man and his wife contribute 10% and 7% of their respective incomes into a savings account. If they earn N35,000 and N22,000 per annum respectively, the total amount saved in the account after one year is",opts:["N4,845","N5,000","N5,040","N9,690"],correct:2},
+  {n:32,cat:"Mathematics",q:"Two friends T and K went out to lunch at a restaurant. If T contributed 40% of the cost and K contributed the balance, which is N150, the cost of the lunch was",opts:["N175","N300","N280","N250"],correct:3},
+  {n:33,cat:"Mathematics",q:"When the food bill for a family increased by 20%, the family head reduced the quantity of food bought for the family by 15%. The fractional increase in the food bill is now",opts:["7/20","7/40","1/20","1/50"],correct:3},
+  {n:34,cat:"Mathematics",q:"To increase the surface area of a sphere by 69% the percentage increase in diameter should be",opts:["69%","34.5%","30%","23%"],correct:2},
+  {n:35,cat:"Mathematics",q:"A bank customer deposited N1500.00 in her bank account. At the end of five years the simple interest on the account amounted to N550. The rate per annum of interest was",opts:["7/3%","7/5%","5/4%","4/3%"],correct:0},
+  {n:36,cat:"Mathematics",q:"A sum of money invested at 6% per annum simple interest increased to N14,750 after 3 years. The sum invested was",opts:["N12,000","N12,500","N12,800","N13,000"],correct:1},
+  {n:37,cat:"Mathematics",q:"The sum invested (question 36) will amount to N17,750 in",opts:["10 yr.","8 yr.","7 yr.","6 yr."],correct:2},
+  {n:38,cat:"Mathematics",q:"The simple interest rate per annum at which a sum of N10,000 accumulates to N12,400 in three years is",opts:["8%","8½%","9%","11%"],correct:0},
+  {n:39,cat:"Mathematics",q:"How long will it take for a sum of money invested at 8% simple interest to double the original sum?",opts:["8 yr.","10.5 yr.","12 yr.","12.5 yr."],correct:3},
+  {n:40,cat:"Mathematics",q:"A sum of money invested at a simple interest rate R increases to 1½ times the original sum after 5 years. The value of R is",opts:["13.3%","10.5%","9.0%","6.0%"],correct:0}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let timeRemaining = 30 * 60;
+let timerInterval = null;
+let isUnlocked = false;
+const LETTERS = ['A','B','C','D'];
+
+function checkPassword(){
+  const input = document.getElementById('passwordInput').value.trim();
+  const err = document.getElementById('lockError');
+  if(input === PASSWORD){
+    isUnlocked = true;
+    document.getElementById('lockScreen').classList.add('hidden');
+    document.getElementById('introScreen').classList.remove('hidden');
+    err.textContent = '';
+    document.getElementById('passwordInput').value = '';
+  } else {
+    err.textContent = '❌ Incorrect password. Try again.';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
+}
+
+function startQuiz(){
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildNavigator();
+  renderQuestion();
+  timerInterval = setInterval(()=>{
+    timeRemaining--;
+    const m = String(Math.floor(timeRemaining/60)).padStart(2,'0');
+    const s = String(timeRemaining%60).padStart(2,'0');
+    const disp = document.getElementById('timerDisplay');
+    disp.textContent = '⏱️ ' + m + ':' + s;
+    if(timeRemaining <= 300) disp.classList.add('warn');
+    if(timeRemaining <= 0){
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting your test now.');
+      showResults();
+    }
+  },1000);
+}
+
+function buildNavigator(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'cell-'+i;
+    cell.textContent = q.n;
+    cell.onclick = ()=>{ current = i; renderQuestion(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('catTag').textContent = q.cat.toUpperCase();
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('answeredLabel').textContent = `${answeredCount} / ${QUESTIONS.length} answered`;
+  document.getElementById('railFill').style.width = (answeredCount/QUESTIONS.length*100)+'%';
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[current]===i ? ' selected' : '');
+    div.innerHTML = `<span class="badge">${LETTERS[i]}</span><span class="otext">${opt}</span>`;
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavigator(); };
+    box.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').textContent = current===QUESTIONS.length-1 ? 'Last Question' : 'Next →';
+  document.getElementById('nextBtn').disabled = current===QUESTIONS.length-1;
+
+  updateNavigator();
+}
+
+function updateNavigator(){
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.getElementById('cell-'+i);
+    cell.classList.toggle('answered', answers[i]!==null);
+    cell.classList.toggle('current', i===current);
+  });
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<QUESTIONS.length-1){ current++; renderQuestion(); } }
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if(!proceed) return;
+  }
+  clearInterval(timerInterval);
+  showResults();
+}
+
+function showResults(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+
+  let score = 0;
+  const catStats = {};
+  QUESTIONS.forEach(q=>{ if(!catStats[q.cat]) catStats[q.cat]={correct:0,total:0}; catStats[q.cat].total++; });
+
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===q.correct){ score++; catStats[q.cat].correct++; }
+  });
+
+  const pct = Math.round(score/QUESTIONS.length*100);
+  document.getElementById('scoreBig').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+
+  let verdict = 'KEEP DRILLING';
+  if(pct>=90) verdict = 'EXCELLENT — MASTERED!';
+  else if(pct>=75) verdict = 'VERY GOOD';
+  else if(pct>=60) verdict = 'GOOD — CLOSE THE GAPS';
+  else verdict = 'NEEDS MORE REVISION';
+  document.getElementById('verdictTag').textContent = verdict;
+
+  const bdBox = document.getElementById('breakdownBox');
+  bdBox.innerHTML = '';
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const div = document.createElement('div');
+    div.className = 'bd-card';
+    div.innerHTML = `<div class="cat">${cat}</div><div class="frac">${s.correct}/${s.total}</div>`;
+    bdBox.appendChild(div);
+  });
+
+  const reviewBox = document.getElementById('reviewBox');
+  reviewBox.innerHTML = '';
+  let missedCount = 0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]!==q.correct){
+      missedCount++;
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      const yourAns = answers[i]===null ? 'Not answered' : `${LETTERS[answers[i]]}. ${q.opts[answers[i]]}`;
+      div.innerHTML = `
+        <div class="rq">Q${q.n}. ${q.q}</div>
+        <div class="rline ryour">Your answer: ${yourAns}</div>
+        <div class="rline rcorrect">Correct answer: ${LETTERS[q.correct]}. ${q.opts[q.correct]}</div>
+      `;
+      reviewBox.appendChild(div);
+    }
+  });
+  if(missedCount===0){
+    reviewBox.innerHTML = '<p style="color:#86efac; font-weight:700; font-size:16px;">🎉 Perfect score — nothing missed! 🔥</p>';
+  }
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  timeRemaining = 30 * 60;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '⏱️ 30:00';
+  disp.classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('introScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
