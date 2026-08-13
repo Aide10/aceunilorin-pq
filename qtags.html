@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AceUnilorin PQ — Question Tags</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --panel:#131a2c; --panel2:#0f1626;
+    --blue:#3b82f6; --blue-soft:#60a5fa; --blue-dim:#1e3a5f;
+    --text:#e8ecf5; --muted:#8b93a7; --line:#232c42;
+    --good:#22c55e; --bad:#ef4444;
+    --gold:#f5a623;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--line);
+    position:sticky; top:0; background:var(--bg); z-index:20;
+  }
+  .brand{font-size:22px; font-weight:800; letter-spacing:-0.3px;}
+  .brand .ace{color:var(--blue-soft);}
+  .brand .uni{color:var(--text);}
+  .brand .pq{color:var(--blue-soft);}
+  .theme-dot{width:34px; height:34px; border-radius:50%; background:var(--panel); display:flex; align-items:center; justify-content:center; font-size:16px; border:1px solid var(--line);}
+
+  .wrap{max-width:640px; margin:0 auto; padding:16px 16px 60px;}
+
+  .meta-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; background:var(--panel); border-radius:12px; margin-bottom:14px;
+  }
+  .timer{font-size:22px; font-weight:800; color:var(--blue-soft); display:flex; align-items:center; gap:8px;}
+  .timer.warn{color:#fca5a5;}
+  .answered-count{font-size:13px; color:var(--muted);}
+
+  .rail{height:5px; background:var(--panel2); border-radius:4px; overflow:hidden; margin-bottom:16px;}
+  .rail-fill{height:100%; background:var(--blue); width:0%; transition:width .3s ease;}
+
+  .qhead{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .qcounter{color:var(--blue-soft); font-weight:700; font-size:14px;}
+  .pill{
+    display:inline-block; padding:4px 12px; border:1px solid var(--blue-dim);
+    border-radius:20px; font-size:12px; color:var(--blue-soft); background:rgba(59,130,246,0.08);
+  }
+
+  .card{background:var(--panel); border-radius:16px; padding:22px 18px; margin-bottom:16px;}
+  .qtext{font-size:17px; font-weight:700; line-height:1.6; margin:0 0 20px; color:var(--text);}
+
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    display:flex; align-items:flex-start; gap:14px;
+    padding:16px; border-radius:12px; background:var(--panel2);
+    border:1.5px solid transparent; cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--blue-dim);}
+  .opt.selected{border-color:var(--blue); background:rgba(59,130,246,0.12);}
+  .opt .badge{
+    min-width:34px; height:34px; border-radius:9px; background:#1c2540;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:var(--text);
+  }
+  .opt.selected .badge{background:var(--blue); color:#fff;}
+  .opt .otext{font-size:14.5px; line-height:1.4; color:var(--text); padding-top:6px;}
+
+  .nav-row{display:flex; gap:10px; margin-top:18px;}
+  .btn{
+    flex:1; padding:14px; border-radius:12px; border:none; font-weight:700; font-size:15px;
+    cursor:pointer; transition:opacity .15s, transform .1s; text-align:center;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.prev{background:var(--panel2); color:var(--muted);}
+  .btn.prev:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn.next{background:var(--panel2); color:var(--text);}
+  .btn.submit{background:var(--blue); color:#fff;}
+
+  .navigator{background:var(--panel); border-radius:16px; padding:18px; margin-top:16px;}
+  .navigator-title{font-size:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; font-weight:700;}
+  .grid{display:grid; grid-template-columns:repeat(8,1fr); gap:8px;}
+  @media (max-width:420px){ .grid{grid-template-columns:repeat(6,1fr);} }
+  .cell{
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:9px; background:var(--panel2); color:var(--muted); font-size:11px; font-weight:600; cursor:pointer;
+  }
+  .cell.answered{background:var(--blue); color:#fff;}
+  .cell.current{outline:2px solid var(--blue-soft); outline-offset:1px;}
+
+  .hidden{display:none !important;}
+
+  .intro{background:var(--panel); border-radius:16px; padding:24px 20px; text-align:center;}
+  .intro h1{font-size:21px; margin-bottom:6px; color:var(--text);}
+  .intro .subtitle{color:var(--muted); font-size:13px; margin-bottom:16px;}
+  .intro-stats{display:flex; justify-content:center; gap:24px; margin-bottom:20px; flex-wrap:wrap;}
+  .intro-stats div{text-align:center;}
+  .intro-stats .n{font-size:24px; font-weight:800; color:var(--blue-soft);}
+  .intro-stats .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px;}
+
+  .advert-banner{
+    background:linear-gradient(135deg, #0f1626, #1a2a4a);
+    border:1px solid var(--blue-dim);
+    border-radius:12px;
+    padding:18px 16px;
+    margin-bottom:20px;
+    text-align:center;
+  }
+  .advert-banner .main-title{
+    font-size:22px; font-weight:900; letter-spacing:-0.5px;
+    background:linear-gradient(90deg, var(--gold), #f9d976);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .advert-banner .sub-title{
+    font-size:15px; font-weight:700; color:var(--text); margin-top:2px;
+  }
+  .advert-banner .date{
+    font-size:13px; color:var(--blue-soft); font-weight:600; margin:6px 0 10px;
+  }
+  .advert-banner .highlight{
+    font-size:12px; color:var(--muted); line-height:1.6;
+  }
+  .advert-banner .highlight strong{color:var(--gold);}
+  .advert-banner .score-row{
+    display:flex; justify-content:center; gap:16px; margin:8px 0 10px; flex-wrap:wrap;
+  }
+  .advert-banner .score-item{
+    font-size:12px; color:var(--muted);
+  }
+  .advert-banner .score-item .pct{
+    color:var(--gold); font-weight:800; font-size:15px; display:block;
+  }
+  .advert-banner .what-you-get{
+    font-size:12px; color:var(--muted); margin:6px 0;
+  }
+  .advert-banner .what-you-get span{
+    display:inline-block; background:rgba(59,130,246,0.15); color:var(--blue-soft);
+    padding:2px 10px; border-radius:12px; margin:2px; font-size:11px;
+  }
+  .advert-banner .investment{
+    font-size:14px; font-weight:700; color:var(--gold); margin:6px 0;
+  }
+  .advert-banner .investment small{
+    font-weight:400; color:var(--muted); font-size:11px;
+  }
+  .advert-banner .pay-details{
+    font-size:12px; color:var(--muted); background:var(--panel2); padding:8px; border-radius:8px; margin:6px 0;
+  }
+  .advert-banner .pay-details strong{color:var(--text);}
+  .advert-banner .cta{
+    font-size:13px; font-weight:700; color:var(--gold); margin-top:6px;
+  }
+
+  .start-btn{background:var(--blue); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;}
+
+  .score-hero{text-align:center; padding:36px 20px; background:var(--panel); border-radius:16px; margin-bottom:20px;}
+  .score-hero .big{font-size:46px; font-weight:800; color:var(--blue-soft); line-height:1; margin-bottom:8px;}
+  .score-hero .sub{font-size:14px; color:var(--muted);}
+  .verdict{display:inline-block; margin-top:14px; padding:6px 16px; border:1px solid var(--blue-dim); border-radius:20px; font-size:12px; color:var(--blue-soft); background:rgba(59,130,246,0.08); font-weight:700;}
+
+  .breakdown{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:22px;}
+  .bd-card{background:var(--panel); border-radius:12px; padding:14px; text-align:center;}
+  .bd-card .cat{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.3px; margin-bottom:6px; font-weight:700;}
+  .bd-card .frac{font-size:19px; font-weight:800; color:var(--blue-soft);}
+
+  .review-item{background:var(--panel); border-radius:12px; border-left:3px solid var(--bad); padding:16px; margin-bottom:10px;}
+  .review-item .rq{font-weight:700; margin-bottom:8px; color:var(--text); font-size:14.5px;}
+  .review-item .rline{font-size:13px; margin:4px 0;}
+  .review-item .ryour{color:#fca5a5;}
+  .review-item .rcorrect{color:#86efac;}
+
+  .section-title{font-size:12px; letter-spacing:0.5px; text-transform:uppercase; color:var(--muted); font-weight:700; margin:26px 0 12px;}
+
+  .lock-screen{max-width:420px; margin:80px auto; background:var(--panel); border-radius:16px; padding:34px 28px; text-align:center; border:1px solid var(--line);}
+  .lock-screen h2{font-size:19px; color:var(--text); margin-bottom:6px;}
+  .lock-screen .sub{font-family:monospace; font-size:11px; color:var(--muted); margin-bottom:22px;}
+  .lock-screen input{width:100%; padding:12px 16px; border:1.5px solid var(--line); border-radius:10px; background:var(--panel2); color:var(--text); font-size:15px; margin-bottom:14px; text-align:center; outline:none;}
+  .lock-screen input:focus{border-color:var(--blue);}
+  .lock-screen input::placeholder{color:var(--muted);}
+  .lock-err{color:var(--bad); font-size:12.5px; margin-bottom:10px; min-height:18px;}
+  .lock-btn{background:var(--blue); color:#fff; border:none; padding:14px 36px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer; width:100%;}
+  .lock-btn:hover{opacity:0.88;}
+
+  .made-by{font-size:11px; color:var(--muted); margin-top:14px; text-align:center;}
+
+  .results-advert{
+    background:linear-gradient(135deg, #0f1626, #1a2a4a);
+    border:1px solid var(--gold);
+    border-radius:12px;
+    padding:16px 14px;
+    margin-top:18px;
+    text-align:center;
+  }
+  .results-advert .tagline{font-size:14px; font-weight:700; color:var(--gold);}
+  .results-advert .details{font-size:12px; color:var(--muted); margin-top:4px;}
+  .results-advert .details strong{color:var(--text);}
+  .results-advert .cta-btn{
+    display:inline-block; margin-top:8px; padding:6px 20px;
+    background:var(--gold); color:#0a0e1a; border-radius:20px;
+    font-weight:700; font-size:12px; text-decoration:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="ace">Ace</span><span class="uni">Unilorin</span> <span class="pq">PQ</span></div>
+  <div class="theme-dot">☀️</div>
+</div>
+
+<div class="wrap">
+  <div id="lockScreen" class="lock-screen">
+    <h2>🔒 Enter Password</h2>
+    <div class="sub">This mock test is password protected</div>
+    <input type="password" id="passwordInput" placeholder="Enter password..." onkeydown="if(event.key==='Enter') checkPassword()">
+    <div class="lock-err" id="lockError"></div>
+    <button class="lock-btn" onclick="checkPassword()">UNLOCK</button>
+  </div>
+
+  <div id="introScreen" class="intro hidden">
+    <h1>Question Tags</h1>
+    <div class="subtitle">Practice Questions on Question Tags</div>
+    <div class="intro-stats">
+      <div><div class="n">29</div><div class="l">Questions</div></div>
+      <div><div class="n">15</div><div class="l">Minutes</div></div>
+      <div><div class="n">1</div><div class="l">Category</div></div>
+    </div>
+
+    <div class="advert-banner">
+      <div class="main-title">★ STUDYPAEDIA ★</div>
+      <div class="sub-title">UNILORIN PUTME REVISION PROGRAM</div>
+      <div class="date">📅 AUGUST 10TH – 13TH 2026</div>
+
+      <div class="highlight"><strong>SURE 4.0</strong> — YOUR 4-DAY POWER BOOST TO ACE UNILORIN PUTME 2026!</div>
+
+      <div class="score-row">
+        <div class="score-item"><span class="pct">92%</span> Qowiyu Muhammed • 2023</div>
+        <div class="score-item"><span class="pct">93%</span> Akinola Boluwatife • 2024</div>
+        <div class="score-item"><span class="pct">89%</span> Hanifat Muhammed • 2025</div>
+      </div>
+
+      <div class="what-you-get">
+        <span>Mentorship</span>
+        <span>Daily Tutorials 4hrs+</span>
+        <span>Materials</span>
+        <span>Multiple CBT Quizzes</span>
+        <span>Past Questions 2006-2025</span>
+        <span>High-Yield Mock</span>
+      </div>
+
+      <div class="highlight" style="font-size:12px; margin:4px 0;">
+        <strong>Convener/Tutor:</strong> Ohijei Aidelokhai — Two-time scorer of 88% • Author of Ace Unilorin Past Questions • Founder, UnilorinPQ.site
+      </div>
+
+      <div class="investment">🔥 #1,999 <small>(was #15,000) — First 25 persons only!</small></div>
+      <div class="pay-details">💳 Pay to: <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)</div>
+      <div class="cta">⚡ FOCUS. PREPARE. PERFORM. YOU CAN BE NEXT! ⚡</div>
+    </div>
+
+    <button class="start-btn" onclick="startQuiz()">START PRACTICE</button>
+    <div class="made-by">Made by Aide Ohijei (07036612528)</div>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="meta-bar">
+      <div class="timer" id="timerDisplay">⏱️ 15:00</div>
+      <div class="answered-count" id="answeredLabel">0 / 29 answered</div>
+    </div>
+    <div class="rail"><div class="rail-fill" id="railFill"></div></div>
+
+    <div class="qhead">
+      <span class="qcounter" id="progressLabel">Question 1 of 29</span>
+      <span class="pill" id="catTag">QUESTION TAGS</span>
+    </div>
+
+    <div class="card">
+      <p class="qtext" id="qText"></p>
+      <div class="options" id="optionsBox"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn prev" id="prevBtn" onclick="goPrev()">← Prev</button>
+      <button class="btn next" id="nextBtn" onclick="goNext()">Next →</button>
+      <button class="btn submit" id="submitBtn" onclick="submitQuiz()">Submit ✓</button>
+    </div>
+
+    <div class="navigator">
+      <div class="navigator-title">Question Navigator</div>
+      <div class="grid" id="navGrid"></div>
+    </div>
+  </div>
+
+  <div id="resultsScreen" class="hidden">
+    <div class="score-hero">
+      <div class="big" id="scoreBig">0/29</div>
+      <div class="sub" id="scorePct">0%</div>
+      <div class="verdict" id="verdictTag">—</div>
+    </div>
+    <div class="section-title">Score by Category</div>
+    <div class="breakdown" id="breakdownBox"></div>
+    <div class="section-title">Review — Questions Missed</div>
+    <div id="reviewBox"></div>
+
+    <div class="results-advert">
+      <div class="tagline">🎯 READY FOR UNILORIN PUTME 2026?</div>
+      <div class="details">
+        Join <strong>STUDYPAEDIA</strong> — SURE 4.0 Revision Program<br>
+        📅 August 10th – 13th, 2026 • 💳 #1,999 (First 25 persons)<br>
+        <strong>3062568945</strong> — Ohijei Aidelokhai (FirstBank)
+      </div>
+      <div class="cta-btn">⚡ FOCUS. PREPARE. PERFORM. ⚡</div>
+    </div>
+
+    <div class="nav-row" style="margin-top:12px;">
+      <button class="btn submit" style="flex:none; padding:12px 28px;" onclick="restartQuiz()">RESTART PRACTICE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PASSWORD = 'TAGS';
+
+const QUESTIONS = [
+  {n:1,cat:"Question Tags",q:'You can travel on your own, _____?',opts:["isn't it","wouldn't you","can't you","shouldn't you"],correct:2},
+  {n:2,cat:"Question Tags",q:'He does not seem to know how to solve the problem _____?',opts:["does not he","does he not","does he","doesn't he"],correct:2},
+  {n:3,cat:"Question Tags",q:'Nowadays, many graduates are not well disposed to teaching _____?',opts:["are they","aren't they","do they","they are"],correct:0},
+  {n:4,cat:"Question Tags",q:'He isn\'t coming home, is he? _____, he isn\'t',opts:["yes","no","why","now"],correct:1},
+  {n:5,cat:"Question Tags",q:'You can travel on your own, ____?',opts:["isn't it","can't you","won't you","shan't you"],correct:1},
+  {n:6,cat:"Question Tags",q:'He wrote to you _____?',opts:["hadn't he","wouldn't he","didn't he","hasn't he"],correct:2},
+  {n:7,cat:"Question Tags",q:'You don\'t like Mathematics ____ you?',opts:["do","don't","can't","can"],correct:0},
+  {n:8,cat:"Question Tags",q:'You are just putting the hat on ____?',opts:["don't you","isn't it","aren't you","not so"],correct:2},
+  {n:9,cat:"Question Tags",q:'We stood up when the principal came in, ______?',opts:["isn't it","didn't we","not so","did us"],correct:1},
+  {n:10,cat:"Question Tags",q:'A: You needn\'t prostrate for everyone in the school. B: ______?',opts:["need you","isn't it","do you","don't you"],correct:0},
+  {n:11,cat:"Question Tags",q:'The Managing Director did not pay his staff last month ______?',opts:["didn't he","had he not","is not it","did he","has he"],correct:3},
+  {n:12,cat:"Question Tags",q:'Must you say "Good Morning" to everybody in the street? No ______',opts:["I needn't","I mustn't","I can't","I do not need"],correct:0},
+  {n:13,cat:"Question Tags",q:'We used to go to that club on Saturday night _____?',opts:["isn't it","didn't we","don't we","aren't we","is it"],correct:1},
+  {n:14,cat:"Question Tags",q:'It had been raining before the match started _____?',opts:["isn't it","hasn't it","hadn't it","wasn't it","is it"],correct:2},
+  {n:15,cat:"Question Tags",q:'The students haven\'t come back from the Library _____',opts:["have they?","is it?","isn't it?","had they?","haven't they?"],correct:0},
+  {n:16,cat:"Question Tags",q:'Student: Excuse me sir, must we complete the assignment before lunch? Teacher: No, you _____.',opts:["needn't","mustn't","can't","shouldn't"],correct:0},
+  {n:17,cat:"Question Tags",q:'It is clear to me that you won\'t visit Okoro this holiday, will you _____.',opts:["Yes, I won't","Yes, I will visit","No, I won't","No, I will not visit"],correct:2},
+  {n:18,cat:"Question Tags",q:'I don\'t think he can _____?',opts:["can't he","isn't it","can he","don't I"],correct:2},
+  {n:19,cat:"Question Tags",q:'We ought to have visited the Governor, _____?',opts:["isn't it","oughtn't we","shouldn't we","haven't we"],correct:1},
+  {n:20,cat:"Question Tags",q:'He didn\'t sense Obi\'s presence in the room, did he? _____',opts:["Yes, he did","No, he did","Yes, he didn't","No, he didn't"],correct:3},
+  {n:21,cat:"Question Tags",q:'Students will always blame their teachers when examination results are unfavourable _____',opts:["won't they","wouldn't they","isn't it","can't they"],correct:0},
+  {n:22,cat:"Question Tags",q:'It\'s been rough so far, ____?',opts:["haven't it","hadn't it","isn't it","wasn't it","hasn't it"],correct:4},
+  {n:23,cat:"Question Tags",q:'The children were all there with him.',opts:["No, they weren't","Yes, they were","No, they couldn't","Yes, they weren't"],correct:1},
+  {n:24,cat:"Question Tags",q:'They seldom play with their mates.',opts:["Yes, they don't","No, they don't","No, they do","No, they can't"],correct:1},
+  {n:25,cat:"Question Tags",q:'Let\'s have a cup of coffee, ______?',opts:["shall we","will you","shouldn't we","could we"],correct:0},
+  {n:26,cat:"Question Tags",q:'Get out of my office immediately, ______?',opts:["shall we","can't you","will you","shouldn't you"],correct:2},
+  {n:27,cat:"Question Tags",q:'She daren\'t slap a military officer, ______?',opts:["should she","can she","dare she","will she"],correct:2},
+  {n:28,cat:"Question Tags",q:'He dared to buy a tiger, ______?',opts:["didn't he","daren't he","doesn't he","isn't it"],correct:0},
+  {n:29,cat:"Question Tags",q:'Hi lady, don\'t you ever get tired of shouting?',opts:["I don't ever","Yes, I don't","No, I do","No, I don't"],correct:3}
+];
+
+let current = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+let timeRemaining = 15 * 60;
+let timerInterval = null;
+let isUnlocked = false;
+const LETTERS = ['A','B','C','D','E'];
+
+function checkPassword(){
+  const input = document.getElementById('passwordInput').value.trim();
+  const err = document.getElementById('lockError');
+  if(input === PASSWORD){
+    isUnlocked = true;
+    document.getElementById('lockScreen').classList.add('hidden');
+    document.getElementById('introScreen').classList.remove('hidden');
+    err.textContent = '';
+    document.getElementById('passwordInput').value = '';
+  } else {
+    err.textContent = '❌ Incorrect password. Try again.';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
+}
+
+function startQuiz(){
+  document.getElementById('introScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildNavigator();
+  renderQuestion();
+  timerInterval = setInterval(()=>{
+    timeRemaining--;
+    const m = String(Math.floor(timeRemaining/60)).padStart(2,'0');
+    const s = String(timeRemaining%60).padStart(2,'0');
+    const disp = document.getElementById('timerDisplay');
+    disp.textContent = '⏱️ ' + m + ':' + s;
+    if(timeRemaining <= 300) disp.classList.add('warn');
+    if(timeRemaining <= 0){
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting your test now.');
+      showResults();
+    }
+  },1000);
+}
+
+function buildNavigator(){
+  const grid = document.getElementById('navGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = 'cell-'+i;
+    cell.textContent = q.n;
+    cell.onclick = ()=>{ current = i; renderQuestion(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderQuestion(){
+  const q = QUESTIONS[current];
+  document.getElementById('catTag').textContent = q.cat.toUpperCase();
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('progressLabel').textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+
+  const answeredCount = answers.filter(a=>a!==null).length;
+  document.getElementById('answeredLabel').textContent = `${answeredCount} / ${QUESTIONS.length} answered`;
+  document.getElementById('railFill').style.width = (answeredCount/QUESTIONS.length*100)+'%';
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt' + (answers[current]===i ? ' selected' : '');
+    div.innerHTML = `<span class="badge">${LETTERS[i]}</span><span class="otext">${opt}</span>`;
+    div.onclick = ()=>{ answers[current]=i; renderQuestion(); updateNavigator(); };
+    box.appendChild(div);
+  });
+
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').textContent = current===QUESTIONS.length-1 ? 'Last Question' : 'Next →';
+  document.getElementById('nextBtn').disabled = current===QUESTIONS.length-1;
+
+  updateNavigator();
+}
+
+function updateNavigator(){
+  QUESTIONS.forEach((q,i)=>{
+    const cell = document.getElementById('cell-'+i);
+    cell.classList.toggle('answered', answers[i]!==null);
+    cell.classList.toggle('current', i===current);
+  });
+}
+
+function goPrev(){ if(current>0){ current--; renderQuestion(); } }
+function goNext(){ if(current<QUESTIONS.length-1){ current++; renderQuestion(); } }
+
+function submitQuiz(){
+  const unanswered = answers.filter(a=>a===null).length;
+  if(unanswered>0){
+    const proceed = confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`);
+    if(!proceed) return;
+  }
+  clearInterval(timerInterval);
+  showResults();
+}
+
+function showResults(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+
+  let score = 0;
+  const catStats = {};
+  QUESTIONS.forEach(q=>{ if(!catStats[q.cat]) catStats[q.cat]={correct:0,total:0}; catStats[q.cat].total++; });
+
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]===q.correct){ score++; catStats[q.cat].correct++; }
+  });
+
+  const pct = Math.round(score/QUESTIONS.length*100);
+  document.getElementById('scoreBig').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('scorePct').textContent = `${pct}% correct`;
+
+  let verdict = 'KEEP DRILLING';
+  if(pct>=90) verdict = 'EXCELLENT — MASTERED!';
+  else if(pct>=75) verdict = 'VERY GOOD';
+  else if(pct>=60) verdict = 'GOOD — CLOSE THE GAPS';
+  else verdict = 'NEEDS MORE REVISION';
+  document.getElementById('verdictTag').textContent = verdict;
+
+  const bdBox = document.getElementById('breakdownBox');
+  bdBox.innerHTML = '';
+  Object.keys(catStats).forEach(cat=>{
+    const s = catStats[cat];
+    const div = document.createElement('div');
+    div.className = 'bd-card';
+    div.innerHTML = `<div class="cat">${cat}</div><div class="frac">${s.correct}/${s.total}</div>`;
+    bdBox.appendChild(div);
+  });
+
+  const reviewBox = document.getElementById('reviewBox');
+  reviewBox.innerHTML = '';
+  let missedCount = 0;
+  QUESTIONS.forEach((q,i)=>{
+    if(answers[i]!==q.correct){
+      missedCount++;
+      const div = document.createElement('div');
+      div.className = 'review-item';
+      const yourAns = answers[i]===null ? 'Not answered' : `${LETTERS[answers[i]]}. ${q.opts[answers[i]]}`;
+      div.innerHTML = `
+        <div class="rq">Q${q.n}. ${q.q}</div>
+        <div class="rline ryour">Your answer: ${yourAns}</div>
+        <div class="rline rcorrect">Correct answer: ${LETTERS[q.correct]}. ${q.opts[q.correct]}</div>
+      `;
+      reviewBox.appendChild(div);
+    }
+  });
+  if(missedCount===0){
+    reviewBox.innerHTML = '<p style="color:#86efac; font-weight:700; font-size:16px;">🎉 Perfect score — nothing missed! 🔥</p>';
+  }
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  timeRemaining = 15 * 60;
+  const disp = document.getElementById('timerDisplay');
+  disp.textContent = '⏱️ 15:00';
+  disp.classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('introScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
